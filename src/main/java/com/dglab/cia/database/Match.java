@@ -1,7 +1,7 @@
 package com.dglab.cia.database;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -14,7 +14,7 @@ public class Match {
 	private long matchId;
 	private String mode;
 	private String version;
-	private LocalDateTime dateTime;
+	private Instant dateTime;
 	private byte players;
 	private byte winnerTeam;
 
@@ -59,7 +59,7 @@ public class Match {
 	}
 
 	@Column(name = "dateTime", nullable = false)
-	public LocalDateTime getDateTime() {
+	public Instant getDateTime() {
 		return dateTime;
 	}
 
@@ -72,7 +72,7 @@ public class Match {
 		this.version = version;
 	}
 
-	public void setDateTime(LocalDateTime dateTime) {
+	public void setDateTime(Instant dateTime) {
 		this.dateTime = dateTime;
 	}
 

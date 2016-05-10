@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.ExecutionException;
@@ -67,7 +67,7 @@ public class MatchServiceImpl implements MatchService {
 			match.setPlayers(matchInfo.getPlayerNumber());
 			match.setMode(matchInfo.getMode());
 			match.setVersion(matchInfo.getVersion());
-			match.setDateTime(LocalDateTime.now(Clock.systemUTC()));
+			match.setDateTime(Instant.now(Clock.systemUTC()));
 
 			for (PlayerInfo playerInfo : matchInfo.getPlayers()) {
 				PlayerMatchData.Pk pk = new PlayerMatchData.Pk();
