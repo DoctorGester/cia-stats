@@ -117,4 +117,18 @@ public class MatchServiceImpl implements MatchService {
 
 		matchDao.putRound(playerRoundData);
 	}
+
+	@Override
+	@Transactional
+	public void putWinner(MatchWinner winner) {
+		Match match = matchDao.getMatch(winner.getMatchId());
+
+		if (match == null) {
+			throw new IllegalArgumentException();
+		}
+
+		match.setWinnerTeam(winner.getWinnerTeam());
+
+		matchDao.save(match);
+	}
 }

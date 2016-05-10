@@ -4,6 +4,10 @@ import com.dglab.cia.persistence.MatchService;
 import com.dglab.cia.persistence.MatchServiceImpl;
 import com.dglab.cia.persistence.PlayerNameService;
 import com.dglab.cia.persistence.PlayerNameServiceImpl;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.MetadataSources;
@@ -84,5 +88,14 @@ public class PersistenceConfig {
 	@Bean
 	public PlayerNameService createPlayerNameService() {
 		return new PlayerNameServiceImpl();
+	}
+
+	@Bean
+	public ObjectMapper createObjectMapper() {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
+		mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+
+		return mapper;
 	}
 }

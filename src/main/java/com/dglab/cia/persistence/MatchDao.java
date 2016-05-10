@@ -35,4 +35,8 @@ public class MatchDao {
 	public Match getMatch(long id) {
 		return sessionFactory.getCurrentSession().byId(Match.class).load(id);
 	}
+
+	public void save(Match match) {
+		sessionFactory.getCurrentSession().save(match);
+	}
 }
