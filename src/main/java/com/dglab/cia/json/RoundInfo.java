@@ -1,5 +1,8 @@
 package com.dglab.cia.json;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -10,6 +13,11 @@ public class RoundInfo {
 	private long matchId;
 	private short roundNumber;
 	private Collection<PlayerRoundInfo> players = new HashSet<>();
+
+	@JsonCreator()
+	public RoundInfo(@JsonProperty(value = "players", required = true) Collection<PlayerRoundInfo> players) {
+		this.players = players;
+	}
 
 	public long getMatchId() {
 		return matchId;

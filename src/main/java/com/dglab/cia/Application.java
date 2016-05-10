@@ -4,13 +4,10 @@ import com.dglab.cia.json.MatchInfo;
 import com.dglab.cia.json.MatchWinner;
 import com.dglab.cia.json.RoundInfo;
 import com.dglab.cia.persistence.MatchService;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import spark.Request;
-
-import java.io.IOException;
 
 import static com.dglab.cia.JsonUtil.json;
 import static spark.Spark.*;
@@ -26,8 +23,6 @@ public class Application {
 	public Application() {
 		port(5141);
 		threadPool(16);
-
-		mapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
 
 		context = new AnnotationConfigApplicationContext(PersistenceConfig.class);
 		matchService = context.getBean(MatchService.class);

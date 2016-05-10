@@ -1,5 +1,8 @@
 package com.dglab.cia.json;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * @author doc
  */
@@ -7,7 +10,9 @@ public class MatchWinner {
 	private long matchId;
 	private byte winnerTeam;
 
-	public MatchWinner() {
+	@JsonCreator()
+	public MatchWinner(@JsonProperty(value = "winnerTeam", required = true) byte winnerTeam) {
+		this.winnerTeam = winnerTeam;
 	}
 
 	public long getMatchId() {

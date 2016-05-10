@@ -3,6 +3,7 @@ package com.dglab.cia.json;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -14,6 +15,7 @@ public class MatchInfo {
 	private String mode;
 	private String version;
 	private Collection<PlayerInfo> players = new HashSet<>();
+	private LocalDateTime dateTime;
 
 	@JsonCreator()
 	public MatchInfo(
@@ -58,5 +60,13 @@ public class MatchInfo {
 
 	public void setVersion(String version) {
 		this.version = version;
+	}
+
+	public LocalDateTime getDateTime() {
+		return dateTime;
+	}
+
+	public void setDateTime(LocalDateTime dateTime) {
+		this.dateTime = dateTime;
 	}
 }
