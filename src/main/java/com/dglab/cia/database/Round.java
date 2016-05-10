@@ -37,6 +37,23 @@ public class Round {
 		public void setNumber(short number) {
 			this.number = number;
 		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			Pk pk = (Pk) o;
+
+			return matchId == pk.matchId && number == pk.number;
+		}
+
+		@Override
+		public int hashCode() {
+			int result = (int) (matchId ^ (matchId >>> 32));
+			result = 31 * result + (int) number;
+			return result;
+		}
 	}
 
 	@EmbeddedId

@@ -48,6 +48,24 @@ public class PlayerRoundData implements Serializable {
 		public void setSteamId64(long steamId64) {
 			this.steamId64 = steamId64;
 		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			Pk pk = (Pk) o;
+
+			return matchId == pk.matchId && number == pk.number && steamId64 == pk.steamId64;
+		}
+
+		@Override
+		public int hashCode() {
+			int result = (int) (matchId ^ (matchId >>> 32));
+			result = 31 * result + (int) number;
+			result = 31 * result + (int) (steamId64 ^ (steamId64 >>> 32));
+			return result;
+		}
 	}
 
 	@EmbeddedId
