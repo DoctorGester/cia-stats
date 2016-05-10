@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.MetadataSources;
@@ -29,6 +30,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.jta.JtaTransactionManager;
 
 import javax.sql.DataSource;
+import java.beans.PropertyVetoException;
 import java.util.Properties;
 
 
@@ -42,11 +44,22 @@ import java.util.Properties;
 public class PersistenceConfig {
 	@Bean
 	public DataSource restDataSource() {
-		BasicDataSource dataSource = new BasicDataSource();
-		dataSource.setDriverClassName("org.hsqldb.jdbc.JDBCDriver");
-		dataSource.setUrl("jdbc:hsqldb:file:data/database;shutdown=true;hsqldb.write_delay=false;");
-		dataSource.setUsername("sa");
+		ComboPooledDataSource dataSource = new ComboPooledDataSource();
+
+		try {
+			dataSource.setDriverClass("org.hsqldb.jdbc.JDBCDriver");
+		} catch (PropertyVetoException e) {
+			e.printStackTrace();
+		}
+
+		dataSource.setJdbcUrl("jdbc:hsqldb:file:data/database;shutdown=true;hsqldb.write_delay=false;");
+		dataSource.setUser("sa");
 		dataSource.setPassword("");
+
+		dataSource.setAcquireIncrement(1);
+		dataSource.setMinPoolSize(2);
+		dataSource.setMaxPoolSize(10);
+		dataSource.setMaxIdleTime(300);
 
 		return dataSource;
 	}
@@ -55,8 +68,8 @@ public class PersistenceConfig {
 	@Autowired
 	public LocalSessionFactoryBean sessionFactory(DataSource dataSource) {
 		LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
-		sessionFactory.setDataSource(restDataSource());
-		sessionFactory.setPackagesToScan(new String[] { "com.dglab.cia.database" });
+		sessionFactory.setDataSource(dataSource);
+		sessionFactory.setPackagesToScan("com.dglab.cia.database");
 		sessionFactory.setHibernateProperties(hibernateProperties());
 
 		return sessionFactory;
@@ -76,7 +89,7 @@ public class PersistenceConfig {
 	Properties hibernateProperties() {
 		return new Properties() {
 			{
-				setProperty("hibernate.hbm2ddl.auto", "create-drop");
+				setProperty("hibernate.hbm2ddl.auto", "update");
 				setProperty("hibernate.show_sql", "true");
 				setProperty("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
 			}
