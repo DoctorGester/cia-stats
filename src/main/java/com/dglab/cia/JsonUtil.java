@@ -13,9 +13,9 @@ import spark.Spark;
  */
 public class JsonUtil {
 	@Autowired
-	private static ObjectMapper mapper;
+	private ObjectMapper mapper;
 
-	public static String toJson(Object object) {
+	public String toJson(Object object) {
 		mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
 
 		try {
@@ -28,7 +28,7 @@ public class JsonUtil {
 		return "";
 	}
 
-	public static ResponseTransformer json() {
-		return JsonUtil::toJson;
+	public ResponseTransformer json() {
+		return this::toJson;
 	}
 }

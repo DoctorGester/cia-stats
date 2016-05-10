@@ -9,7 +9,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import spark.Request;
 
-import static com.dglab.cia.JsonUtil.json;
 import static spark.Spark.*;
 
 /**
@@ -19,6 +18,7 @@ public class Application {
 	private ApplicationContext context;
 	private MatchService matchService;
 	private ObjectMapper mapper;
+	private JsonUtil jsonUtil;
 
 	public Application() {
 		port(5141);
@@ -27,10 +27,11 @@ public class Application {
 		context = new AnnotationConfigApplicationContext(PersistenceConfig.class);
 		matchService = context.getBean(MatchService.class);
 		mapper = context.getBean(ObjectMapper.class);
+		jsonUtil = context.getBean(JsonUtil.class);
 
 		get("/match/:id", (request, response) -> {
 			return matchService.getMatchDetails(Long.valueOf(request.params("id")));
-		}, json());
+		}, jsonUtil.json());
 
 		post("/match/:id", (request, response) -> {
 			long matchId = Long.valueOf(request.params("id"));

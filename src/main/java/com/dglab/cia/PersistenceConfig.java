@@ -103,4 +103,9 @@ public class PersistenceConfig {
 
 		return mapper;
 	}
+
+	@Bean
+	public JsonUtil createJsonUtil() {
+		return new JsonUtil();
+	}
 }
