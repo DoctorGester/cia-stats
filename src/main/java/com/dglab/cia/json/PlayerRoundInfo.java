@@ -1,6 +1,7 @@
 package com.dglab.cia.json;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author doc
@@ -13,7 +14,19 @@ public class PlayerRoundInfo {
 	private String hero;
 
 	@JsonCreator
-	// TODO
+	public PlayerRoundInfo(
+			@JsonProperty(value = "steamId64", required = true) long steamId64,
+			@JsonProperty(value = "damageDealt", required = true) short damageDealt,
+			@JsonProperty(value = "projectilesFired", required = true) short projectilesFired,
+			@JsonProperty(value = "score", required = true) short score,
+			@JsonProperty(value = "hero") String hero) {
+		this.steamId64 = steamId64;
+		this.damageDealt = damageDealt;
+		this.projectilesFired = projectilesFired;
+		this.score = score;
+		this.hero = hero;
+	}
+
 	public long getSteamId64() {
 		return steamId64;
 	}
