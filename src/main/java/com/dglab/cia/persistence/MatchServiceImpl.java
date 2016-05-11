@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -52,7 +53,31 @@ public class MatchServiceImpl implements MatchService {
 			info.getPlayers().add(playerInfo);
 		}
 
-		return new MatchDetails(info);
+        Collection<RoundInfo> roundInfoCollection = new ArrayList<>();
+
+        for (Round round : match.getRounds()) {
+            Collection<PlayerRoundData> playerRoundData = round.getPlayerRoundData();
+            Collection<PlayerRoundInfo> playerRoundInfoCollection = new ArrayList<>();
+
+            for (PlayerRoundData roundData : playerRoundData) {
+                PlayerRoundInfo playerRoundInfo = new PlayerRoundInfo();
+
+                playerRoundInfo.setSteamId64(roundData.getPk().getSteamId64());
+                playerRoundInfo.setDamageDealt(roundData.getDamageDealt());
+                playerRoundInfo.setProjectilesFired(roundData.getProjectilesFired());
+                playerRoundInfo.setScore(roundData.getScore());
+                playerRoundInfo.setHero(roundData.getHero());
+
+                playerRoundInfoCollection.add(playerRoundInfo);
+            }
+
+            RoundInfo roundInfo = new RoundInfo(playerRoundInfoCollection, round.getWinner());
+            roundInfo.setRoundNumber(round.getPk().getNumber());
+
+            roundInfoCollection.add(roundInfo);
+        }
+
+		return new MatchDetails(info, roundInfoCollection);
 	}
 
 	@Override

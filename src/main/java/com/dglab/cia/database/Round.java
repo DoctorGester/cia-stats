@@ -13,7 +13,7 @@ import java.util.HashSet;
 public class Round {
 	private Match match;
 	private Pk pk;
-	private byte winner;
+	private Byte winner;
 	private Collection<PlayerRoundData> playerRoundData = new HashSet<>();
 
 	@Embeddable
@@ -78,11 +78,11 @@ public class Round {
 	}
 
 	@Column(name = "winner")
-	public byte getWinner() {
+	public Byte getWinner() {
 		return winner;
 	}
 
-	public void setWinner(byte winner) {
+	public void setWinner(Byte winner) {
 		this.winner = winner;
 	}
 

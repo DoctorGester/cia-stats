@@ -13,6 +13,8 @@ public class PlayerRoundInfo {
 	private short score;
 	private String hero;
 
+    public PlayerRoundInfo(){}
+
 	@JsonCreator
 	public PlayerRoundInfo(
 			@JsonProperty(value = "steamId64", required = true) long steamId64,
