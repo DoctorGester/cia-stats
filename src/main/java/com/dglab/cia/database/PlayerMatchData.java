@@ -1,5 +1,8 @@
 package com.dglab.cia.database;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -73,6 +76,7 @@ public class PlayerMatchData implements Serializable {
 	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
+    @NotFound(action = NotFoundAction.IGNORE)
 	@JoinColumn(
 			name = "steamId64",
 			insertable = false,

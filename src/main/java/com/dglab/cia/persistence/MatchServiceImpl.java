@@ -1,10 +1,8 @@
 package com.dglab.cia.persistence;
 
-import com.dglab.cia.database.Match;
-import com.dglab.cia.database.PlayerMatchData;
-import com.dglab.cia.database.PlayerRoundData;
-import com.dglab.cia.database.Round;
+import com.dglab.cia.database.*;
 import com.dglab.cia.json.*;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +42,12 @@ public class MatchServiceImpl implements MatchService {
 			PlayerInfo playerInfo = new PlayerInfo();
 			playerInfo.setTeam(playerMatchData.getTeam());
 			playerInfo.setSteamId64(playerMatchData.getPk().getSteamId64());
-			playerInfo.setName(playerMatchData.getName().getName());
+
+            PlayerName name = playerMatchData.getName();
+
+            if (name != null) {
+                playerInfo.setName(name.getName());
+            }
 
 			info.getPlayers().add(playerInfo);
 		}
@@ -52,13 +55,8 @@ public class MatchServiceImpl implements MatchService {
 		return new MatchDetails(info);
 	}
 
-	@Transactional
-	public void doPutMatch(Match match) {
-		matchDao.putMatch(match);
-	}
-
 	@Override
-	@Transactional
+    @Transactional
 	public void putMatch(MatchInfo matchInfo) {
 		Collection<PlayerMatchData> playerMatchData = new HashSet<>();
 
@@ -78,16 +76,14 @@ public class MatchServiceImpl implements MatchService {
 			playerData.setPk(pk);
 			playerData.setTeam(playerInfo.getTeam());
 
+            playerNameService.updatePlayerName(playerInfo.getSteamId64());
+
 			playerMatchData.add(playerData);
 		}
 
 		match.setMatchData(playerMatchData);
 
-		doPutMatch(match);
-
-		for (PlayerInfo playerInfo : matchInfo.getPlayers()) {
-			playerNameService.updatePlayerName(playerInfo.getSteamId64());
-		}
+        matchDao.putMatch(match);
 	}
 
 	@Override
