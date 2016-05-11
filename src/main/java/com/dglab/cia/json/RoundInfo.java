@@ -12,6 +12,7 @@ import java.util.HashSet;
 public class RoundInfo {
 	private long matchId;
 	private short roundNumber;
+	private Byte winner;
 	private Collection<PlayerRoundInfo> players = new HashSet<>();
 
 	@JsonCreator()
@@ -41,5 +42,13 @@ public class RoundInfo {
 
 	public void setPlayers(Collection<PlayerRoundInfo> players) {
 		this.players = players;
+	}
+
+	public Byte getWinner() {
+		return winner;
+	}
+
+	public void setWinner(Byte winner) {
+		this.winner = winner;
 	}
 }

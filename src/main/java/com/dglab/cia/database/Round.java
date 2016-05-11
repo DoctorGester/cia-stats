@@ -13,6 +13,7 @@ import java.util.HashSet;
 public class Round {
 	private Match match;
 	private Pk pk;
+	private byte winner;
 	private Collection<PlayerRoundData> playerRoundData = new HashSet<>();
 
 	@Embeddable
@@ -74,6 +75,15 @@ public class Round {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "round")
 	public Collection<PlayerRoundData> getPlayerRoundData() {
 		return playerRoundData;
+	}
+
+	@Column(name = "winner")
+	public byte getWinner() {
+		return winner;
+	}
+
+	public void setWinner(byte winner) {
+		this.winner = winner;
 	}
 
 	@Transient

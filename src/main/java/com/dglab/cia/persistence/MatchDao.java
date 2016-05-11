@@ -3,6 +3,7 @@ package com.dglab.cia.persistence;
 import com.dglab.cia.database.Match;
 import com.dglab.cia.database.PlayerMatchData;
 import com.dglab.cia.database.PlayerRoundData;
+import com.dglab.cia.database.Round;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -26,9 +27,11 @@ public class MatchDao {
 		}
 	}
 
-	public void putRound(Collection<PlayerRoundData> roundData) {
-		for (PlayerRoundData playerRoundData : roundData) {
-			sessionFactory.getCurrentSession().saveOrUpdate(roundData);
+	public void putRound(Round round) {
+		sessionFactory.getCurrentSession().saveOrUpdate(round);
+
+		for (PlayerRoundData playerRoundData : round.getPlayerRoundData()) {
+			sessionFactory.getCurrentSession().saveOrUpdate(playerRoundData);
 		}
 	}
 

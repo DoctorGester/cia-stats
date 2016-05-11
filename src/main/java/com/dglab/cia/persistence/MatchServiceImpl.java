@@ -3,8 +3,8 @@ package com.dglab.cia.persistence;
 import com.dglab.cia.database.Match;
 import com.dglab.cia.database.PlayerMatchData;
 import com.dglab.cia.database.PlayerRoundData;
+import com.dglab.cia.database.Round;
 import com.dglab.cia.json.*;
-import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,9 +19,6 @@ import java.util.concurrent.ExecutionException;
  */
 
 public class MatchServiceImpl implements MatchService {
-	@Autowired
-	private SessionFactory sessionFactory;
-
 	@Autowired
 	private MatchDao matchDao;
 
@@ -99,25 +96,42 @@ public class MatchServiceImpl implements MatchService {
 			throw new IllegalArgumentException();
 		}
 
+		Round round = new Round();
+
+		Round.Pk roundKey = new Round.Pk();
+		roundKey.setMatchId(match.getMatchId());
+		roundKey.setNumber(roundInfo.getRoundNumber());
+
+		round.setPk(roundKey);
+		round.setMatch(match);
+
+		if (roundInfo.getWinner() != null) {
+			round.setWinner(roundInfo.getWinner());
+		}
+
 		Collection<PlayerRoundData> playerRoundData = new HashSet<>();
 
 		for (PlayerRoundInfo playerRoundInfo : roundInfo.getPlayers()) {
 			PlayerRoundData roundData = new PlayerRoundData();
 
-			PlayerRoundData.Pk pk = new PlayerRoundData.Pk();
+			PlayerRoundData.Pk playerKey = new PlayerRoundData.Pk();
 
-			pk.setMatchId(match.getMatchId());
-			pk.setNumber(roundInfo.getRoundNumber());
-			pk.setSteamId64(playerRoundInfo.getSteamId64());
+			playerKey.setMatchId(roundKey.getMatchId());
+			playerKey.setNumber(roundKey.getNumber());
+			playerKey.setSteamId64(playerRoundInfo.getSteamId64());
 
-			roundData.setPk(pk);
+			roundData.setPk(playerKey);
 			roundData.setHero(playerRoundInfo.getHero());
 			roundData.setScore(playerRoundInfo.getScore());
 			roundData.setDamageDealt(playerRoundInfo.getDamageDealt());
 			roundData.setProjectilesFired(playerRoundInfo.getProjectilesFired());
+
+			playerRoundData.add(roundData);
 		}
 
-		matchDao.putRound(playerRoundData);
+		round.setPlayerRoundData(playerRoundData);
+
+		matchDao.putRound(round);
 	}
 
 	@Override

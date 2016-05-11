@@ -1,5 +1,7 @@
 package com.dglab.cia.json;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 /**
  * @author doc
  */
@@ -10,6 +12,8 @@ public class PlayerRoundInfo {
 	private short score;
 	private String hero;
 
+	@JsonCreator
+	// TODO
 	public long getSteamId64() {
 		return steamId64;
 	}
