@@ -12,7 +12,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.concurrent.ExecutionException;
 
 /**
  * @author doc
@@ -45,7 +44,7 @@ public class MatchServiceImpl implements MatchService {
 			PlayerInfo playerInfo = new PlayerInfo();
 			playerInfo.setTeam(playerMatchData.getTeam());
 			playerInfo.setSteamId64(playerMatchData.getPk().getSteamId64());
-			playerInfo.setName(playerMatchData.getName());
+			playerInfo.setName(playerMatchData.getName().getName());
 
 			info.getPlayers().add(playerInfo);
 		}
@@ -53,37 +52,41 @@ public class MatchServiceImpl implements MatchService {
 		return new MatchDetails(info);
 	}
 
+	@Transactional
+	public void doPutMatch(Match match) {
+		matchDao.putMatch(match);
+	}
+
 	@Override
 	@Transactional
 	public void putMatch(MatchInfo matchInfo) {
-		try {
-			Collection<PlayerMatchData> playerMatchData = new HashSet<>();
+		Collection<PlayerMatchData> playerMatchData = new HashSet<>();
 
-			Match match = new Match();
-			match.setMatchId(matchInfo.getMatchId());
-			match.setPlayers(matchInfo.getPlayerNumber());
-			match.setMode(matchInfo.getMode());
-			match.setVersion(matchInfo.getVersion());
-			match.setDateTime(Instant.now(Clock.systemUTC()));
+		Match match = new Match();
+		match.setMatchId(matchInfo.getMatchId());
+		match.setPlayers(matchInfo.getPlayerNumber());
+		match.setMode(matchInfo.getMode());
+		match.setVersion(matchInfo.getVersion());
+		match.setDateTime(Instant.now(Clock.systemUTC()));
 
-			for (PlayerInfo playerInfo : matchInfo.getPlayers()) {
-				PlayerMatchData.Pk pk = new PlayerMatchData.Pk();
-				pk.setMatchId(match.getMatchId());
-				pk.setSteamId64(playerInfo.getSteamId64());
+		for (PlayerInfo playerInfo : matchInfo.getPlayers()) {
+			PlayerMatchData.Pk pk = new PlayerMatchData.Pk();
+			pk.setMatchId(match.getMatchId());
+			pk.setSteamId64(playerInfo.getSteamId64());
 
-				PlayerMatchData playerData = new PlayerMatchData();
-				playerData.setPk(pk);
-				playerData.setTeam(playerInfo.getTeam());
-				playerData.setName(playerNameService.getPlayerName(playerInfo.getSteamId64()).get());
+			PlayerMatchData playerData = new PlayerMatchData();
+			playerData.setPk(pk);
+			playerData.setTeam(playerInfo.getTeam());
 
-				playerMatchData.add(playerData);
-			}
+			playerMatchData.add(playerData);
+		}
 
-			match.setMatchData(playerMatchData);
+		match.setMatchData(playerMatchData);
 
-			matchDao.putMatch(match);
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
+		doPutMatch(match);
+
+		for (PlayerInfo playerInfo : matchInfo.getPlayers()) {
+			playerNameService.updatePlayerName(playerInfo.getSteamId64());
 		}
 	}
 

@@ -6,5 +6,5 @@ import java.util.concurrent.Future;
  * @author doc
  */
 public interface PlayerNameService {
-	Future<String> getPlayerName(long steamId64);
+	Future<String> updatePlayerName(long steamId64);
 }

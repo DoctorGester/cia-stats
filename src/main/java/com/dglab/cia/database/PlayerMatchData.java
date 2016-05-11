@@ -13,7 +13,7 @@ public class PlayerMatchData implements Serializable {
 	private Match match;
 	private Pk pk;
 	private byte team;
-	private String name;
+	private PlayerName name;
 
 	@Embeddable
 	public static class Pk implements Serializable {
@@ -72,8 +72,14 @@ public class PlayerMatchData implements Serializable {
 		return team;
 	}
 
-	@Column(name = "name")
-	public String getName() {
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(
+			name = "steamId64",
+			insertable = false,
+			updatable = false,
+			foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT)
+	)
+	public PlayerName getName() {
 		return name;
 	}
 
@@ -85,7 +91,7 @@ public class PlayerMatchData implements Serializable {
 		this.match = match;
 	}
 
-	public void setName(String name) {
+	public void setName(PlayerName name) {
 		this.name = name;
 	}
 
