@@ -8,16 +8,10 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-import org.apache.commons.dbcp.BasicDataSource;
+import com.zaxxer.hikari.HikariDataSource;
 import org.hibernate.SessionFactory;
-import org.hibernate.boot.MetadataSources;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.cfg.Environment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -25,12 +19,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
-import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.transaction.jta.JtaTransactionManager;
 
 import javax.sql.DataSource;
-import java.beans.PropertyVetoException;
 import java.util.Properties;
 
 
@@ -44,22 +35,12 @@ import java.util.Properties;
 public class PersistenceConfig {
 	@Bean
 	public DataSource restDataSource() {
-		ComboPooledDataSource dataSource = new ComboPooledDataSource();
+		HikariDataSource dataSource = new HikariDataSource();
 
-		try {
-			dataSource.setDriverClass("org.hsqldb.jdbc.JDBCDriver");
-		} catch (PropertyVetoException e) {
-			e.printStackTrace();
-		}
-
-		dataSource.setJdbcUrl("jdbc:hsqldb:file:data/database;shutdown=true;hsqldb.write_delay=false;");
-		dataSource.setUser("sa");
-		dataSource.setPassword("");
-
-		dataSource.setAcquireIncrement(1);
-		dataSource.setMinPoolSize(2);
-		dataSource.setMaxPoolSize(10);
-		dataSource.setMaxIdleTime(300);
+		dataSource.setDataSourceClassName("org.hsqldb.jdbc.JDBCDataSource");
+		dataSource.addDataSourceProperty("url", "file:data/database;shutdown=true;hsqldb.write_delay=false;");
+		dataSource.addDataSourceProperty("user", "sa");
+		dataSource.addDataSourceProperty("password", "");
 
 		return dataSource;
 	}
@@ -89,7 +70,7 @@ public class PersistenceConfig {
 	Properties hibernateProperties() {
 		return new Properties() {
 			{
-				setProperty("hibernate.hbm2ddl.auto", "create");
+				setProperty("hibernate.hbm2ddl.auto", "update");
 				setProperty("hibernate.show_sql", "true");
 				setProperty("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
 			}
