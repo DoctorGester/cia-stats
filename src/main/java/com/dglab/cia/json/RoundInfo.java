@@ -16,11 +16,8 @@ public class RoundInfo {
 	private Collection<PlayerRoundInfo> players = new HashSet<>();
 
 	@JsonCreator()
-	public RoundInfo(
-			@JsonProperty(value = "players", required = true) Collection<PlayerRoundInfo> players,
-			@JsonProperty(value = "winner") Byte winner) {
+	public RoundInfo(@JsonProperty(value = "players", required = true) Collection<PlayerRoundInfo> players) {
 		this.players = players;
-		this.winner = winner;
 	}
 
 	public long getMatchId() {

@@ -20,13 +20,12 @@ public class PlayerRoundInfo {
 			@JsonProperty(value = "steamId64", required = true) long steamId64,
 			@JsonProperty(value = "damageDealt", required = true) short damageDealt,
 			@JsonProperty(value = "projectilesFired", required = true) short projectilesFired,
-			@JsonProperty(value = "score", required = true) short score,
-			@JsonProperty(value = "hero") String hero) {
+			@JsonProperty(value = "score", required = true) short score
+	) {
 		this.steamId64 = steamId64;
 		this.damageDealt = damageDealt;
 		this.projectilesFired = projectilesFired;
 		this.score = score;
-		this.hero = hero;
 	}
 
 	public long getSteamId64() {

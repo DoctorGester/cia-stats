@@ -75,8 +75,20 @@ public class PlayerRoundData implements Serializable {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumns({
-			@JoinColumn(name = "number", nullable = false, insertable = false, updatable = false),
-			@JoinColumn(name = "matchId", nullable = false, insertable = false, updatable = false)
+			@JoinColumn(
+					name = "matchId",
+					referencedColumnName = "matchId",
+					nullable = false,
+					insertable = false,
+					updatable = false
+			),
+			@JoinColumn(
+					name = "number",
+					referencedColumnName = "number",
+					nullable = false,
+					insertable = false,
+					updatable = false
+			)
 	})
 	public Round getRound() {
 		return round;

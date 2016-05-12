@@ -71,7 +71,8 @@ public class MatchServiceImpl implements MatchService {
                 playerRoundInfoCollection.add(playerRoundInfo);
             }
 
-            RoundInfo roundInfo = new RoundInfo(playerRoundInfoCollection, round.getWinner());
+            RoundInfo roundInfo = new RoundInfo(playerRoundInfoCollection);
+			roundInfo.setWinner(round.getWinner());
             roundInfo.setRoundNumber(round.getPk().getNumber());
 
             roundInfoCollection.add(roundInfo);
@@ -144,6 +145,7 @@ public class MatchServiceImpl implements MatchService {
 			playerKey.setNumber(roundKey.getNumber());
 			playerKey.setSteamId64(playerRoundInfo.getSteamId64());
 
+			roundData.setRound(round);
 			roundData.setPk(playerKey);
 			roundData.setHero(playerRoundInfo.getHero());
 			roundData.setScore(playerRoundInfo.getScore());
