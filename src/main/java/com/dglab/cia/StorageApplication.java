@@ -5,7 +5,6 @@ import com.dglab.cia.json.MatchWinner;
 import com.dglab.cia.json.RoundInfo;
 import com.dglab.cia.persistence.MatchService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import spark.Request;
 
@@ -14,17 +13,21 @@ import static spark.Spark.*;
 /**
  * @author doc
  */
-public class Application {
-	private ApplicationContext context;
+public class StorageApplication {
+	private AnnotationConfigApplicationContext context;
 	private MatchService matchService;
 	private ObjectMapper mapper;
 	private JsonUtil jsonUtil;
 
-	public Application() {
+	public StorageApplication() {
 		port(5141);
 		threadPool(16);
 
-		context = new AnnotationConfigApplicationContext(PersistenceConfig.class);
+		context = new AnnotationConfigApplicationContext();
+		context.getEnvironment().setActiveProfiles("readWrite");
+		context.register(PersistenceConfig.class);
+		context.refresh();
+
 		matchService = context.getBean(MatchService.class);
 		mapper = context.getBean(ObjectMapper.class);
 		jsonUtil = context.getBean(JsonUtil.class);

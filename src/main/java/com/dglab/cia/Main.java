@@ -5,6 +5,6 @@ package com.dglab.cia;
  */
 public class Main {
 	public static void main(String ... args) {
-		new Application();
+		new StorageApplication();
 	}
 }

@@ -1,5 +1,7 @@
 package com.dglab.cia.database;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -116,6 +118,7 @@ public class PlayerRoundData implements Serializable {
 	}
 
 	@Column(name = "connectionState", nullable = false)
+	@ColumnDefault("0")
 	public byte getConnectionState() {
 		return connectionState;
 	}
