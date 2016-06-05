@@ -11,6 +11,7 @@ public class PlayerRoundInfo {
 	private short damageDealt;
 	private short projectilesFired;
 	private short score;
+	private byte connectionState;
 	private String hero;
 
     public PlayerRoundInfo(){}
@@ -20,12 +21,14 @@ public class PlayerRoundInfo {
 			@JsonProperty(value = "steamId64", required = true) long steamId64,
 			@JsonProperty(value = "damageDealt", required = true) short damageDealt,
 			@JsonProperty(value = "projectilesFired", required = true) short projectilesFired,
-			@JsonProperty(value = "score", required = true) short score
+			@JsonProperty(value = "score", required = true) short score,
+			@JsonProperty(value = "connectionState", required = true) byte connectionState
 	) {
 		this.steamId64 = steamId64;
 		this.damageDealt = damageDealt;
 		this.projectilesFired = projectilesFired;
 		this.score = score;
+		this.connectionState = connectionState;
 	}
 
 	public long getSteamId64() {
@@ -66,5 +69,13 @@ public class PlayerRoundInfo {
 
 	public void setHero(String hero) {
 		this.hero = hero;
+	}
+
+	public byte getConnectionState() {
+		return connectionState;
+	}
+
+	public void setConnectionState(byte connectionState) {
+		this.connectionState = connectionState;
 	}
 }

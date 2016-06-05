@@ -56,7 +56,7 @@ public class Application {
 			return null;
 		});
 
-		post("/match/:id/winner", (request, response) -> {
+		post("/winner/:id", (request, response) -> {
 			long matchId = Long.valueOf(request.params("id"));
 
 			MatchWinner matchWinner = requestObject(request, MatchWinner.class);

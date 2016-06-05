@@ -15,6 +15,7 @@ public class PlayerRoundData implements Serializable {
 	private short projectilesFired;
 	private short score;
 	private String hero;
+	private byte connectionState;
 
 	@Embeddable
 	public static class Pk implements Serializable {
@@ -112,6 +113,15 @@ public class PlayerRoundData implements Serializable {
 	@Column(name = "hero")
 	public String getHero() {
 		return hero;
+	}
+
+	@Column(name = "connectionState", nullable = false)
+	public byte getConnectionState() {
+		return connectionState;
+	}
+
+	public void setConnectionState(byte connectionState) {
+		this.connectionState = connectionState;
 	}
 
 	public void setPk(Pk pk) {

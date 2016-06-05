@@ -67,6 +67,7 @@ public class MatchServiceImpl implements MatchService {
                 playerRoundInfo.setProjectilesFired(roundData.getProjectilesFired());
                 playerRoundInfo.setScore(roundData.getScore());
                 playerRoundInfo.setHero(roundData.getHero());
+				playerRoundInfo.setConnectionState(roundData.getConnectionState());
 
                 playerRoundInfoCollection.add(playerRoundInfo);
             }
@@ -151,6 +152,7 @@ public class MatchServiceImpl implements MatchService {
 			roundData.setScore(playerRoundInfo.getScore());
 			roundData.setDamageDealt(playerRoundInfo.getDamageDealt());
 			roundData.setProjectilesFired(playerRoundInfo.getProjectilesFired());
+			roundData.setConnectionState(playerRoundInfo.getConnectionState());
 
 			playerRoundData.add(roundData);
 		}
