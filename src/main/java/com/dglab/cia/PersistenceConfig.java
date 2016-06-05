@@ -57,6 +57,7 @@ public class PersistenceConfig {
 		dataSource.addDataSourceProperty("url", "file:data/database;shutdown=true;readonly=true;");
 		dataSource.addDataSourceProperty("user", "sa");
 		dataSource.addDataSourceProperty("password", "");
+		dataSource.setReadOnly(true);
 
 		return dataSource;
 	}

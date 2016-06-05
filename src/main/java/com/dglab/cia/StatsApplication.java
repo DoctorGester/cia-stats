@@ -2,8 +2,7 @@ package com.dglab.cia;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import static spark.Spark.port;
-import static spark.Spark.threadPool;
+import static spark.Spark.*;
 
 /**
  * @author doc
@@ -20,5 +19,8 @@ public class StatsApplication {
 		context.register(PersistenceConfig.class);
 		context.refresh();
 
+		get("/index", (request, response) -> {
+			return "Hello world!";
+		});
 	}
 }
