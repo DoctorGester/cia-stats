@@ -5,6 +5,13 @@ package com.dglab.cia;
  */
 public class Main {
 	public static void main(String ... args) {
-		new StorageApplication();
+		if (args.length != 1) {
+			throw new RuntimeException("Please specify service type, i.e. 'stats' or 'storage'");
+		}
+
+		switch (args[0]) {
+			case "stats": new StatsApplication(); break;
+			case "storage": new StorageApplication(); break;
+		}
 	}
 }

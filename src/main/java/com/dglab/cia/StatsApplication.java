@@ -12,7 +12,7 @@ public class StatsApplication {
 	private AnnotationConfigApplicationContext context;
 
 	public StatsApplication() {
-		port(5141);
+		port(80);
 		threadPool(16);
 
 		context = new AnnotationConfigApplicationContext();
