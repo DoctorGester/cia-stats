@@ -43,7 +43,7 @@ public class StorageApplication {
 
 			matchService.putMatch(matchInfo);
 
-			return null;
+			return "";
 		});
 
 		post("/match/:id/:round", (request, response) -> {
@@ -56,7 +56,7 @@ public class StorageApplication {
 
 			matchService.putRound(roundInfo);
 
-			return null;
+			return "";
 		});
 
 		post("/winner/:id", (request, response) -> {
@@ -67,7 +67,7 @@ public class StorageApplication {
 
 			matchService.putWinner(matchWinner);
 
-			return null;
+			return "";
 		});
 
 		exception(Exception.class, (exception, request, response) -> {
