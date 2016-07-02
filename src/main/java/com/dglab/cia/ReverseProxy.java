@@ -5,7 +5,7 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import spark.utils.IOUtils;
 
-import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -47,8 +47,10 @@ public class ReverseProxy {
 						.asBinary();
 
 				if (answer.getStatus() != 200) {
-					throw new UnirestException("Service error");
+					throw new UnirestException("Service error: " + IOUtils.toString(answer.getBody()));
 				}
+
+				return answer;
 			} catch (UnirestException e) {
 				logger.log(Level.SEVERE, e.getMessage());
 
@@ -57,6 +59,8 @@ public class ReverseProxy {
 				} else {
 					e.printStackTrace();
 				}
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 
 			return null;

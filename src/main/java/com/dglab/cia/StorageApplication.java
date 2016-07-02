@@ -1,9 +1,8 @@
 package com.dglab.cia;
 
-import com.dglab.cia.json.MatchInfo;
-import com.dglab.cia.json.MatchWinner;
-import com.dglab.cia.json.RoundInfo;
+import com.dglab.cia.json.*;
 import com.dglab.cia.persistence.MatchService;
+import com.dglab.cia.persistence.RankService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import spark.Request;
@@ -16,6 +15,7 @@ import static spark.Spark.*;
 public class StorageApplication {
 	private AnnotationConfigApplicationContext context;
 	private MatchService matchService;
+	private RankService rankService;
 	private ObjectMapper mapper;
 	private JsonUtil jsonUtil;
 
@@ -29,11 +29,16 @@ public class StorageApplication {
 		context.refresh();
 
 		matchService = context.getBean(MatchService.class);
+		rankService = context.getBean(RankService.class);
 		mapper = context.getBean(ObjectMapper.class);
 		jsonUtil = context.getBean(JsonUtil.class);
 
 		get("/match/:id", (request, response) -> {
 			return matchService.getMatchDetails(Long.valueOf(request.params("id")));
+		}, jsonUtil.json());
+
+		get("/rank/:id", (request, response) -> {
+			return rankService.getPlayerRanks(Long.valueOf(request.params("id")));
 		}, jsonUtil.json());
 
 		post("/match/:id", (request, response) -> {
@@ -43,8 +48,8 @@ public class StorageApplication {
 
 			matchService.putMatch(matchInfo);
 
-			return "";
-		});
+			return rankService.getMatchRanks(matchId);
+		}, jsonUtil.json());
 
 		post("/match/:id/:round", (request, response) -> {
 			long matchId = Long.valueOf(request.params("id"));
@@ -67,8 +72,8 @@ public class StorageApplication {
 
 			matchService.putWinner(matchWinner);
 
-			return "";
-		});
+			return rankService.processMatchResults(matchId);
+		}, jsonUtil.json());
 
 		exception(Exception.class, (exception, request, response) -> {
 			exception.printStackTrace();

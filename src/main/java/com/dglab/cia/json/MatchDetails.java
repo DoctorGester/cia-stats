@@ -13,4 +13,20 @@ public class MatchDetails {
 		this.info = info;
         this.rounds = rounds;
     }
+
+	public MatchInfo getInfo() {
+		return info;
+	}
+
+	public void setInfo(MatchInfo info) {
+		this.info = info;
+	}
+
+	public Collection<RoundInfo> getRounds() {
+		return rounds;
+	}
+
+	public void setRounds(Collection<RoundInfo> rounds) {
+		this.rounds = rounds;
+	}
 }

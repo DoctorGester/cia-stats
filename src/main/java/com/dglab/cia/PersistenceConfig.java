@@ -1,9 +1,6 @@
 package com.dglab.cia;
 
-import com.dglab.cia.persistence.MatchService;
-import com.dglab.cia.persistence.MatchServiceImpl;
-import com.dglab.cia.persistence.PlayerNameService;
-import com.dglab.cia.persistence.PlayerNameServiceImpl;
+import com.dglab.cia.persistence.*;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -117,6 +114,11 @@ public class PersistenceConfig {
 	@Bean
 	public PlayerNameService createPlayerNameService() {
 		return new PlayerNameServiceImpl();
+	}
+
+	@Bean
+	public RankService createRankService() {
+		return new RankServiceImpl();
 	}
 
 	@Bean
