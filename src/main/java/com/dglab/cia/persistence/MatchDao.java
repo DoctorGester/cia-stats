@@ -32,6 +32,10 @@ public class MatchDao {
 		Hibernate.initialize(match.getMatchData());
 		Hibernate.initialize(match.getRounds());
 
+		for (Round round : match.getRounds()) {
+			Hibernate.initialize(round.getPlayerRoundData());
+		}
+
 		return match;
 	}
 
