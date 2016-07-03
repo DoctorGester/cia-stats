@@ -48,12 +48,12 @@ public class Match {
 		return winnerTeam;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "match")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "match", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 	public Collection<PlayerMatchData> getMatchData() {
 		return matchData;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "match")
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "match", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 	public Collection<Round> getRounds() {
 		return rounds;
 	}

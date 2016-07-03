@@ -13,6 +13,7 @@ import java.util.Map;
 public interface RankService {
 	byte getCurrentSeason();
 	Map<RankedMode, RankAndStars> getPlayerRanks(long steamId64);
+	Map<Byte, Map<RankedMode, RankAndStars>> getPlayerRankHistory(long steamId64);
 	RankedMode getMatchRankedMode(Match match);
 	Map<Long, RankAndStars> getMatchRanks(long matchId);
 	RankUpdateDetails processMatchResults(long matchId);

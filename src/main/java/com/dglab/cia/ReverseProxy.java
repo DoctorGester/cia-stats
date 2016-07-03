@@ -51,7 +51,7 @@ public class ReverseProxy {
 				}
 
 				return answer;
-			} catch (UnirestException e) {
+			} catch (UnirestException | IOException e) {
 				logger.log(Level.SEVERE, e.getMessage());
 
 				if (--triesLeft > 0) {
@@ -59,8 +59,6 @@ public class ReverseProxy {
 				} else {
 					e.printStackTrace();
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
 
 			return null;

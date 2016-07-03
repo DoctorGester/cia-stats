@@ -47,6 +47,26 @@ public class RankServiceImpl implements RankService {
 	}
 
 	@Override
+	public Map<Byte, Map<RankedMode, RankAndStars>> getPlayerRankHistory(long steamId64) {
+		Map<Byte, Map<RankedMode, RankAndStars>> result = new HashMap<>();
+		Collection<PlayerRank> ranks = rankDao.findPlayerRanks(steamId64);
+
+		for (PlayerRank rank : ranks) {
+			byte season = rank.getPk().getSeason();
+			Map<RankedMode, RankAndStars> seasonRanks = result.get(season);
+
+			if (seasonRanks == null) {
+				seasonRanks = new HashMap<>();
+				result.put(season, seasonRanks);
+			}
+
+			seasonRanks.put(rank.getPk().getMode(), new RankAndStars(rank.getRank(), rank.getStars()));
+		}
+
+		return result;
+	}
+
+	@Override
 	public RankedMode getMatchRankedMode(Match match) {
 		String mode = match.getMode();
 		byte players = match.getPlayers();
