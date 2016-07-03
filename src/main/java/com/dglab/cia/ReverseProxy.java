@@ -3,6 +3,8 @@ package com.dglab.cia;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import org.apache.commons.lang3.StringUtils;
+import spark.Request;
 import spark.utils.IOUtils;
 
 import java.io.BufferedReader;
@@ -79,6 +81,8 @@ public class ReverseProxy {
 
 	private void downloadAndParseWhiteList() {
 		try {
+			logger.log(Level.INFO, "Downloading IP white-list");
+
 			HttpResponse<String> response = Unirest.get(IP_POOL).asString();
 
 			if (response == null) {
@@ -108,10 +112,25 @@ public class ReverseProxy {
 			lock.lock();
 			whiteList.clear();
 			whiteList.addAll(result);
+			whiteList.add("127.0.0.1");
 			lock.unlock();
+
+			logger.log(Level.INFO, "IP white-list updated successfully");
 		} catch (Exception e) {
-			logger.log(Level.WARNING, "Could not obtain IP whitelist:" + e.getMessage());
+			logger.log(Level.WARNING, "Could not obtain IP white-list:" + e.getMessage());
 		}
+	}
+
+	private String initialRequestStage(Request request) {
+		lock.lock();
+		if (!whiteList.contains(request.ip())) {
+			halt(403);
+		}
+		lock.unlock();
+
+		String queryString = (request.queryString() != null ? "?" + request.queryString() : "");
+
+		return request.uri() + queryString;
 	}
 
 	public ReverseProxy() {
@@ -123,17 +142,29 @@ public class ReverseProxy {
 
 		service.scheduleAtFixedRate(this::downloadAndParseWhiteList, 0, 2, TimeUnit.HOURS);
 
-		post("/*", (request, response) -> {
-			lock.lock();
+		get("/*", ((request, response) -> {
+			String url = initialRequestStage(request);
+			Map<String, String> headers = request.headers().stream().collect(Collectors.toMap(h -> h, request::headers));
 
-			if (!whiteList.contains(request.ip())) {
-				halt(403);
+			HttpResponse<InputStream> answer = Unirest
+					.get(PROXY_TARGET + url)
+					.headers(headers)
+					.asBinary();
+
+			if (answer == null) {
+				return null;
 			}
 
-			lock.unlock();
+			response.status(answer.getStatus());
+			answer.getHeaders().forEach((header, values) -> {
+				response.header(header, StringUtils.join(values, ";"));
+			});
 
-			String queryString = (request.queryString() != null ? "?" + request.queryString() : "");
-			String url = request.uri() + queryString;
+			return IOUtils.toByteArray(answer.getBody());
+		}));
+
+		post("/*", (request, response) -> {
+			String url = initialRequestStage(request);
 			Map<String, String> headers = request.headers().stream().collect(Collectors.toMap(h -> h, request::headers));
 			headers.remove("Content-Length");
 
