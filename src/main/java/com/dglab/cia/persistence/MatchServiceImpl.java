@@ -4,6 +4,7 @@ import com.dglab.cia.database.*;
 import com.dglab.cia.json.*;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
@@ -16,6 +17,7 @@ import java.util.HashSet;
  * @author doc
  */
 
+@Service
 public class MatchServiceImpl implements MatchService {
 	@Autowired
 	private MatchDao matchDao;
@@ -24,7 +26,6 @@ public class MatchServiceImpl implements MatchService {
 	private PlayerNameService playerNameService;
 
 	@Override
-	@Transactional
 	public MatchDetails getMatchDetails(long matchId) {
 		Match match = matchDao.getMatch(matchId);
 
@@ -83,7 +84,6 @@ public class MatchServiceImpl implements MatchService {
 	}
 
 	@Override
-    @Transactional
 	public void putMatch(MatchInfo matchInfo) {
 		Collection<PlayerMatchData> playerMatchData = new HashSet<>();
 
@@ -114,7 +114,6 @@ public class MatchServiceImpl implements MatchService {
 	}
 
 	@Override
-	@Transactional
 	public void putRound(RoundInfo roundInfo) {
 		Match match = matchDao.getMatch(roundInfo.getMatchId());
 
@@ -163,7 +162,6 @@ public class MatchServiceImpl implements MatchService {
 	}
 
 	@Override
-	@Transactional
 	public void putWinner(MatchWinner winner) {
 		Match match = matchDao.getMatch(winner.getMatchId());
 

@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.zaxxer.hikari.HikariDataSource;
 import org.hibernate.SessionFactory;
+import org.hibernate.jpa.HibernatePersistenceProvider;
+import org.hibernate.jpa.internal.EntityManagerFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -18,8 +20,13 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
+import org.springframework.orm.jpa.EntityManagerFactoryAccessor;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.Properties;
 
@@ -38,7 +45,12 @@ public class PersistenceConfig {
 		HikariDataSource dataSource = new HikariDataSource();
 
 		dataSource.setDataSourceClassName("org.hsqldb.jdbc.JDBCDataSource");
-		dataSource.addDataSourceProperty("url", "file:data/database;shutdown=true;hsqldb.write_delay=false;");
+		dataSource.addDataSourceProperty("url",
+				"file:data/database;" +
+				"shutdown=true;" +
+				"hsqldb.write_delay=false;" +
+				"hsqldb.default_table_type=cached;"
+		);
 		dataSource.addDataSourceProperty("user", "sa");
 		dataSource.addDataSourceProperty("password", "");
 
@@ -61,21 +73,24 @@ public class PersistenceConfig {
 
 	@Bean
 	@Autowired
-	public LocalSessionFactoryBean sessionFactory(
+	public EntityManagerFactory createEntityManagerFactory(
 			DataSource dataSource, @Qualifier("dataSourceProperties") Properties properties
 	) {
-		LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
-		sessionFactory.setDataSource(dataSource);
-		sessionFactory.setPackagesToScan("com.dglab.cia.database");
-		sessionFactory.setHibernateProperties(properties);
+		LocalContainerEntityManagerFactoryBean bean = new LocalContainerEntityManagerFactoryBean();
+		bean.setDataSource(dataSource);
+		bean.setPackagesToScan("com.dglab.cia.database");
+		bean.setJpaDialect(new HibernateJpaDialect());
+		bean.setJpaProperties(properties);
+		bean.setPersistenceProvider(new HibernatePersistenceProvider());
+		bean.afterPropertiesSet();
 
-		return sessionFactory;
+		return bean.getNativeEntityManagerFactory();
 	}
 
 	@Bean
 	@Autowired
-	public HibernateTransactionManager transactionManager(SessionFactory sessionFactory) {
-		return new HibernateTransactionManager(sessionFactory);
+	public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
+		return new JpaTransactionManager(entityManagerFactory);
 	}
 
 	@Bean
@@ -104,21 +119,6 @@ public class PersistenceConfig {
 				setProperty("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
 			}
 		};
-	}
-
-	@Bean
-	public MatchService createMatchService() {
-		return new MatchServiceImpl();
-	}
-
-	@Bean
-	public PlayerNameService createPlayerNameService() {
-		return new PlayerNameServiceImpl();
-	}
-
-	@Bean
-	public RankService createRankService() {
-		return new RankServiceImpl();
 	}
 
 	@Bean

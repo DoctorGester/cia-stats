@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class PlayerInfo {
 	private long steamId64;
-	private byte team;
+	private Byte team;
 	private String name;
 
 	public PlayerInfo(){}
@@ -16,7 +16,7 @@ public class PlayerInfo {
 	@JsonCreator()
 	public PlayerInfo(
 			@JsonProperty(value = "steamId64", required = true) long steamId64,
-			@JsonProperty(value = "team", required = true) byte team) {
+			@JsonProperty(value = "team") Byte team) {
 		this.steamId64 = steamId64;
 		this.team = team;
 	}
@@ -29,11 +29,11 @@ public class PlayerInfo {
 		this.steamId64 = steamId64;
 	}
 
-	public byte getTeam() {
+	public Byte getTeam() {
 		return team;
 	}
 
-	public void setTeam(byte team) {
+	public void setTeam(Byte team) {
 		this.team = team;
 	}
 

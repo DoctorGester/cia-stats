@@ -6,16 +6,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 /**
  * @author doc
  */
 @Repository
 public class PlayerNameDao {
-	@Autowired
-	private SessionFactory sessionFactory;
+	@PersistenceContext
+	private EntityManager entityManager;
 
     @Transactional
 	public void update(PlayerName playerName) {
-		sessionFactory.getCurrentSession().saveOrUpdate(playerName);
+		entityManager.merge(playerName);
 	}
 }

@@ -7,7 +7,15 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.EntityType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -16,9 +24,22 @@ import java.util.List;
  * @author doc
  */
 @Repository
+@Transactional(propagation = Propagation.REQUIRED)
 public class RankDao {
-	@Autowired
-	private SessionFactory sessionFactory;
+	@PersistenceContext
+	private EntityManager entityManager;
+
+	public Collection<PlayerRank> findPlayerRanks(long steamId64) {
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<PlayerRank> query = builder.createQuery(PlayerRank.class);
+		EntityType<PlayerRank> entity = entityManager.getMetamodel().entity(PlayerRank.class);
+
+		Root<PlayerRank> root = query.from(entity);
+		query.select(root);
+		query.where(builder.equal(root.get("pk.steamId64"), steamId64));
+
+		return entityManager.createQuery(query).getResultList();
+	}
 
 	public Collection<PlayerRank> findPlayerRanks(long steamId64, byte season) {
 		Collection<PlayerRank> result = new ArrayList<>();
@@ -35,13 +56,14 @@ public class RankDao {
 	}
 
 	public PlayerRank findPlayerRank(long steamId64, byte season, RankedMode mode) {
-		List playerEntries = sessionFactory
-				.getCurrentSession()
-				.createCriteria(PlayerMatchData.class)
-				.add(Restrictions.eq("pk.steamId64", steamId64))
-				.list();
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<PlayerMatchData> query = builder.createQuery(PlayerMatchData.class);
 
-		if (playerEntries.isEmpty()) {
+		Root<PlayerMatchData> matchDataRoot = query.from(PlayerMatchData.class);
+		query.select(matchDataRoot);
+		query.where(builder.equal(matchDataRoot.get("pk.steamId64"), steamId64));
+
+		if (entityManager.createQuery(query).getResultList().isEmpty()) {
 			return null;
 		}
 
@@ -50,7 +72,7 @@ public class RankDao {
 		pk.setSeason(season);
 		pk.setMode(mode);
 
-		PlayerRank rank = sessionFactory.getCurrentSession().byId(PlayerRank.class).load(pk);
+		PlayerRank rank = entityManager.find(PlayerRank.class, pk);
 
 		if (rank == null) {
 			rank = new PlayerRank();
@@ -58,13 +80,13 @@ public class RankDao {
 			rank.setStars(mode.getStars());
 			rank.setRank((byte) 30);
 
-			sessionFactory.getCurrentSession().save(rank);
+			save(rank);
 		}
 
 		return rank;
 	}
 
 	public void save(PlayerRank rank) {
-		sessionFactory.getCurrentSession().save(rank);
+		entityManager.persist(rank);
 	}
 }

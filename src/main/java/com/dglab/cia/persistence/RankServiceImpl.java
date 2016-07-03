@@ -7,6 +7,8 @@ import com.dglab.cia.database.PlayerRank;
 import com.dglab.cia.json.RankAndStars;
 import com.dglab.cia.json.RankUpdateDetails;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZoneOffset;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 /**
  * @author doc
  */
+@Service
 public class RankServiceImpl implements RankService {
 	private static final ZonedDateTime FIRST_SEASON = ZonedDateTime.of(2016, 7, 1, 0, 0, 0, 0, ZoneOffset.UTC);
 
@@ -30,7 +33,6 @@ public class RankServiceImpl implements RankService {
 	private MatchDao matchDao;
 
 	@Override
-	@Transactional
 	public Map<RankedMode, RankAndStars> getPlayerRanks(long steamId64) {
 		Collection<PlayerRank> playerRanks = rankDao.findPlayerRanks(steamId64, getCurrentSeason());
 
@@ -65,7 +67,6 @@ public class RankServiceImpl implements RankService {
 	}
 
 	@Override
-	@Transactional
 	public Map<Long, RankAndStars> getMatchRanks(long matchId) {
 		Match match = matchDao.getMatch(matchId);
 
@@ -100,7 +101,6 @@ public class RankServiceImpl implements RankService {
 	}
 
 	@Override
-	@Transactional
 	public RankUpdateDetails processMatchResults(long matchId) {
 		Match match = matchDao.getMatch(matchId);
 

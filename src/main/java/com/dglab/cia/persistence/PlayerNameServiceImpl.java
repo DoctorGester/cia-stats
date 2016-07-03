@@ -4,6 +4,7 @@ import com.dglab.cia.database.PlayerName;
 import com.github.koraktor.steamcondenser.exceptions.SteamCondenserException;
 import com.github.koraktor.steamcondenser.steam.community.SteamId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.ExecutorService;
@@ -14,6 +15,7 @@ import java.util.logging.Logger;
 /**
  * @author doc
  */
+@Service
 public class PlayerNameServiceImpl implements PlayerNameService {
     private Logger log = Logger.getLogger(PlayerNameService.class.getName());
 
