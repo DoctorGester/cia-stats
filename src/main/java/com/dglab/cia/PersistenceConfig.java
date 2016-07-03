@@ -104,7 +104,6 @@ public class PersistenceConfig {
 		return new Properties() {
 			{
 				setProperty("hibernate.hbm2ddl.auto", "update");
-				setProperty("hibernate.show_sql", "true");
 				setProperty("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
 			}
 		};
@@ -115,7 +114,6 @@ public class PersistenceConfig {
 	public Properties readProperties() {
 		return new Properties() {
 			{
-				setProperty("hibernate.show_sql", "true");
 				setProperty("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
 			}
 		};
