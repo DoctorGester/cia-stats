@@ -66,17 +66,24 @@ task bigJar(type: Jar, dependsOn: compilePulled) {
     }
 
     baseName = project.name
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    from {[
+            configurations.compile.collect { it.isDirectory() ? it : zipTree(it) },
+            'clone/classes/main'
+    ]}
     with jar
 }
 
 ext.runProcess = { String type, int port ->
-    def idGetter = new ProcessBuilder('fuser' + port + "/tcp")
-    def process = idGetter.start()
-    def id = process.text
-    process.waitFor()
+    try {
+        def idGetter = new ProcessBuilder('fuser ' + port + "/tcp")
+        def process = idGetter.start()
+        def id = process.text
+        process.waitFor()
 
-    new ProcessBuilder('kill -KILL ' + id).start()
+        new ProcessBuilder('kill -KILL ' + id).start()
+    } catch (Exception e) {
+        println(e.getMessage())
+    }
 
     def builder = new ProcessBuilder(
             'java',
