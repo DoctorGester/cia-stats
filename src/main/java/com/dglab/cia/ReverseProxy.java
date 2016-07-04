@@ -11,6 +11,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -37,7 +39,7 @@ public class ReverseProxy {
 	private static final String IP_POOL = "https://raw.githubusercontent.com/SteamDatabase/GameTracking/master/dota/game/dota/pak01_dir/scripts/regions.txt";
 
 	private ScheduledExecutorService service = Executors.newScheduledThreadPool(16);
-	private Collection<String> whiteList = new HashSet<>();
+	private Collection<IpRange> whiteList = new HashSet<>();
 	private Lock lock = new ReentrantLock();
 
 	private class ServiceRequest {
@@ -79,6 +81,43 @@ public class ReverseProxy {
 		}
 	}
 
+	private static class IpRange {
+		private final long network;
+		private final long netmask;
+
+		public IpRange(String networkPart, String cidrPart) throws UnknownHostException {
+			long netmask = 0;
+			int cidr = cidrPart == null ? 32 : Integer.parseInt(cidrPart);
+			for (int pos = 0; pos < 32; ++pos) {
+				if (pos >= 32 - cidr) {
+					netmask |= (1L << pos);
+				}
+			}
+
+			this.network = netmask & toMask(InetAddress.getByName(networkPart));
+			this.netmask = netmask;
+		}
+
+		public boolean isInRange(String ip) {
+			try {
+				return network == (toMask(InetAddress.getByName(ip)) & netmask);
+			} catch (UnknownHostException e) {
+				return false;
+			}
+		}
+
+		private long toMask(InetAddress address) {
+			byte[] data = address.getAddress();
+			long accum = 0;
+			int idx = 3;
+			for (int shiftBy = 0; shiftBy < 32; shiftBy += 8) {
+				accum |= ((long) (data[idx] & 0xff)) << shiftBy;
+				idx--;
+			}
+			return accum;
+		}
+	}
+
 	private void downloadAndParseWhiteList() {
 		try {
 			logger.log(Level.INFO, "Downloading IP white-list");
@@ -95,8 +134,8 @@ public class ReverseProxy {
 
 			String body = response.getBody();
 			BufferedReader reader = new BufferedReader(new StringReader(body));
-			Collection<String> result = new HashSet<>();
-			Pattern pattern = Pattern.compile("\"(\\d{1,4}\\.\\d{1,4}.\\d{1,4}.\\d{1,4}(/\\d{1,3})?\")");
+			Collection<IpRange> result = new HashSet<>();
+			Pattern pattern = Pattern.compile("\"((?:\\d|\\.)+)(?:/(\\d{1,2}))?\"");
 
 			String line;
 			while ((line = reader.readLine()) != null) {
@@ -104,7 +143,7 @@ public class ReverseProxy {
 					Matcher matcher = pattern.matcher(line);
 
 					while (matcher.find()) {
-						result.add(matcher.group(1));
+						result.add(new IpRange(matcher.group(1), matcher.group(2)));
 					}
 				}
 			}
@@ -112,7 +151,7 @@ public class ReverseProxy {
 			lock.lock();
 			whiteList.clear();
 			whiteList.addAll(result);
-			whiteList.add("127.0.0.1");
+			whiteList.add(new IpRange("127.0.0.1", null));
 			lock.unlock();
 
 			logger.log(Level.INFO, "IP white-list updated successfully");
@@ -121,11 +160,14 @@ public class ReverseProxy {
 		}
 	}
 
-	private String initialRequestStage(Request request) {
+	private String initialRequestStage(Request request){
 		lock.lock();
-		if (!whiteList.contains(request.ip())) {
+
+		String ip = request.ip();
+		if (whiteList.stream().noneMatch(range -> range.isInRange(ip))) {
 			halt(403);
 		}
+
 		lock.unlock();
 
 		String queryString = (request.queryString() != null ? "?" + request.queryString() : "");
