@@ -29,11 +29,14 @@ public class MatchDao {
 
 	public Match getMatch(long id) {
 		Match match = entityManager.find(Match.class, id);
-		Hibernate.initialize(match.getMatchData());
-		Hibernate.initialize(match.getRounds());
 
-		for (Round round : match.getRounds()) {
-			Hibernate.initialize(round.getPlayerRoundData());
+		if (match != null) {
+			Hibernate.initialize(match.getMatchData());
+			Hibernate.initialize(match.getRounds());
+
+			for (Round round : match.getRounds()) {
+				Hibernate.initialize(round.getPlayerRoundData());
+			}
 		}
 
 		return match;
