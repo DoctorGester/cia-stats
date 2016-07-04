@@ -2,6 +2,7 @@ group 'dg-lab'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: 'application'
 
 repositories {
     mavenCentral()
@@ -26,4 +27,78 @@ dependencies {
     compile group: 'org.springframework', name: 'spring-orm', version: '4.2.6.+'
     compile group: 'com.github.koraktor', name: 'steam-condenser', version: '1.3.+'
     compile group: 'com.mashape.unirest', name: 'unirest-java', version: '1.4.+'
+}
+
+import org.ajoberstar.grgit.*
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'org.ajoberstar:grgit:1.7.0'
+    }
+}
+
+task pullSources {
+    def dir = file('clone')
+
+    if (!dir.exists()) {
+        Grgit.clone(dir: dir, uri: 'https://github.com/doctorgester/cia-stats')
+    } else {
+        Grgit.open(dir: dir).pull()
+    }
+}
+
+task compilePulled(type: JavaCompile, dependsOn: pullSources) {
+    source = file('clone/src/main/java')
+    destinationDir = file('clone/classes/main')
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+    dependencyCacheDir = file('clone/dependency-cache')
+    classpath = configurations.compile
+}
+
+task bigJar(type: Jar, dependsOn: compilePulled) {
+    manifest {
+        attributes 'Main-Class': 'com.dglab.cia.Main'
+    }
+
+    baseName = project.name
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+ext.runProcess = { String type, int port ->
+    def idGetter = new ProcessBuilder('fuser' + port + "/tcp")
+    def process = idGetter.start()
+    def id = process.text
+    process.waitFor()
+
+    new ProcessBuilder('kill -KILL ' + id).start()
+
+    def builder = new ProcessBuilder(
+            'java',
+            '-jar',
+            'build/libs/' + project.name + '-' + project.version + '.jar',
+            type
+    )
+
+    builder.directory(projectDir)
+    builder.redirectOutput(new File(project.name + '-' + type + "-log.txt"))
+    builder.redirectError(new File(project.name + '-' + type + "-log.txt"))
+    builder.start()
+}
+
+task publishStorage(dependsOn: bigJar) {
+    doLast {
+        runProcess('storage')
+    }
+}
+
+task publishProxy(dependsOn: bigJar) {
+    doLast {
+        runProcess('proxy')
+    }
 }
