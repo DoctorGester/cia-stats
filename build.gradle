@@ -75,12 +75,12 @@ task bigJar(type: Jar, dependsOn: compilePulled) {
 
 ext.runProcess = { String type, int port ->
     try {
-        def idGetter = new ProcessBuilder('fuser ' + port + "/tcp")
+        def idGetter = new ProcessBuilder('fuser',  + port + '/tcp')
         def process = idGetter.start()
         def id = process.text
         process.waitFor()
 
-        new ProcessBuilder('kill -KILL ' + id).start()
+        new ProcessBuilder('kill', '-KILL', id).start()
     } catch (Exception e) {
         println(e.getMessage())
     }
