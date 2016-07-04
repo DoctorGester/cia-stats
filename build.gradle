@@ -93,12 +93,12 @@ ext.runProcess = { String type, int port ->
 
 task publishStorage(dependsOn: bigJar) {
     doLast {
-        runProcess('storage')
+        runProcess('storage', 5141)
     }
 }
 
 task publishProxy(dependsOn: bigJar) {
     doLast {
-        runProcess('proxy')
+        runProcess('proxy', 3637)
     }
 }
