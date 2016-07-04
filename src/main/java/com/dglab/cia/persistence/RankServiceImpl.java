@@ -141,6 +141,11 @@ public class RankServiceImpl implements RankService {
 		for (PlayerMatchData player : match.getMatchData()) {
 			long steamId64 = player.getPk().getSteamId64();
 			PlayerRank playerRank = rankDao.findPlayerRank(steamId64, season, matchRankedMode);
+
+			if (playerRank.getRank() == 1) {
+				continue;
+			}
+
 			int stars = playerRank.getStars();
 
 			previous.put(steamId64, new RankAndStars(playerRank.getRank(), playerRank.getStars()));
@@ -154,7 +159,7 @@ public class RankServiceImpl implements RankService {
 			if (stars > matchRankedMode.getStars()) {
 				stars = matchRankedMode.getStars();
 
-				int newRank = Math.max(0, playerRank.getRank() - 1);
+				int newRank = Math.max(1, playerRank.getRank() - 1);
 				playerRank.setRank((byte) newRank);
 				playerRank.setStars((byte) stars);
 			} else if (stars <= 0) {
