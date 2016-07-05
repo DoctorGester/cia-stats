@@ -1,6 +1,5 @@
 package com.dglab.cia;
 
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 /**
@@ -19,20 +18,28 @@ public class IpRange {
 			}
 		}
 
-		this.network = netmask & toMask(InetAddress.getByName(networkPart));
+		this.network = netmask & toMask(networkPart);
 		this.netmask = netmask;
 	}
 
 	public boolean isInRange(String ip) {
-		try {
-			return network == (toMask(InetAddress.getByName(ip)) & netmask);
-		} catch (UnknownHostException e) {
-			return false;
-		}
+        return network == (toMask(ip) & netmask);
 	}
 
-	private long toMask(InetAddress address) {
-		byte[] data = address.getAddress();
+	private long toMask(String ip) {
+        int ipInt = 0;
+
+        for (String value : ip.split("\\.")) {
+            ipInt = (ipInt << 8) + Integer.valueOf(value);
+        }
+
+        byte[] data = new byte[4];
+
+        data[3] = (byte) (ipInt & 0xFF);
+        data[2] = (byte) ((ipInt >> 8) & 0xFF);
+        data[1] = (byte) ((ipInt >> 16) & 0xFF);
+        data[0] = (byte) ((ipInt >> 24) & 0xFF);
+
 		long accum = 0;
 		int idx = 3;
 		for (int shiftBy = 0; shiftBy < 32; shiftBy += 8) {
