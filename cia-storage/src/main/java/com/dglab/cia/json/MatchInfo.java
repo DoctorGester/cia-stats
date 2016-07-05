@@ -16,6 +16,7 @@ public class MatchInfo {
 	private String version;
 	private Collection<PlayerInfo> players = new HashSet<>();
 	private Instant dateTime;
+    private byte winnerTeam;
 
 	@JsonCreator()
 	public MatchInfo(
@@ -69,4 +70,12 @@ public class MatchInfo {
 	public void setDateTime(Instant dateTime) {
 		this.dateTime = dateTime;
 	}
+
+    public byte getWinnerTeam() {
+        return winnerTeam;
+    }
+
+    public void setWinnerTeam(byte winnerTeam) {
+        this.winnerTeam = winnerTeam;
+    }
 }

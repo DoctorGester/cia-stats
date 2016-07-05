@@ -42,6 +42,7 @@ public class MatchServiceImpl implements MatchService {
 		info.setMode(match.getMode());
 		info.setVersion(match.getVersion());
 		info.setDateTime(match.getDateTime());
+        info.setWinnerTeam(match.getWinnerTeam());
 
 		for (PlayerMatchData playerMatchData : match.getMatchData()) {
 			PlayerInfo playerInfo = new PlayerInfo();

@@ -38,19 +38,19 @@ public class StorageApplication {
 		jsonUtil = context.getBean(JsonUtil.class);
 
 		get("/match/:id", (request, response) -> {
-			return matchService.getMatchDetails(Long.valueOf(request.params("id")));
+			return matchService.getMatchDetails(requestLong(request, "id"));
 		}, jsonUtil.json());
 
         get("/matches/:id", (request, response) -> {
-            return matchService.getRecentPlayerMatches(Long.valueOf(request.params("id")));
+            return matchService.getRecentPlayerMatches(requestLong(request, "id"));
         }, jsonUtil.json());
 
         get("/ranks/player/:id", (request, response) -> {
-			return rankService.getPlayerRanks(Long.valueOf(request.params("id")));
+			return rankService.getPlayerRanks(requestLong(request, "id"));
 		}, jsonUtil.json());
 
 		get("/ranks/history/:id", (request, response) -> {
-			return rankService.getPlayerRankHistory(Long.valueOf(request.params("id")));
+			return rankService.getPlayerRankHistory(requestLong(request, "id"));
 		}, jsonUtil.json());
 
 		get("/ranks/top", (request, response) -> {
@@ -58,7 +58,7 @@ public class StorageApplication {
 		}, jsonUtil.json());
 
 		post("/match/:id", (request, response) -> {
-			long matchId = Long.valueOf(request.params("id"));
+			long matchId = requestLong(request, "id");
 			MatchInfo matchInfo = requestObject(request, MatchInfo.class);
 			matchInfo.setMatchId(matchId);
 
@@ -70,8 +70,8 @@ public class StorageApplication {
 		}, jsonUtil.json());
 
 		post("/match/:id/:round", (request, response) -> {
-			long matchId = Long.valueOf(request.params("id"));
-			short round = Short.valueOf(request.params("round"));
+			long matchId = requestLong(request, "id");
+			short round = requestLong(request, "round").shortValue();
 
 			RoundInfo roundInfo = requestObject(request, RoundInfo.class);
 			roundInfo.setMatchId(matchId);
@@ -83,7 +83,7 @@ public class StorageApplication {
 		});
 
 		post("/winner/:id", (request, response) -> {
-			long matchId = Long.valueOf(request.params("id"));
+			long matchId = requestLong(request, "id");
 
 			MatchWinner matchWinner = requestObject(request, MatchWinner.class);
 			matchWinner.setMatchId(matchId);
@@ -99,6 +99,16 @@ public class StorageApplication {
 			exception.printStackTrace();
 		});
 	}
+
+    private Long requestLong(Request request, String name) {
+        try {
+            return Long.valueOf(request.params(name));
+        } catch (NumberFormatException e) {
+            halt(400);
+        }
+
+        return 0L;
+    }
 
 	private <T> T requestObject(Request request, Class<T> type) throws Exception {
 		String data = request.raw().getParameter("data");
