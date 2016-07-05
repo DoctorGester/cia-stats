@@ -1,2 +1,3 @@
 rootProject.name = 'cia-stats'
 
+include 'cia-storage', 'cia-proxy'
