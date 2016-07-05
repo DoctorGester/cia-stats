@@ -74,8 +74,8 @@ subprojects {
         )
 
         builder.directory(projectDir)
+        builder.redirectErrorStream(true)
         builder.redirectOutput(new File(project.name + "-log.txt"))
-        builder.redirectError(new File(project.name + "-log.txt"))
         builder.start()
     }
 }
