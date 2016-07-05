@@ -171,7 +171,8 @@ public class RankServiceImpl implements RankService {
 
 			int stars = playerRank.getStars();
 
-			previous.put(steamId64, new RankAndStars(playerRank.getRank(), playerRank.getStars()));
+			RankAndStars oldRank = new RankAndStars(playerRank.getRank(), playerRank.getStars());
+			previous.put(steamId64, oldRank);
 
 			if (abandoned || notPlayed >= 2) {
 				stars--;
@@ -195,6 +196,11 @@ public class RankServiceImpl implements RankService {
 				playerRank.setStars((byte) stars);
 			} else {
 				playerRank.setStars((byte) stars);
+			}
+
+			if (oldRank.getRank() == playerRank.getRank() && oldRank.getStars() == playerRank.getStars()) {
+				previous.remove(steamId64);
+				continue;
 			}
 
 			updated.put(steamId64, new RankAndStars(playerRank.getRank(), playerRank.getStars()));
