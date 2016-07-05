@@ -7,12 +7,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import spark.Request;
 
+import java.util.logging.Logger;
+
 import static spark.Spark.*;
 
 /**
  * @author doc
  */
 public class StorageApplication {
+	private static Logger logger = Logger.getLogger(StorageApplication.class.getName());
+
 	private AnnotationConfigApplicationContext context;
 	private MatchService matchService;
 	private RankService rankService;
@@ -50,6 +54,8 @@ public class StorageApplication {
 			MatchInfo matchInfo = requestObject(request, MatchInfo.class);
 			matchInfo.setMatchId(matchId);
 
+			logger.info("Match begun " + matchId);
+
 			matchService.putMatch(matchInfo);
 
 			return rankService.getMatchRanks(matchId);
@@ -73,6 +79,8 @@ public class StorageApplication {
 
 			MatchWinner matchWinner = requestObject(request, MatchWinner.class);
 			matchWinner.setMatchId(matchId);
+
+			logger.info("Winner set " + matchId);
 
 			matchService.putWinner(matchWinner);
 

@@ -2,16 +2,15 @@ package com.dglab.cia.persistence;
 
 import com.dglab.cia.database.*;
 import com.dglab.cia.json.*;
-import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.logging.Logger;
 
 /**
  * @author doc
@@ -19,6 +18,8 @@ import java.util.HashSet;
 
 @Service
 public class MatchServiceImpl implements MatchService {
+	private static Logger logger = Logger.getLogger(MatchService.class.getName());
+
 	@Autowired
 	private MatchDao matchDao;
 

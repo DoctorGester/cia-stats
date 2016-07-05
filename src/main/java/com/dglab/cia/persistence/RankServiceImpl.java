@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class RankServiceImpl implements RankService {
+	private static Logger logger = Logger.getLogger(RankService.class.getName());
 	private static final ZonedDateTime FIRST_SEASON = ZonedDateTime.of(2016, 7, 1, 0, 0, 0, 0, ZoneOffset.UTC);
 
 	@Autowired
@@ -91,12 +93,16 @@ public class RankServiceImpl implements RankService {
 	public Map<Long, RankAndStars> getMatchRanks(long matchId) {
 		Match match = matchDao.getMatch(matchId);
 
+		logger.info("GetMatchRanks " + match + " " + matchId);
+
 		if (match == null) {
 			return null;
 		}
 
 		RankedMode matchRankedMode = getMatchRankedMode(match);
 		byte season = getCurrentSeason();
+
+		logger.info("Mode and season: " + matchRankedMode + " " + season);
 
 		if (matchRankedMode == null) {
 			return null;
