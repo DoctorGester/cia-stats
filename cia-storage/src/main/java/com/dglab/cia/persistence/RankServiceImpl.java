@@ -172,13 +172,13 @@ public class RankServiceImpl implements RankService {
 			RankAndStars oldRank = new RankAndStars(playerRank.getRank(), playerRank.getStars());
 			previous.put(steamId64, oldRank);
 
-			if (abandoned || notPlayed >= 2) {
-				stars--;
-			} else if (player.getTeam() == match.getWinnerTeam()) {
-				stars++;
-			} else {
-				stars--;
-			}
+            boolean won = player.getTeam() == match.getWinnerTeam() && !(abandoned || notPlayed >= 2);
+
+            if (playerRank.getRank() == 1) {
+
+            } else {
+                stars = stars + (won ? 1 : -1);
+            }
 
 			if (stars > matchRankedMode.getStars()) {
 				stars = matchRankedMode.getStars();

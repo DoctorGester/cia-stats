@@ -2,7 +2,6 @@ package com.dglab.cia.database;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Collection;
 
 /**
  * @author doc
