@@ -3,6 +3,7 @@ package com.dglab.cia.persistence;
 import com.dglab.cia.RankedMode;
 import com.dglab.cia.database.PlayerMatchData;
 import com.dglab.cia.database.PlayerRank;
+import com.dglab.cia.database.RankPrimaryKey;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,7 +66,7 @@ public class RankDao {
 			return null;
 		}
 
-		PlayerRank.Pk pk = new PlayerRank.Pk();
+		RankPrimaryKey pk = new RankPrimaryKey();
 		pk.setSteamId64(steamId64);
 		pk.setSeason(season);
 		pk.setMode(mode);

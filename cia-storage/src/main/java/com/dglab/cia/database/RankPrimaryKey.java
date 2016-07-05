@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import java.io.Serializable;
 
 /**
  * User: kartemov
@@ -13,7 +14,7 @@ import javax.persistence.Enumerated;
  * Time: 20:38
  */
 @Embeddable
-public class RankPrimaryKey {
+public class RankPrimaryKey implements Serializable {
     private long steamId64;
     private byte season;
     private RankedMode mode;
