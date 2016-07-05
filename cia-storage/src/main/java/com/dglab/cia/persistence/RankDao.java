@@ -16,9 +16,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import javax.persistence.metamodel.EntityType;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author doc
@@ -86,17 +84,38 @@ public class RankDao {
 		return rank;
 	}
 
-	public Collection<PlayerRank> findTopPlayers(byte season, int amount) {
+	public List<PlayerRank> findTopPlayers(byte season, RankedMode mode, int amount) {
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 		CriteriaQuery<PlayerRank> query = builder.createQuery(PlayerRank.class);
 		EntityType<PlayerRank> entity = entityManager.getMetamodel().entity(PlayerRank.class);
 
 		Root<PlayerRank> root = query.from(entity);
 		query.select(root);
+        query.where(
+                builder.and(
+                        builder.equal(root.get("pk").get("season"), season),
+                        builder.equal(root.get("pk").get("mode"), mode)
+                )
+        );
+
 		query.orderBy(builder.asc(root.get("rank")));
 
 		return entityManager.createQuery(query).setMaxResults(amount).getResultList();
 	}
+
+    public Map<RankedMode, List<PlayerRank>> findTopPlayers(byte season, int amount) {
+        Map<RankedMode, List<PlayerRank>> result = new HashMap<>();
+
+        for (RankedMode rankedMode : RankedMode.values()) {
+            List<PlayerRank> topPlayers = findTopPlayers(season, rankedMode, amount);
+
+            if (!topPlayers.isEmpty()) {
+                result.put(rankedMode, topPlayers);
+            }
+        }
+
+        return result;
+    }
 
 	public void save(PlayerRank rank) {
 		entityManager.merge(rank);

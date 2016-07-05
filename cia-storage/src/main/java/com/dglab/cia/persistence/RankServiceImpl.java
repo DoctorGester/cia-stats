@@ -215,22 +215,11 @@ public class RankServiceImpl implements RankService {
 
 	@Override
 	public Map<RankedMode, List<RankedPlayer>> getTopPlayers() {
-		Collection<PlayerRank> topPlayers = rankDao.findTopPlayers(getCurrentSeason(), 5);
-		Map<RankedMode, List<RankedPlayer>> result = new HashMap<>();
-
-		for (PlayerRank topPlayer : topPlayers) {
-			RankedMode mode = topPlayer.getPk().getMode();
-
-			List<RankedPlayer> rankedPlayers = result.get(mode);
-
-			if (rankedPlayers == null) {
-				rankedPlayers = new ArrayList<>();
-				result.put(mode, rankedPlayers);
-			}
-
-			rankedPlayers.add(new RankedPlayer(topPlayer.getPk().getSteamId64(), topPlayer.getRank()));
-		}
-
-		return result;
+        Map<RankedMode, List<PlayerRank>> topPlayers = rankDao.findTopPlayers(getCurrentSeason(), 5);
+        return topPlayers.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry ->
+            entry.getValue().stream().map(
+                    rank -> new RankedPlayer(rank.getPk().getSteamId64(), rank.getRank())
+            ).collect(Collectors.toList())
+        ));
 	}
 }
