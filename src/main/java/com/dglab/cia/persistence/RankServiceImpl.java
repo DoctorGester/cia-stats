@@ -1,21 +1,22 @@
 package com.dglab.cia.persistence;
 
+import com.dglab.cia.ConnectionState;
 import com.dglab.cia.RankedMode;
 import com.dglab.cia.database.Match;
 import com.dglab.cia.database.PlayerMatchData;
 import com.dglab.cia.database.PlayerRank;
+import com.dglab.cia.database.PlayerRoundData;
 import com.dglab.cia.json.RankAndStars;
 import com.dglab.cia.json.RankUpdateDetails;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -139,6 +140,22 @@ public class RankServiceImpl implements RankService {
 		Map<Long, RankAndStars> updated = new HashMap<>();
 
 		for (PlayerMatchData player : match.getMatchData()) {
+			List<PlayerRoundData> playerData = match
+					.getRounds()
+					.stream()
+					.flatMap(round -> round.getPlayerRoundData().stream())
+					.filter(data -> data.getPk().getSteamId64() == player.getPk().getSteamId64())
+					.collect(Collectors.toList());
+
+			long notPlayed = playerData
+					.stream()
+					.filter(data -> data.getHero() == null)
+					.count();
+
+			boolean abandoned = playerData
+					.stream()
+					.anyMatch(data -> data.getConnectionState() == ConnectionState.ABANDONED.ordinal());
+
 			long steamId64 = player.getPk().getSteamId64();
 			PlayerRank playerRank = rankDao.findPlayerRank(steamId64, season, matchRankedMode);
 
@@ -150,7 +167,9 @@ public class RankServiceImpl implements RankService {
 
 			previous.put(steamId64, new RankAndStars(playerRank.getRank(), playerRank.getStars()));
 
-			if (player.getTeam() == match.getWinnerTeam()) {
+			if (abandoned || notPlayed >= 2) {
+				stars--;
+			} else if (player.getTeam() == match.getWinnerTeam()) {
 				stars++;
 			} else {
 				stars--;
