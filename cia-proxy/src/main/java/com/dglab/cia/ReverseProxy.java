@@ -82,7 +82,7 @@ public class ReverseProxy {
 	}
 
 	private String initialRequestStage(Request request){
-		lock.lock();
+		/*lock.lock();
 
 		String ip = request.ip();
 		if (whiteList.stream().noneMatch(range -> range.isInRange(ip))) {
@@ -90,9 +90,11 @@ public class ReverseProxy {
 			halt(403);
 		}
 
-		lock.unlock();
+		lock.unlock();*/
 
 		String queryString = (request.queryString() != null ? "?" + request.queryString() : "");
+
+		logger.log(Level.INFO, "Access " + request.ip() + " " + queryString);
 
 		return request.uri() + queryString;
 	}
