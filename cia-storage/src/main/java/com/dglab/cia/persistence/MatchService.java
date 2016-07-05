@@ -1,15 +1,15 @@
 package com.dglab.cia.persistence;
 
-import com.dglab.cia.json.MatchDetails;
-import com.dglab.cia.json.MatchInfo;
-import com.dglab.cia.json.MatchWinner;
-import com.dglab.cia.json.RoundInfo;
+import com.dglab.cia.json.*;
+
+import java.util.List;
 
 /**
  * @author doc
  */
 public interface MatchService {
 	MatchDetails getMatchDetails(long matchId);
+    List<MatchHeader> getRecentPlayerMatches(long steamId64);
 	void putMatch(MatchInfo matchInfo);
 	void putRound(RoundInfo roundInfo);
 	void putWinner(MatchWinner winner);

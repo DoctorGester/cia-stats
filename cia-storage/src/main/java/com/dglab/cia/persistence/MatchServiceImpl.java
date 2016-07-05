@@ -10,7 +10,9 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * @author doc
@@ -84,7 +86,16 @@ public class MatchServiceImpl implements MatchService {
 		return new MatchDetails(info, roundInfoCollection);
 	}
 
-	@Override
+    @Override
+    public List<MatchHeader> getRecentPlayerMatches(long steamId64) {
+        List<Match> recentMatches = matchDao.getRecentPlayerMatches(steamId64, 1000);
+
+        return recentMatches.stream().map(match ->
+            new MatchHeader(match.getMatchId(), match.getMode(), match.getDateTime())
+        ).collect(Collectors.toList());
+    }
+
+    @Override
 	public void putMatch(MatchInfo matchInfo) {
 		Collection<PlayerMatchData> playerMatchData = new HashSet<>();
 

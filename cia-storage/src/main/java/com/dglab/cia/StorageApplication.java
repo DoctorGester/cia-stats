@@ -41,7 +41,11 @@ public class StorageApplication {
 			return matchService.getMatchDetails(Long.valueOf(request.params("id")));
 		}, jsonUtil.json());
 
-		get("/ranks/player/:id", (request, response) -> {
+        get("/matches/:id", (request, response) -> {
+            return matchService.getRecentPlayerMatches(Long.valueOf(request.params("id")));
+        }, jsonUtil.json());
+
+        get("/ranks/player/:id", (request, response) -> {
 			return rankService.getPlayerRanks(Long.valueOf(request.params("id")));
 		}, jsonUtil.json());
 
