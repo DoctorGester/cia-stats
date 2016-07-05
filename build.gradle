@@ -32,12 +32,11 @@ subprojects {
     }
 
     task compilePulled(type: JavaCompile, dependsOn: pullSources) {
-        def base = 'clone' + project.name;
-        source = file(base + '/src/main/java')
-        destinationDir = file(base + '/classes/main')
+        source = file('clone/' + project.name + '/src/main/java')
+        destinationDir = file('build/classes/main')
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
-        dependencyCacheDir = file('/dependency-cache')
+        dependencyCacheDir = file('dependency-cache')
         classpath = configurations.compile
     }
 
@@ -50,7 +49,7 @@ subprojects {
         from {
             [
                     configurations.compile.collect { it.isDirectory() ? it : zipTree(it) },
-                    'clone' + project.name + '/classes/main'
+                    'build/classes/main'
             ]
         }
         with jar
