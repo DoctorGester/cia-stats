@@ -8,16 +8,14 @@ import com.dglab.cia.database.PlayerRank;
 import com.dglab.cia.database.PlayerRoundData;
 import com.dglab.cia.json.RankAndStars;
 import com.dglab.cia.json.RankUpdateDetails;
+import com.dglab.cia.json.RankedPlayer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -213,5 +211,26 @@ public class RankServiceImpl implements RankService {
 		details.setUpdated(updated);
 
 		return details;
+	}
+
+	@Override
+	public Map<RankedMode, List<RankedPlayer>> getTopPlayers() {
+		Collection<PlayerRank> topPlayers = rankDao.findTopPlayers(getCurrentSeason(), 5);
+		Map<RankedMode, List<RankedPlayer>> result = new HashMap<>();
+
+		for (PlayerRank topPlayer : topPlayers) {
+			RankedMode mode = topPlayer.getPk().getMode();
+
+			List<RankedPlayer> rankedPlayers = result.get(mode);
+
+			if (rankedPlayers == null) {
+				rankedPlayers = new ArrayList<>();
+				result.put(mode, rankedPlayers);
+			}
+
+			rankedPlayers.add(new RankedPlayer(topPlayer.getPk().getSteamId64(), topPlayer.getRank()));
+		}
+
+		return result;
 	}
 }

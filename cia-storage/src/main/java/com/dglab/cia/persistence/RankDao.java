@@ -86,6 +86,18 @@ public class RankDao {
 		return rank;
 	}
 
+	public Collection<PlayerRank> findTopPlayers(byte season, int amount) {
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<PlayerRank> query = builder.createQuery(PlayerRank.class);
+		EntityType<PlayerRank> entity = entityManager.getMetamodel().entity(PlayerRank.class);
+
+		Root<PlayerRank> root = query.from(entity);
+		query.select(root);
+		query.orderBy(builder.asc(root.get("rank")));
+
+		return entityManager.createQuery(query).setMaxResults(amount).getResultList();
+	}
+
 	public void save(PlayerRank rank) {
 		entityManager.merge(rank);
 	}

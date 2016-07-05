@@ -49,6 +49,10 @@ public class StorageApplication {
 			return rankService.getPlayerRankHistory(Long.valueOf(request.params("id")));
 		}, jsonUtil.json());
 
+		get("/ranks/top", (request, response) -> {
+			return rankService.getTopPlayers();
+		}, jsonUtil.json());
+
 		post("/match/:id", (request, response) -> {
 			long matchId = Long.valueOf(request.params("id"));
 			MatchInfo matchInfo = requestObject(request, MatchInfo.class);

@@ -4,7 +4,9 @@ import com.dglab.cia.RankedMode;
 import com.dglab.cia.database.Match;
 import com.dglab.cia.json.RankAndStars;
 import com.dglab.cia.json.RankUpdateDetails;
+import com.dglab.cia.json.RankedPlayer;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,4 +19,5 @@ public interface RankService {
 	RankedMode getMatchRankedMode(Match match);
 	Map<Long, RankAndStars> getMatchRanks(long matchId);
 	RankUpdateDetails processMatchResults(long matchId);
+	Map<RankedMode, List<RankedPlayer>> getTopPlayers();
 }
