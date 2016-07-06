@@ -80,17 +80,8 @@ public class RankDao {
 			save(rank);
 		}
 
-		if (rank.getRank() == 1) {
-			EliteStreak streak = rank.getStreak();
-
-			if (streak == null) {
-				streak = new EliteStreak();
-				streak.setPk(pk);
-
-				rank.setStreak(streak);
-
-				save(rank);
-			}
+		if (checkRankStreak(rank)) {
+			save(rank);
 		}
 
 		return rank;
@@ -114,7 +105,10 @@ public class RankDao {
 
 		query.orderBy(builder.asc(root.get("rank")), builder.desc(join.get("maxStreak")));
 
-		return entityManager.createQuery(query).setMaxResults(amount).getResultList();
+		List<PlayerRank> result = entityManager.createQuery(query).setMaxResults(amount).getResultList();
+		result.stream().filter(this::checkRankStreak).forEach(this::save);
+
+		return result;
 	}
 
     public Map<RankedMode, List<PlayerRank>> findTopPlayers(byte season, int amount) {
@@ -132,6 +126,16 @@ public class RankDao {
     }
 
 	public void save(PlayerRank rank) {
+		checkRankStreak(rank);
+
+		entityManager.merge(rank);
+	}
+
+	public void save(Collection<PlayerRank> ranks) {
+		ranks.forEach(this::save);
+	}
+
+	private boolean checkRankStreak(PlayerRank rank) {
 		if (rank.getRank() == 1) {
 			EliteStreak streak = rank.getStreak();
 
@@ -141,14 +145,10 @@ public class RankDao {
 
 				rank.setStreak(streak);
 
-				save(rank);
+				return true;
 			}
 		}
 
-		entityManager.merge(rank);
-	}
-
-	public void save(Collection<PlayerRank> ranks) {
-		ranks.forEach(this::save);
+		return false;
 	}
 }
