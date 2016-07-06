@@ -56,7 +56,7 @@ public class ReverseProxy {
 			String body = response.getBody();
 			BufferedReader reader = new BufferedReader(new StringReader(body));
 			Collection<IpRange> result = new HashSet<>();
-			Pattern pattern = Pattern.compile("\"((?:\\d|\\.)+)(?:/(\\d{1,2}))?\"");
+			Pattern pattern = Pattern.compile("\"(\\d{1,4}\\.\\d{1,4}.\\d{1,4}.\\d{1,4})(/(\\d{1,3}))?\"");
 
 			String line;
 			while ((line = reader.readLine()) != null) {
@@ -64,7 +64,7 @@ public class ReverseProxy {
 					Matcher matcher = pattern.matcher(line);
 
 					while (matcher.find()) {
-						result.add(new IpRange(matcher.group(1), matcher.group(2)));
+						result.add(new IpRange(matcher.group(1), matcher.group(3)));
 					}
 				}
 			}
