@@ -1,9 +1,7 @@
 package com.dglab.cia.persistence;
 
 import com.dglab.cia.RankedMode;
-import com.dglab.cia.database.PlayerMatchData;
-import com.dglab.cia.database.PlayerRank;
-import com.dglab.cia.database.RankPrimaryKey;
+import com.dglab.cia.database.*;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.SingularAttribute;
+import java.time.Instant;
 import java.util.*;
 
 /**
@@ -82,6 +80,19 @@ public class RankDao {
 			save(rank);
 		}
 
+		if (rank.getRank() == 1) {
+			EliteStreak streak = rank.getStreak();
+
+			if (streak == null) {
+				streak = new EliteStreak();
+				streak.setPk(pk);
+
+				rank.setStreak(streak);
+
+				save(rank);
+			}
+		}
+
 		return rank;
 	}
 
@@ -99,7 +110,9 @@ public class RankDao {
                 )
         );
 
-		query.orderBy(builder.asc(root.get("rank")));
+		Join<PlayerRank, EliteStreak> join = root.join(entity.getSingularAttribute("streak", EliteStreak.class), JoinType.LEFT);
+
+		query.orderBy(builder.asc(root.get("rank")), builder.desc(join.get("maxStreak")));
 
 		return entityManager.createQuery(query).setMaxResults(amount).getResultList();
 	}
@@ -119,6 +132,23 @@ public class RankDao {
     }
 
 	public void save(PlayerRank rank) {
+		if (rank.getRank() == 1) {
+			EliteStreak streak = rank.getStreak();
+
+			if (streak == null) {
+				streak = new EliteStreak();
+				streak.setPk(rank.getPk());
+
+				rank.setStreak(streak);
+
+				save(rank);
+			}
+		}
+
 		entityManager.merge(rank);
+	}
+
+	public void save(Collection<PlayerRank> ranks) {
+		ranks.forEach(this::save);
 	}
 }

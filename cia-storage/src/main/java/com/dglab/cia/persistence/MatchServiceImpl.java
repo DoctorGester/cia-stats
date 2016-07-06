@@ -89,7 +89,7 @@ public class MatchServiceImpl implements MatchService {
 
     @Override
     public List<MatchHeader> getRecentPlayerMatches(long steamId64) {
-        List<Match> recentMatches = matchDao.getRecentPlayerMatches(steamId64, 1000);
+        List<Match> recentMatches = matchDao.getRecentPlayerMatches(steamId64, 40);
 
         return recentMatches.stream().map(match ->
             new MatchHeader(match.getMatchId(), match.getMode(), match.getDateTime())

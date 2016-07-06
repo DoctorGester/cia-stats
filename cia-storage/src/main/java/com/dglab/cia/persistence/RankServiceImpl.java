@@ -2,13 +2,11 @@ package com.dglab.cia.persistence;
 
 import com.dglab.cia.ConnectionState;
 import com.dglab.cia.RankedMode;
-import com.dglab.cia.database.Match;
-import com.dglab.cia.database.PlayerMatchData;
-import com.dglab.cia.database.PlayerRank;
-import com.dglab.cia.database.PlayerRoundData;
+import com.dglab.cia.database.*;
 import com.dglab.cia.json.RankAndStars;
 import com.dglab.cia.json.RankUpdateDetails;
 import com.dglab.cia.json.RankedPlayer;
+import com.dglab.cia.json.Streak;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +40,17 @@ public class RankServiceImpl implements RankService {
 				.collect(
 						Collectors.toMap(
 								rank -> rank.getPk().getMode(),
-								rank -> new RankAndStars(rank.getRank(), rank.getStars())
+								rank -> {
+									RankAndStars rankAndStars = new RankAndStars(rank.getRank(), rank.getStars());
+
+									EliteStreak streak = rank.getStreak();
+
+									if (streak != null) {
+										rankAndStars.setStreak(new Streak(streak.getCurrentStreak(), streak.getMaxStreak()));
+									}
+
+									return rankAndStars;
+								}
 						)
 				);
 	}
@@ -143,6 +151,8 @@ public class RankServiceImpl implements RankService {
 		Map<Long, RankAndStars> previous = new HashMap<>();
 		Map<Long, RankAndStars> updated = new HashMap<>();
 
+		List<PlayerRank> toUpdate = new ArrayList<>();
+
 		for (PlayerMatchData player : match.getMatchData()) {
 			List<PlayerRoundData> playerData = match
 					.getRounds()
@@ -162,10 +172,7 @@ public class RankServiceImpl implements RankService {
 
 			long steamId64 = player.getPk().getSteamId64();
 			PlayerRank playerRank = rankDao.findPlayerRank(steamId64, season, matchRankedMode);
-
-			if (playerRank.getRank() == 1) {
-				continue;
-			}
+			EliteStreak streak = playerRank.getStreak();
 
 			int stars = playerRank.getStars();
 
@@ -175,7 +182,9 @@ public class RankServiceImpl implements RankService {
             boolean won = player.getTeam() == match.getWinnerTeam() && !(abandoned || notPlayed >= 2);
 
             if (playerRank.getRank() == 1) {
+				oldRank.setStreak(new Streak(streak.getCurrentStreak(), streak.getMaxStreak()));
 
+				updateEliteStreak(playerRank, won);
             } else {
                 stars = stars + (won ? 1 : -1);
             }
@@ -196,21 +205,49 @@ public class RankServiceImpl implements RankService {
 				playerRank.setStars((byte) stars);
 			}
 
-			if (oldRank.getRank() == playerRank.getRank() && oldRank.getStars() == playerRank.getStars()) {
+			boolean rankUpdated = oldRank.getRank() == playerRank.getRank() && oldRank.getStars() == playerRank.getStars();
+			boolean streakUpdated = false;
+
+			if (oldRank.getStreak() != null) {
+				streakUpdated = oldRank.getStreak().getCurrent() != streak.getCurrentStreak();
+			}
+
+			if (!rankUpdated && !streakUpdated) {
 				previous.remove(steamId64);
 				continue;
 			}
 
-			updated.put(steamId64, new RankAndStars(playerRank.getRank(), playerRank.getStars()));
+			RankAndStars newRank = new RankAndStars(playerRank.getRank(), playerRank.getStars());
 
-			rankDao.save(playerRank);
+			if (streak != null) {
+				newRank.setStreak(new Streak(streak.getCurrentStreak(), streak.getMaxStreak()));
+			}
+
+			updated.put(steamId64, newRank);
+
+			toUpdate.add(playerRank);
 		}
+
+		rankDao.save(toUpdate);
 
 		RankUpdateDetails details = new RankUpdateDetails();
 		details.setPrevious(previous);
 		details.setUpdated(updated);
 
 		return details;
+	}
+
+	private EliteStreak updateEliteStreak(PlayerRank rank, boolean won) {
+		EliteStreak streak = rank.getStreak();
+
+		if (won) {
+			streak.setCurrentStreak((short) (streak.getCurrentStreak() + 1));
+			streak.setMaxStreak((short) Math.max(streak.getMaxStreak(), streak.getCurrentStreak()));
+		} else {
+			streak.setCurrentStreak((short) 0);
+		}
+
+		return streak;
 	}
 
 	@Override
