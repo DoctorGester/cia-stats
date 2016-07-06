@@ -31,6 +31,18 @@ public class RankServiceImpl implements RankService {
 	@Autowired
 	private MatchDao matchDao;
 
+	private RankAndStars convertRank(PlayerRank rank) {
+		RankAndStars rankAndStars = new RankAndStars(rank.getRank(), rank.getStars());
+
+		EliteStreak streak = rank.getStreak();
+
+		if (streak != null) {
+			rankAndStars.setStreak(new Streak(streak.getCurrentStreak(), streak.getMaxStreak()));
+		}
+
+		return rankAndStars;
+	}
+
 	@Override
 	public Map<RankedMode, RankAndStars> getPlayerRanks(long steamId64) {
 		Collection<PlayerRank> playerRanks = rankDao.findPlayerRanks(steamId64, getCurrentSeason());
@@ -40,17 +52,7 @@ public class RankServiceImpl implements RankService {
 				.collect(
 						Collectors.toMap(
 								rank -> rank.getPk().getMode(),
-								rank -> {
-									RankAndStars rankAndStars = new RankAndStars(rank.getRank(), rank.getStars());
-
-									EliteStreak streak = rank.getStreak();
-
-									if (streak != null) {
-										rankAndStars.setStreak(new Streak(streak.getCurrentStreak(), streak.getMaxStreak()));
-									}
-
-									return rankAndStars;
-								}
+								this::convertRank
 						)
 				);
 	}
@@ -121,7 +123,7 @@ public class RankServiceImpl implements RankService {
 
 			PlayerRank rank = rankDao.findPlayerRank(player.getPk().getSteamId64(), season, matchRankedMode);
 
-			result.put(steamId64, new RankAndStars(rank.getRank(), rank.getStars()));
+			result.put(steamId64, convertRank(rank));
 		}
 
 		return result;
@@ -176,14 +178,12 @@ public class RankServiceImpl implements RankService {
 
 			int stars = playerRank.getStars();
 
-			RankAndStars oldRank = new RankAndStars(playerRank.getRank(), playerRank.getStars());
+			RankAndStars oldRank = convertRank(playerRank);
 			previous.put(steamId64, oldRank);
 
             boolean won = player.getTeam() == match.getWinnerTeam() && !(abandoned || notPlayed >= 2);
 
             if (playerRank.getRank() == 1) {
-				oldRank.setStreak(new Streak(streak.getCurrentStreak(), streak.getMaxStreak()));
-
 				updateEliteStreak(playerRank, won);
             } else {
                 stars = stars + (won ? 1 : -1);
@@ -205,7 +205,7 @@ public class RankServiceImpl implements RankService {
 				playerRank.setStars((byte) stars);
 			}
 
-			boolean rankUpdated = oldRank.getRank() == playerRank.getRank() && oldRank.getStars() == playerRank.getStars();
+			boolean rankUpdated = oldRank.getRank() != playerRank.getRank() || oldRank.getStars() != playerRank.getStars();
 			boolean streakUpdated = false;
 
 			if (oldRank.getStreak() != null) {
@@ -217,13 +217,7 @@ public class RankServiceImpl implements RankService {
 				continue;
 			}
 
-			RankAndStars newRank = new RankAndStars(playerRank.getRank(), playerRank.getStars());
-
-			if (streak != null) {
-				newRank.setStreak(new Streak(streak.getCurrentStreak(), streak.getMaxStreak()));
-			}
-
-			updated.put(steamId64, newRank);
+			updated.put(steamId64, convertRank(playerRank));
 
 			toUpdate.add(playerRank);
 		}
