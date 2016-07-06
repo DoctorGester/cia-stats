@@ -249,7 +249,13 @@ public class RankServiceImpl implements RankService {
         Map<RankedMode, List<PlayerRank>> topPlayers = rankDao.findTopPlayers(getCurrentSeason(), 5);
         return topPlayers.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry ->
             entry.getValue().stream().map(
-                    rank -> new RankedPlayer(rank.getPk().getSteamId64(), rank.getRank())
+                    rank -> {
+						RankAndStars rankAndStars = convertRank(rank);
+						RankedPlayer player = new RankedPlayer(rank.getPk().getSteamId64(), rankAndStars.getRank());
+						player.setStreak(rankAndStars.getStreak());
+
+						return player;
+					}
             ).collect(Collectors.toList())
         ));
 	}

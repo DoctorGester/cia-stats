@@ -11,6 +11,7 @@ public class RankedPlayer {
 	@JsonSerialize(using = ToStringSerializer.class)
 	private long steamId64;
 	private byte rank;
+	private Streak streak;
 
 	public RankedPlayer(long steamId64, byte rank) {
 		this.steamId64 = steamId64;
@@ -31,5 +32,13 @@ public class RankedPlayer {
 
 	public void setRank(byte rank) {
 		this.rank = rank;
+	}
+
+	public Streak getStreak() {
+		return streak;
+	}
+
+	public void setStreak(Streak streak) {
+		this.streak = streak;
 	}
 }
