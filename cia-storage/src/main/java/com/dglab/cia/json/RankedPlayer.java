@@ -1,13 +1,14 @@
 package com.dglab.cia.json;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 /**
  * @author doc
  */
 public class RankedPlayer {
 	// Thanks you cuck javascript
-	@JsonSerialize(using = SteamIdSerializer.class, as = String.class)
+	@JsonSerialize(using = ToStringSerializer.class)
 	private long steamId64;
 	private byte rank;
 
