@@ -86,6 +86,14 @@ subprojects {
 def shared = project(':cia-shared')
 
 project(':cia-shared') {
+    sourceSets {
+        main {
+            java {
+                srcDir '../clone/' + project.name + '/src/main/java'
+            }
+        }
+    }
+
     dependencies {
         testCompile group: 'junit', name: 'junit', version: '4.11'
 
@@ -135,6 +143,14 @@ project(':cia-storage') {
 }
 
 project(':cia-view') {
+    sourceSets {
+        main {
+            resources {
+                srcDir '../clone/' + project.name + '/src/main/resources'
+            }
+        }
+    }
+
     dependencies {
         testCompile group: 'junit', name: 'junit', version: '4.11'
 

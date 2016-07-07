@@ -48,6 +48,10 @@ public class RankServiceImpl implements RankService {
 		RankedPlayer player = new RankedPlayer(rank.getPk().getSteamId64(), rankAndStars.getRank());
 		player.setStreak(rankAndStars.getStreak());
 
+        if (rank.getName() != null) {
+            player.setName(rank.getName().getName());
+        }
+
 		return player;
 	}
 

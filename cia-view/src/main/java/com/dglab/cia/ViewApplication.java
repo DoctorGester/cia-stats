@@ -44,6 +44,7 @@ public class ViewApplication {
 	public ViewApplication() {
 		port(80);
 		threadPool(16);
+        staticFileLocation("public");
 
 		mapGet("/ranks/top/:mode", "ranks/top/byMode", new TypeReference<List<RankedPlayer>>(){});
 

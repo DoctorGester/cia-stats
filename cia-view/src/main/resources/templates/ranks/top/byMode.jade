@@ -1,17 +1,44 @@
 doctype html
 html
-  head
-    link(rel="stylesheet", href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css")
-    meta(name="viewport", content="width=device-width, initial-scale=1")
-    title= Memes
-  body
-    table.pure-table
-        tbody
-            for player in model
-                tr
-                    td #{player.steamId64}
+    head
+        link(rel="stylesheet", href="/styles/pure-min.css")
+        link(rel="stylesheet", href="/styles/main.css")
+        meta(name="viewport", content="width=device-width, initial-scale=1")
+        title CIA stats
+    body
+        div.header
+            div.home-menu.pure-menu.pure-menu-horizontal.pure-menu-fixed
+                a.pure-menu-heading(href="/") CIA stats YO
+                ul.pure-menu-list
+                    li.pure-menu-item
+                        a.pure-menu-link(href="/") Home
+                    li.pure-menu-item
+                        a.pure-menu-link(href="/ranks/top/teams") Leaderboards
+                    li.pure-menu-item
+                        a.pure-menu-link(href="#") Heroes
+                    li.pure-menu-item
+                        a.pure-menu-link(href="#") Matches
 
-                    if player.streak
-                        td +#{player.streak.max}
-                    else
-                        td #{player.rank}
+        div.content-wrapper
+            div.content
+                h2.content-head.is-center Top ranked players this season
+                div.pure-g
+                    div.pure-u-1-1
+                        table.pure-table.pure-table-horizontal.ranked-table
+                            thead
+                                th Name
+                                th Rank
+                            tbody
+                                for player in model
+                                    tr
+                                        td
+                                            a.pure-u(href="http://steamcommunity.com/profiles/#{player.steamId64}")
+                                                if player.name
+                                                    | #{player.name}
+                                                else
+                                                    | #{player.steamId64}
+
+                                        if player.streak
+                                            td +#{player.streak.max}
+                                        else
+                                            td #{player.rank}
