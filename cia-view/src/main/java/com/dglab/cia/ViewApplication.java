@@ -12,13 +12,19 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
+import de.neuland.jade4j.JadeConfiguration;
+import de.neuland.jade4j.template.TemplateLoader;
 import org.apache.commons.lang3.StringUtils;
 import spark.ModelAndView;
 import spark.Spark;
 import spark.template.jade.JadeTemplateEngine;
+import spark.template.jade.loader.SparkClasspathTemplateLoader;
 import spark.utils.IOUtils;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +38,7 @@ import static spark.Spark.*;
 public class ViewApplication {
 	public static final String PROXY_TARGET = "http://127.0.0.1:5141";
 
-	private JadeTemplateEngine jadeTemplateEngine = new JadeTemplateEngine();
+	private JadeTemplateEngine jadeTemplateEngine = createTemplateEngine();
 	private ObjectMapper mapper = createObjectMapper();
 
 	public ViewApplication() {
@@ -74,7 +80,7 @@ public class ViewApplication {
 			model.put("model", result);
 
 			return new ModelAndView(model, view);
-		}), new JadeTemplateEngine());
+		}), jadeTemplateEngine);
 	}
 
 	private ObjectMapper createObjectMapper() {
@@ -87,4 +93,21 @@ public class ViewApplication {
 
 		return mapper;
 	}
+
+    private JadeTemplateEngine createTemplateEngine() {
+        JadeConfiguration configuration = new JadeConfiguration();
+        configuration.setTemplateLoader(new TemplateLoader() {
+            @Override
+            public long getLastModified(String name) throws IOException {
+                return -1;
+            }
+
+            @Override
+            public Reader getReader(String name) throws IOException {
+                return new InputStreamReader(getClass().getResourceAsStream("/templates/" + name));
+            }
+        });
+
+        return new JadeTemplateEngine(configuration);
+    }
 }
