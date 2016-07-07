@@ -20,4 +20,5 @@ public interface RankService {
 	Map<Long, RankAndStars> getMatchRanks(long matchId);
 	RankUpdateDetails processMatchResults(long matchId);
 	Map<RankedMode, List<RankedPlayer>> getTopPlayers();
+	List<RankedPlayer> getTopPlayers(RankedMode mode);
 }

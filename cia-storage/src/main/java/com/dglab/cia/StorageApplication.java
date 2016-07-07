@@ -53,6 +53,18 @@ public class StorageApplication {
 			return rankService.getPlayerRankHistory(requestLong(request, "id"));
 		}, jsonUtil.json());
 
+		get("/ranks/top/:mode", (request, response) -> {
+			String mode = request.params("mode");
+
+			for (RankedMode rankedMode : RankedMode.values()) {
+				if (rankedMode.getUrl().equalsIgnoreCase(mode)) {
+					return rankService.getTopPlayers(rankedMode);
+				}
+			}
+
+			return null;
+		}, jsonUtil.json());
+
 		get("/ranks/top", (request, response) -> {
 			return rankService.getTopPlayers();
 		}, jsonUtil.json());

@@ -43,6 +43,14 @@ public class RankServiceImpl implements RankService {
 		return rankAndStars;
 	}
 
+	private RankedPlayer convertPlayer(PlayerRank rank) {
+		RankAndStars rankAndStars = convertRank(rank);
+		RankedPlayer player = new RankedPlayer(rank.getPk().getSteamId64(), rankAndStars.getRank());
+		player.setStreak(rankAndStars.getStreak());
+
+		return player;
+	}
+
 	@Override
 	public Map<RankedMode, RankAndStars> getPlayerRanks(long steamId64) {
 		Collection<PlayerRank> playerRanks = rankDao.findPlayerRanks(steamId64, getCurrentSeason());
@@ -248,15 +256,16 @@ public class RankServiceImpl implements RankService {
 	public Map<RankedMode, List<RankedPlayer>> getTopPlayers() {
         Map<RankedMode, List<PlayerRank>> topPlayers = rankDao.findTopPlayers(getCurrentSeason(), 5);
         return topPlayers.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry ->
-            entry.getValue().stream().map(
-                    rank -> {
-						RankAndStars rankAndStars = convertRank(rank);
-						RankedPlayer player = new RankedPlayer(rank.getPk().getSteamId64(), rankAndStars.getRank());
-						player.setStreak(rankAndStars.getStreak());
-
-						return player;
-					}
-            ).collect(Collectors.toList())
+            entry.getValue().stream().map(this::convertPlayer).collect(Collectors.toList())
         ));
+	}
+
+	@Override
+	public List<RankedPlayer> getTopPlayers(RankedMode mode) {
+		return rankDao
+				.findTopPlayers(getCurrentSeason(), mode, 50)
+				.stream()
+				.map(this::convertPlayer)
+				.collect(Collectors.toList());
 	}
 }
