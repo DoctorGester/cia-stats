@@ -4,7 +4,6 @@ import com.dglab.cia.json.RankedPlayer;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,15 +15,12 @@ import de.neuland.jade4j.JadeConfiguration;
 import de.neuland.jade4j.template.TemplateLoader;
 import org.apache.commons.lang3.StringUtils;
 import spark.ModelAndView;
-import spark.Spark;
 import spark.template.jade.JadeTemplateEngine;
-import spark.template.jade.loader.SparkClasspathTemplateLoader;
+import spark.utils.GzipUtils;
 import spark.utils.IOUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,9 +40,43 @@ public class ViewApplication {
 	public ViewApplication() {
 		port(80);
 		threadPool(16);
-        staticFileLocation("public");
 
 		mapGet("/ranks/top/:mode", "ranks/top/byMode", new TypeReference<List<RankedPlayer>>(){});
+
+        // What a hack
+        get("/public/*", ((request, response) -> {
+            String path = request.splat()[0];
+            try (InputStream stream = getClass().getResourceAsStream("/public/" + path)) {
+                if (path.contains("/")) {
+                    path = path.substring(path.lastIndexOf('/') + 1);
+                }
+
+                byte[] data = IOUtils.toByteArray(stream);
+
+                String guessed = URLConnection.guessContentTypeFromName(path);
+
+                if (guessed == null && path.endsWith(".css")) {
+                    guessed = "text/css";
+                }
+
+                if (guessed == null) {
+                    guessed = URLConnection.guessContentTypeFromStream(new ByteArrayInputStream(data));
+                }
+
+                if (guessed != null) {
+                    response.type(guessed);
+                }
+
+                OutputStream wrappedOutputStream = GzipUtils.checkAndWrap(request.raw(), response.raw(), false);
+
+                wrappedOutputStream.write(data);
+
+                wrappedOutputStream.flush();
+                wrappedOutputStream.close();
+            }
+
+            return null;
+        }));
 
 		exception(Exception.class, (exception, request, response) -> {
 			exception.printStackTrace();
