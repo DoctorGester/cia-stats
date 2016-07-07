@@ -6,6 +6,8 @@ package com.dglab.cia.json;
 public class Streak {
 	private short max, current;
 
+	public Streak(){}
+
 	public Streak(short current, short max) {
 		this.current = current;
 		this.max = max;

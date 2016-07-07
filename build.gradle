@@ -1,4 +1,3 @@
-
 import org.ajoberstar.grgit.*
 
 buildscript {
@@ -8,6 +7,18 @@ buildscript {
 
     dependencies {
         classpath 'org.ajoberstar:grgit:1.7.0'
+    }
+}
+
+task pullSources {
+    logger.info("Pulling " + project.name)
+
+    def dir = file('clone')
+
+    if (!dir.exists()) {
+        Grgit.clone(dir: dir, uri: 'https://github.com/doctorgester/cia-stats')
+    } else {
+        Grgit.open(dir: dir).pull()
     }
 }
 
@@ -21,22 +32,10 @@ subprojects {
         mavenCentral()
     }
 
-    task pullSources << {
-        logger.info("Pulling " + project.name)
+    task compilePulled(type: JavaCompile, dependsOn: pullSources) {
+        System.out.println(file('../clone/' + project.name + '/src/main/java'))
 
-        def dir = file('clone')
-
-        if (!dir.exists()) {
-            Grgit.clone(dir: dir, uri: 'https://github.com/doctorgester/cia-stats')
-        } else {
-            Grgit.open(dir: dir).pull()
-        }
-    }
-
-    task compilePulled(type: JavaCompile, dependsOn: pullSources) << {
-        logger.info("Compiling " + project.name)
-
-        source = file('clone/' + project.name + '/src/main/java')
+        source = file('../clone/' + project.name + '/src/main/java')
         destinationDir = file('build/classes/main')
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
@@ -44,7 +43,7 @@ subprojects {
         classpath = configurations.compile
     }
 
-    task bigJar(type: Jar, dependsOn: compilePulled) << {
+    task bigJar(type: Jar, dependsOn: compilePulled) {
         manifest {
             attributes 'Main-Class': 'com.dglab.cia.Main'
         }
@@ -84,6 +83,18 @@ subprojects {
     }
 }
 
+def shared = project(':cia-shared')
+
+project(':cia-shared') {
+    dependencies {
+        testCompile group: 'junit', name: 'junit', version: '4.11'
+
+        compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.7.+'
+        compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.7.+'
+        compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.7.+'
+    }
+}
+
 project(':cia-proxy') {
     dependencies {
         testCompile group: 'junit', name: 'junit', version: '4.11'
@@ -110,13 +121,12 @@ project(':cia-storage') {
         compile group: 'org.hibernate', name: 'hibernate-java8', version: '5.1.+'
         compile group: 'org.hibernate', name: 'hibernate-hikaricp', version: '5.1.+'
         compile group: 'org.hibernate.javax.persistence', name: 'hibernate-jpa-2.1-api'
-        compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.7.+'
-        compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.7.+'
-        compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.7.+'
         compile group: 'org.springframework', name: 'spring-context', version: '4.2.6.+'
         compile group: 'org.springframework', name: 'spring-tx', version: '4.2.6.+'
         compile group: 'org.springframework', name: 'spring-orm', version: '4.2.6.+'
         compile group: 'com.github.koraktor', name: 'steam-condenser', version: '1.3.+'
+
+        compile shared
     }
 
     task publish(dependsOn: bigJar) << {
@@ -129,9 +139,12 @@ project(':cia-view') {
         testCompile group: 'junit', name: 'junit', version: '4.11'
 
         compile group: 'com.sparkjava', name: 'spark-core', version: '2.+'
+        compile group: 'com.sparkjava', name: 'spark-template-jade', version: '2.+'
         compile group: 'com.mashape.unirest', name: 'unirest-java', version: '1.4.+'
         compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.+'
         compile group: 'de.neuland-bfi', name: 'jade4j', version: '1.2.+'
+
+        compile shared
     }
 
     task publish(dependsOn: bigJar) << {

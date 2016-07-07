@@ -13,6 +13,8 @@ public class RankedPlayer {
 	private byte rank;
 	private Streak streak;
 
+	public RankedPlayer() {}
+
 	public RankedPlayer(long steamId64, byte rank) {
 		this.steamId64 = steamId64;
 		this.rank = rank;
