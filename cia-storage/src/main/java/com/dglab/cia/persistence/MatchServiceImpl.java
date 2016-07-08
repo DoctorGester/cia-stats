@@ -2,6 +2,8 @@ package com.dglab.cia.persistence;
 
 import com.dglab.cia.database.*;
 import com.dglab.cia.json.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class MatchServiceImpl implements MatchService {
-	private static Logger logger = Logger.getLogger(MatchService.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(MatchServiceImpl.class);
 
 	@Autowired
 	private MatchDao matchDao;

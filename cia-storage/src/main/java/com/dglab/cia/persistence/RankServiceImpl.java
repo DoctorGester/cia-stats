@@ -7,6 +7,8 @@ import com.dglab.cia.json.RankAndStars;
 import com.dglab.cia.json.RankUpdateDetails;
 import com.dglab.cia.json.RankedPlayer;
 import com.dglab.cia.json.Streak;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +16,6 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class RankServiceImpl implements RankService {
-	private static Logger logger = Logger.getLogger(RankService.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(RankServiceImpl.class);
 	private static final ZonedDateTime FIRST_SEASON = ZonedDateTime.of(2016, 7, 1, 0, 0, 0, 0, ZoneOffset.UTC);
 
 	@Autowired
@@ -113,16 +114,12 @@ public class RankServiceImpl implements RankService {
 	public Map<Long, RankAndStars> getMatchRanks(long matchId) {
 		Match match = matchDao.getMatch(matchId);
 
-		logger.info("GetMatchRanks " + match + " " + matchId);
-
 		if (match == null) {
 			return null;
 		}
 
 		RankedMode matchRankedMode = getMatchRankedMode(match);
 		byte season = getCurrentSeason();
-
-		logger.info("Mode and season: " + matchRankedMode + " " + season);
 
 		if (matchRankedMode == null) {
 			return null;
@@ -235,6 +232,8 @@ public class RankServiceImpl implements RankService {
 		}
 
 		rankDao.save(toUpdate);
+
+        log.info("Updated ranks for match {}", matchId);
 
 		RankUpdateDetails details = new RankUpdateDetails();
 		details.setPrevious(previous);

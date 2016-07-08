@@ -4,10 +4,11 @@ import com.dglab.cia.json.*;
 import com.dglab.cia.persistence.MatchService;
 import com.dglab.cia.persistence.RankService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import spark.Request;
 
-import java.util.logging.Logger;
 
 import static spark.Spark.*;
 
@@ -15,15 +16,17 @@ import static spark.Spark.*;
  * @author doc
  */
 public class StorageApplication {
-	private static Logger logger = Logger.getLogger(StorageApplication.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(StorageApplication.class);
 
-	private AnnotationConfigApplicationContext context;
+    private AnnotationConfigApplicationContext context;
 	private MatchService matchService;
 	private RankService rankService;
 	private ObjectMapper mapper;
 	private JsonUtil jsonUtil;
 
 	public StorageApplication() {
+        System.setProperty("org.jboss.logging.provider", "slf4j");
+
 		port(5141);
 		threadPool(16);
 
@@ -74,7 +77,11 @@ public class StorageApplication {
 			MatchInfo matchInfo = requestObject(request, MatchInfo.class);
 			matchInfo.setMatchId(matchId);
 
-			logger.info("Match begun " + matchId);
+			log.info("Match started {}", matchId);
+
+            for (PlayerInfo player : matchInfo.getPlayers()) {
+                log.info("Match {} player with {} in team {}", matchId, player.getSteamId64(), player.getTeam());
+            }
 
 			matchService.putMatch(matchInfo);
 
@@ -100,7 +107,7 @@ public class StorageApplication {
 			MatchWinner matchWinner = requestObject(request, MatchWinner.class);
 			matchWinner.setMatchId(matchId);
 
-			logger.info("Winner set " + matchId);
+			log.info("Winner set {}", matchId);
 
 			matchService.putWinner(matchWinner);
 

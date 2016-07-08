@@ -9,8 +9,8 @@ import java.util.HashSet;
 /**
  * @author doc
  */
-public class RoundInfo {
-	private long matchId;
+public class  RoundInfo {
+	private Long matchId;
 	private short roundNumber;
 	private Byte winner;
 	private Collection<PlayerRoundInfo> players = new HashSet<>();
@@ -20,11 +20,11 @@ public class RoundInfo {
 		this.players = players;
 	}
 
-	public long getMatchId() {
+	public Long getMatchId() {
 		return matchId;
 	}
 
-	public void setMatchId(long matchId) {
+	public void setMatchId(Long matchId) {
 		this.matchId = matchId;
 	}
 
