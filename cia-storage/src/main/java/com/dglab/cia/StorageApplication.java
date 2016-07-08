@@ -71,7 +71,7 @@ public class StorageApplication {
 				}
 			}
 
-			return null;
+			return "";
 		}, jsonUtil.json());
 
 		get("/ranks/top", (request, response) -> {
