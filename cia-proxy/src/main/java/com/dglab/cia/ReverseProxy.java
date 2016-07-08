@@ -3,6 +3,7 @@ package com.dglab.cia;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import spark.utils.IOUtils;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -56,7 +58,9 @@ public class ReverseProxy {
 			String body = response.getBody();
 			BufferedReader reader = new BufferedReader(new StringReader(body));
 			Collection<IpRange> result = new HashSet<>();
-			Pattern pattern = Pattern.compile("\"(\\d{1,4}\\.\\d{1,4}.\\d{1,4}.\\d{1,4})(/(\\d{1,3}))?\"");
+            String ipPattern = "(\\d{1,4}\\.\\d{1,4}.\\d{1,4}.\\d{1,4})";
+			Pattern pattern = Pattern.compile(String.format("\"%s(/(\\d{1,3}))?\"", ipPattern));
+            Pattern ipRangePattern = Pattern.compile(String.format("\"%s-%s\"", ipPattern, ipPattern));
 
 			String line;
 			while ((line = reader.readLine()) != null) {
@@ -66,6 +70,28 @@ public class ReverseProxy {
 					while (matcher.find()) {
 						result.add(new IpRange(matcher.group(1), matcher.group(3)));
 					}
+
+                    matcher = ipRangePattern.matcher(line);
+
+                    while (matcher.find()) {
+                        String startIp[] = matcher.group(1).split("\\.");
+                        String endIp[] = matcher.group(2).split("\\.");
+
+                        log.info("Found IP range of {}-{}", startIp, endIp);
+
+                        int startNumber = Integer.valueOf(startIp[startIp.length - 1]);
+                        int endNumber = Integer.valueOf(endIp[endIp.length - 1]);
+
+                        if (startNumber > endNumber) {
+                            continue;
+                        }
+
+                        for (; startNumber <= endNumber; startNumber++) {
+                            String newIp = StringUtils.join(Arrays.copyOf(startIp, 3), ".") + "." + startNumber;
+                            result.add(new IpRange(newIp, null));
+                            log.info("Added {}", newIp);
+                        }
+                    }
 				}
 			}
 
@@ -75,7 +101,7 @@ public class ReverseProxy {
 			whiteList.add(new IpRange("127.0.0.1", null));
 			lock.unlock();
 
-            log.info("IP white-list updated successfully");
+            log.info("IP white-list updated successfully, size: {}", whiteList.size());
 		} catch (Exception e) {
 			log.warn("Could not obtain IP white-list:" + e.getMessage());
 		}
