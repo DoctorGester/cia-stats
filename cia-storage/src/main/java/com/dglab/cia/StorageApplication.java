@@ -121,7 +121,8 @@ public class StorageApplication {
 		}, jsonUtil.json());
 
 		exception(Exception.class, (exception, request, response) -> {
-			exception.printStackTrace();
+			log.error("Error processing request: {} at {}", exception, exception.getStackTrace()[0]);
+            response.status(500);
 		});
 	}
 
