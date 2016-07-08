@@ -2,6 +2,7 @@ doctype html
 html
     head
         link(rel="stylesheet", href="/public/styles/pure-min.css", type="text/css")
+        link(rel="stylesheet", href="/public/styles/ez-plug-min.css", type="text/css")
         link(rel="stylesheet", href="/public/styles/main.css", type="text/css")
         link(rel="icon", type="image/png", sizes="32x32", href="/public/images/favicon.png")
         meta(name="viewport", content="width=device-width, initial-scale=1")
@@ -20,26 +21,23 @@ html
                     li.pure-menu-item
                         a.pure-menu-link(href="#") Matches
 
-        div.content-wrapper
-            div.content
+        div.ez-wr.content-margin
+            div.ez-box
                 h2.content-head.is-center Top ranked players this season
-                div.pure-g
-                    div.pure-u-1-1
-                        table.pure-table.pure-table-horizontal.ranked-table
-                            thead
-                                th Name
-                                th Rank
-                            tbody
-                                for player in model
-                                    tr
-                                        td
-                                            a.pure-u(href="http://steamcommunity.com/profiles/#{player.steamId64}")
-                                                if player.name
-                                                    | #{player.name}
-                                                else
-                                                    | #{player.steamId64}
-
-                                        if player.streak
-                                            td +#{player.streak.max}
-                                        else
-                                            td #{player.rank}
+            div.ez-wr.ranked-table
+                for player in model
+                    div.ez-box.rank-row
+                        div.ez-fl.ez-negmr.ez-75.ranked-name-container
+                            a.ranked-name.pure-u(href="http://steamcommunity.com/profiles/#{player.steamId64}")
+                                if player.name
+                                    | #{player.name}
+                                else
+                                    | #{player.steamId64}
+                        div.ez-last.ez-oh
+                            - var rankImage = 101 - player.rank
+                            div.rank-image-container
+                                img.rank-image(src="/public/images/ranks/#{rankImage}.png")
+                                if player.streak
+                                    span.rank-number.elite-number +#{player.streak.max}
+                                else
+                                    span.rank-number.normal-number #{player.rank}
