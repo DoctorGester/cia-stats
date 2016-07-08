@@ -6,6 +6,7 @@ import com.dglab.cia.persistence.RankService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.impl.SimpleLogger;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import spark.Request;
 
@@ -16,7 +17,14 @@ import static spark.Spark.*;
  * @author doc
  */
 public class StorageApplication {
-    private static final Logger log = LoggerFactory.getLogger(StorageApplication.class);
+    static {
+        System.setProperty("org.jboss.logging.provider", "slf4j");
+        System.setProperty(SimpleLogger.SHOW_DATE_TIME_KEY, "true");
+        System.setProperty(SimpleLogger.SHOW_SHORT_LOG_NAME_KEY, "true");
+        System.setProperty(SimpleLogger.DATE_TIME_FORMAT_KEY, "[yyyy/MM/dd HH:mm:ss]");
+    }
+
+    private static Logger log = LoggerFactory.getLogger(StorageApplication.class);
 
     private AnnotationConfigApplicationContext context;
 	private MatchService matchService;
@@ -25,8 +33,6 @@ public class StorageApplication {
 	private JsonUtil jsonUtil;
 
 	public StorageApplication() {
-        System.setProperty("org.jboss.logging.provider", "slf4j");
-
 		port(5141);
 		threadPool(16);
 
