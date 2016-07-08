@@ -81,17 +81,7 @@ public class ReverseProxy {
 		}
 	}
 
-	private String initialRequestStage(Request request){
-		/*lock.lock();
-
-		String ip = request.ip();
-		if (whiteList.stream().noneMatch(range -> range.isInRange(ip))) {
-			log.info("Access rejected to " + ip);
-			halt(403);
-		}
-
-		lock.unlock();*/
-
+	private String getRequestURL(Request request){
 		String queryString = (request.queryString() != null ? "?" + request.queryString() : "");
 
 		return request.uri() + queryString;
@@ -107,7 +97,7 @@ public class ReverseProxy {
 		service.scheduleAtFixedRate(this::downloadAndParseWhiteList, 0, 2, TimeUnit.HOURS);
 
 		get("/*", ((request, response) -> {
-			String url = initialRequestStage(request);
+			String url = getRequestURL(request);
 			Map<String, String> headers = request.headers().stream().collect(Collectors.toMap(h -> h, request::headers));
 
 			HttpResponse<InputStream> answer = Unirest
@@ -128,7 +118,17 @@ public class ReverseProxy {
 		}));
 
 		post("/*", (request, response) -> {
-			String url = initialRequestStage(request);
+            lock.lock();
+
+            String ip = request.ip();
+            if (whiteList.stream().noneMatch(range -> range.isInRange(ip))) {
+                log.info("Access rejected to " + ip);
+                halt(403);
+            }
+
+            lock.unlock();
+
+            String url = getRequestURL(request);
 			Map<String, String> headers = request.headers().stream().collect(Collectors.toMap(h -> h, request::headers));
 			headers.remove("Content-Length");
 
