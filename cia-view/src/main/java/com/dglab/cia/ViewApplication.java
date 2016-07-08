@@ -39,7 +39,7 @@ public class ViewApplication {
 
 	public ViewApplication() {
 		port(80);
-		threadPool(16);
+		threadPool(4);
 
 		mapGet("/ranks/top/:mode", "ranks/top/byMode", new TypeReference<List<RankedPlayer>>(){});
 
@@ -75,7 +75,7 @@ public class ViewApplication {
                 wrappedOutputStream.close();
             }
 
-            return null;
+            return "";
         }));
 
 		exception(Exception.class, (exception, request, response) -> {
