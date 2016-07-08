@@ -51,6 +51,7 @@ public class RankServiceImpl implements RankService {
 
         if (rank.getName() != null) {
             player.setName(rank.getName().getName());
+            player.setAvatarUrl(rank.getName().getAvatarUrl());
         }
 
 		return player;

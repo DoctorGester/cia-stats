@@ -108,19 +108,21 @@ public class MatchServiceImpl implements MatchService {
 		match.setVersion(matchInfo.getVersion());
 		match.setDateTime(Instant.now(Clock.systemUTC()));
 
-		for (PlayerInfo playerInfo : matchInfo.getPlayers()) {
-			PlayerMatchData.Pk pk = new PlayerMatchData.Pk();
-			pk.setMatchId(match.getMatchId());
-			pk.setSteamId64(playerInfo.getSteamId64());
+        List<Long> steamId64s = matchInfo.getPlayers().stream().map(playerInfo -> {
+            PlayerMatchData.Pk pk = new PlayerMatchData.Pk();
+            pk.setMatchId(match.getMatchId());
+            pk.setSteamId64(playerInfo.getSteamId64());
 
-			PlayerMatchData playerData = new PlayerMatchData();
-			playerData.setPk(pk);
-			playerData.setTeam(playerInfo.getTeam());
+            PlayerMatchData playerData = new PlayerMatchData();
+            playerData.setPk(pk);
+            playerData.setTeam(playerInfo.getTeam());
 
-            playerNameService.updatePlayerName(playerInfo.getSteamId64());
+            playerMatchData.add(playerData);
 
-			playerMatchData.add(playerData);
-		}
+            return playerInfo.getSteamId64();
+        }).collect(Collectors.toList());
+
+        playerNameService.updatePlayerNames(steamId64s);
 
 		match.setMatchData(playerMatchData);
 

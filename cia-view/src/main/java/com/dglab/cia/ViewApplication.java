@@ -1,14 +1,9 @@
 package com.dglab.cia;
 
+import com.dglab.cia.json.ObjectMapperFactory;
 import com.dglab.cia.json.RankedPlayer;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import de.neuland.jade4j.JadeConfiguration;
@@ -35,7 +30,7 @@ public class ViewApplication {
 	public static final String PROXY_TARGET = "http://127.0.0.1:5141";
 
 	private JadeTemplateEngine jadeTemplateEngine = createTemplateEngine();
-	private ObjectMapper mapper = createObjectMapper();
+	private ObjectMapper mapper = ObjectMapperFactory.createObjectMapper();
 
 	public ViewApplication() {
 		port(80);
@@ -112,17 +107,6 @@ public class ViewApplication {
 
 			return new ModelAndView(model, view);
 		}), jadeTemplateEngine);
-	}
-
-	private ObjectMapper createObjectMapper() {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JavaTimeModule());
-		mapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
-		mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true);
-		mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-		mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-
-		return mapper;
 	}
 
     private JadeTemplateEngine createTemplateEngine() {

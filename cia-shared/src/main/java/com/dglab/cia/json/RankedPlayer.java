@@ -12,6 +12,7 @@ public class RankedPlayer {
 	private long steamId64;
 	private byte rank;
     private String name;
+    private String avatarUrl;
 	private Streak streak;
 
 	public RankedPlayer() {}
@@ -52,4 +53,12 @@ public class RankedPlayer {
 	public void setStreak(Streak streak) {
 		this.streak = streak;
 	}
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
 }

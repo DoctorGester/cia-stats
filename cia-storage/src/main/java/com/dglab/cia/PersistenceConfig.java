@@ -1,12 +1,7 @@
 package com.dglab.cia;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.dglab.cia.json.ObjectMapperFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.zaxxer.hikari.HikariDataSource;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,14 +111,7 @@ public class PersistenceConfig {
 
 	@Bean
 	public ObjectMapper createObjectMapper() {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JavaTimeModule());
-		mapper.configure(DeserializationFeature.FAIL_ON_MISSING_CREATOR_PROPERTIES, true);
-		mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true);
-		mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-		mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-
-		return mapper;
+		return ObjectMapperFactory.createObjectMapper();
 	}
 
 	@Bean
