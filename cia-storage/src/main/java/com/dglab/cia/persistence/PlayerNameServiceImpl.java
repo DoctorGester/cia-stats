@@ -41,7 +41,7 @@ public class PlayerNameServiceImpl implements PlayerNameService {
                 SteamId id = SteamId.create(steamId64);
                 name = id.getNickname();
             } catch (SteamCondenserException e) {
-                log.warn("Couldn't get name for profile %d", steamId64);
+                log.warn("Couldn't get name for profile {}", steamId64);
                 return null;
             }
 
