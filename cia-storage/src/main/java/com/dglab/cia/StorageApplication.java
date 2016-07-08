@@ -34,7 +34,7 @@ public class StorageApplication {
 
 	public StorageApplication() {
 		port(5141);
-		threadPool(16);
+		threadPool(4);
 
 		context = new AnnotationConfigApplicationContext();
 		context.getEnvironment().setActiveProfiles("readWrite");
