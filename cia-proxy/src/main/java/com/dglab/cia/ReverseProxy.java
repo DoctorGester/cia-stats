@@ -4,6 +4,8 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spark.Request;
 import spark.utils.IOUtils;
 
@@ -18,8 +20,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -30,7 +30,7 @@ import static spark.Spark.*;
  * @author doc
  */
 public class ReverseProxy {
-	private static Logger logger = Logger.getLogger(ReverseProxy.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(ReverseProxy.class);
 
 	public static final String PROXY_TARGET = "http://127.0.0.1:5141";
 	private static final String IP_POOL = "https://raw.githubusercontent.com/SteamDatabase/GameTracking/master/dota/game/dota/pak01_dir/scripts/regions.txt";
@@ -41,7 +41,7 @@ public class ReverseProxy {
 
 	private void downloadAndParseWhiteList() {
 		try {
-			logger.log(Level.INFO, "Downloading IP white-list");
+            log.info("Downloading IP white-list");
 
 			HttpResponse<String> response = Unirest.get(IP_POOL).asString();
 
@@ -75,9 +75,9 @@ public class ReverseProxy {
 			whiteList.add(new IpRange("127.0.0.1", null));
 			lock.unlock();
 
-			logger.log(Level.INFO, "IP white-list updated successfully");
+            log.info("IP white-list updated successfully");
 		} catch (Exception e) {
-			logger.log(Level.WARNING, "Could not obtain IP white-list:" + e.getMessage());
+			log.warn("Could not obtain IP white-list:" + e.getMessage());
 		}
 	}
 
@@ -86,7 +86,7 @@ public class ReverseProxy {
 
 		String ip = request.ip();
 		if (whiteList.stream().noneMatch(range -> range.isInRange(ip))) {
-			logger.log(Level.INFO, "Access rejected to " + ip);
+			log.info("Access rejected to " + ip);
 			halt(403);
 		}
 

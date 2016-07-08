@@ -3,23 +3,22 @@ package com.dglab.cia;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spark.utils.IOUtils;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author doc
  */
 public class ServiceRequest {
-	private ScheduledExecutorService service = Executors.newScheduledThreadPool(16);
-	private static Logger logger = Logger.getLogger(ServiceRequest.class.getName());
+	private static ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+    private static final Logger log = LoggerFactory.getLogger(ServiceRequest.class);
 
 	private int triesLeft = 5;
 	private Map<String, String> headers;
@@ -45,13 +44,14 @@ public class ServiceRequest {
 			}
 
 			return answer;
-		} catch (UnirestException | IOException e) {
-			logger.log(Level.SEVERE, e.getMessage());
+		} catch (Exception e) {
+			log.info(e.getMessage());
 
 			if (--triesLeft > 0) {
+                log.info("Retrying request to {}", url);
 				service.schedule(this::retry, 30, TimeUnit.SECONDS);
 			} else {
-				e.printStackTrace();
+				log.info("Not retrying anymore: {}", url);
 			}
 		}
 
