@@ -101,28 +101,44 @@ public class MatchServiceImpl implements MatchService {
 	public void putMatch(MatchInfo matchInfo) {
 		Collection<PlayerMatchData> playerMatchData = new HashSet<>();
 
-		Match match = new Match();
+		Match match = matchDao.getMatch(matchInfo.getMatchId());
+
+		if (match == null) {
+			match = new Match();
+		}
+
 		match.setMatchId(matchInfo.getMatchId());
 		match.setPlayers(matchInfo.getPlayerNumber());
 		match.setMode(matchInfo.getMode());
 		match.setVersion(matchInfo.getVersion());
 		match.setDateTime(Instant.now(Clock.systemUTC()));
 
-        List<Long> steamId64s = matchInfo.getPlayers().stream().map(playerInfo -> {
-            PlayerMatchData.Pk pk = new PlayerMatchData.Pk();
-            pk.setMatchId(match.getMatchId());
-            pk.setSteamId64(playerInfo.getSteamId64());
+		for (PlayerInfo info : matchInfo.getPlayers()) {
+			PlayerMatchData matchData = match
+					.getMatchData()
+					.stream()
+					.filter(data -> data.getPk().getSteamId64() == info.getSteamId64())
+					.findAny()
+					.orElseGet(() -> {
+						PlayerMatchData.Pk pk = new PlayerMatchData.Pk();
+						pk.setMatchId(matchInfo.getMatchId());
+						pk.setSteamId64(info.getSteamId64());
 
-            PlayerMatchData playerData = new PlayerMatchData();
-            playerData.setPk(pk);
-            playerData.setTeam(playerInfo.getTeam());
+						PlayerMatchData playerData = new PlayerMatchData();
+						playerData.setPk(pk);
+						return playerData;
+					});
 
-            playerMatchData.add(playerData);
+			if (info.getTeam() != 0) {
+				matchData.setTeam(info.getTeam());
+			}
 
-            return playerInfo.getSteamId64();
-        }).collect(Collectors.toList());
+			playerMatchData.add(matchData);
+		}
 
-        playerNameService.updatePlayerNames(steamId64s);
+		playerNameService.updatePlayerNames(
+				matchInfo.getPlayers().stream().map(PlayerInfo::getSteamId64).collect(Collectors.toList())
+		);
 
 		match.setMatchData(playerMatchData);
 
