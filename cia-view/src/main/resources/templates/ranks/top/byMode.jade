@@ -34,6 +34,8 @@ html
                                 else
                                     | #{player.steamId64}
                         div.ez-last.ez-oh
+                        	img.rank-avatar(src="#{player.avatarUrl}")
+                        	
                             - var rankImage = 101 - player.rank
                             div.rank-image-container
                                 img.rank-image(src="/public/images/ranks/#{rankImage}.png")
