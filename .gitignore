@@ -8,6 +8,8 @@
 *.war
 *.ear
 
+private.key
+
 /.idea
 
 gradlew
