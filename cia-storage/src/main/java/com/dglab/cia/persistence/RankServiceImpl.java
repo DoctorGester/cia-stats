@@ -160,6 +160,11 @@ public class RankServiceImpl implements RankService {
 			return null;
 		}
 
+		if (checkRankedAbuse(match)) {
+			log.info("Ranked abuse detected! Match ID {}", matchId);
+			return null;
+		}
+
 		Map<Long, RankAndStars> previous = new HashMap<>();
 		Map<Long, RankAndStars> updated = new HashMap<>();
 
@@ -242,6 +247,39 @@ public class RankServiceImpl implements RankService {
 
 		return details;
 	}
+
+	private boolean checkRankedAbuse(Match match) {
+		PlayerMatchData firstPlayer = match.getMatchData().iterator().next();
+		List<Match> lastMatches = matchDao.getPlayerMatchesInADay(firstPlayer.getPk().getSteamId64());
+
+		int sameSetAmount = 0;
+
+		Set<Long> initialSet = match
+				.getMatchData()
+				.stream()
+				.map(data -> data.getPk().getSteamId64())
+				.collect(Collectors.toSet());
+
+		for (Match lastMatch : lastMatches) {
+			if (lastMatch.getMatchId() != match.getMatchId()) {
+
+				if (getMatchRankedMode(lastMatch) != null) {
+					Set<Long> playerSet = lastMatch
+							.getMatchData()
+							.stream()
+							.map(data -> data.getPk().getSteamId64())
+							.collect(Collectors.toSet());
+
+					if (playerSet.equals(initialSet)) {
+						sameSetAmount++;
+					}
+				}
+			}
+		}
+
+		return sameSetAmount > 2;
+	}
+
 
 	private EliteStreak updateEliteStreak(PlayerRank rank, boolean won) {
 		EliteStreak streak = rank.getStreak();
