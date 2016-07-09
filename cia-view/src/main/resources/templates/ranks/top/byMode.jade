@@ -28,14 +28,15 @@ html
                 for player in model
                     div.ez-box.rank-row
                         div.ez-fl.ez-negmr.ez-75.ranked-name-container
+                            if player.avatarUrl
+                                img.ranked-avatar(src="#{player.avatarUrl}")
+                                
                             a.ranked-name.pure-u(href="http://steamcommunity.com/profiles/#{player.steamId64}")
                                 if player.name
                                     | #{player.name}
                                 else
                                     | #{player.steamId64}
                         div.ez-last.ez-oh
-                            img.rank-avatar(src="#{player.avatarUrl}")
-                            
                             - var rankImage = 101 - player.rank
                             div.rank-image-container
                                 img.rank-image(src="/public/images/ranks/#{rankImage}.png")
