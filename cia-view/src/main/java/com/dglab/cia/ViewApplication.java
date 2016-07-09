@@ -8,7 +8,27 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import de.neuland.jade4j.JadeConfiguration;
 import de.neuland.jade4j.template.TemplateLoader;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.pac4j.core.authorization.RequireAnyRoleAuthorizer;
+import org.pac4j.core.client.Clients;
+import org.pac4j.core.config.Config;
+import org.pac4j.core.context.HttpConstants;
+import org.pac4j.core.context.WebContext;
+import org.pac4j.core.exception.CredentialsException;
+import org.pac4j.core.http.HttpActionAdapter;
+import org.pac4j.core.profile.CommonProfile;
+import org.pac4j.core.util.CommonHelper;
+import org.pac4j.http.client.direct.DirectBasicAuthClient;
+import org.pac4j.http.client.indirect.IndirectBasicAuthClient;
+import org.pac4j.http.credentials.UsernamePasswordCredentials;
+import org.pac4j.http.credentials.authenticator.Authenticator;
+import org.pac4j.http.credentials.authenticator.test.SimpleTestUsernamePasswordAuthenticator;
+import org.pac4j.http.profile.HttpProfile;
+import org.pac4j.oauth.client.Google2Client;
+import org.pac4j.sparkjava.DefaultHttpActionAdapter;
+import org.pac4j.sparkjava.RequiresAuthenticationFilter;
+import org.pac4j.sparkjava.SparkWebContext;
 import spark.ModelAndView;
 import spark.template.jade.JadeTemplateEngine;
 import spark.utils.GzipUtils;
@@ -76,6 +96,76 @@ public class ViewApplication {
 		exception(Exception.class, (exception, request, response) -> {
 			exception.printStackTrace();
 		});
+
+		before("/admin/*", new RequiresAuthenticationFilter(setupAuth(), "DirectBasicAuthClient"));
+		mapGet("/admin/ranks/set/:id/:mode/:rank");
+		mapGet("/admin/streaks/set/:id/:mode/:current/:max");
+	}
+
+	private Config setupAuth() {
+		DirectBasicAuthClient directBasicAuthClient = new DirectBasicAuthClient();
+		directBasicAuthClient.setAuthenticator(credentials -> {
+			if (credentials == null) {
+				throw new CredentialsException("No credential");
+			}
+
+			String username = credentials.getUsername();
+			String password = credentials.getPassword();
+
+			if (CommonHelper.isBlank(username)) {
+				throw new CredentialsException("Username cannot be blank");
+			}
+			if (CommonHelper.isBlank(password)) {
+				throw new CredentialsException("Password cannot be blank");
+			}
+
+			try {
+				String key = FileUtils.readFileToString(new File("private.key"));
+
+				if (CommonHelper.areNotEquals(password, key)) {
+					throw new CredentialsException("Incorrect password");
+				}
+
+				final HttpProfile profile = new HttpProfile();
+				profile.setId(username);
+				profile.addAttribute(CommonProfile.USERNAME, username);
+				credentials.setUserProfile(profile);
+			} catch (IOException e) {
+				throw new CredentialsException(e);
+			}
+		});
+
+		Config config = new Config(new Clients(directBasicAuthClient));
+		config.addAuthorizer("admin", new RequireAnyRoleAuthorizer("ROLE_ADMIN"));
+		config.setHttpActionAdapter((code, context) -> {
+			SparkWebContext webContext = (SparkWebContext) context;
+			if (code == HttpConstants.UNAUTHORIZED) {
+				context.setResponseHeader("WWW-Authenticate", "Basic realm=\"Dr. Pavel, I am from CIA\"");
+				halt(HttpConstants.UNAUTHORIZED, "authentication required");
+			} else if (code == HttpConstants.FORBIDDEN) {
+				halt(HttpConstants.FORBIDDEN, "forbidden");
+			} else if (code == HttpConstants.OK) {
+				halt(HttpConstants.OK, webContext.getBody());
+			} else if (code == HttpConstants.TEMP_REDIRECT) {
+				webContext.getSparkResponse().redirect(webContext.getLocation());
+			}
+
+			return null;
+		});
+
+		return config;
+	}
+
+	private void mapGet(String uri) {
+		get(uri, ((request, response) -> {
+			String queryString = (request.queryString() != null ? "?" + request.queryString() : "");
+			Map<String, String> headers = request.headers().stream().collect(Collectors.toMap(h -> h, request::headers));
+			Unirest.get(PROXY_TARGET + request.uri() + queryString)
+					.headers(headers)
+					.asBinary();
+
+			return "";
+		}));
 	}
 
 	private void mapGet(String uri, TypeReference<?> type) {

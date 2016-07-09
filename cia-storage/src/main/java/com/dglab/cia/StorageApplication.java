@@ -3,6 +3,7 @@ package com.dglab.cia;
 import com.dglab.cia.json.*;
 import com.dglab.cia.persistence.MatchService;
 import com.dglab.cia.persistence.RankService;
+import com.dglab.cia.persistence.StatsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,12 +64,10 @@ public class StorageApplication {
 		}, jsonUtil.json());
 
 		get("/ranks/top/:mode", (request, response) -> {
-			String mode = request.params("mode");
+			RankedMode mode = paramToMode(request, "mode");
 
-			for (RankedMode rankedMode : RankedMode.values()) {
-				if (rankedMode.getUrl().equalsIgnoreCase(mode)) {
-					return rankService.getTopPlayers(rankedMode);
-				}
+			if (mode != null) {
+				return rankService.getTopPlayers(mode);
 			}
 
 			return "";
@@ -120,10 +119,53 @@ public class StorageApplication {
 			return rankService.processMatchResults(matchId);
 		}, jsonUtil.json());
 
+		before("/admin/*", (request, response) -> {
+			if (!"127.0.0.1".equals(request.ip())) {
+				throw new IllegalAccessException();
+			}
+		});
+
+		get("/admin/ranks/set/:id/:mode/:rank", (request, response) -> {
+			RankedMode mode = paramToMode(request, "mode");
+
+			if (mode != null) {
+				rankService.setRank(requestLong(request, "id"), mode, requestLong(request, "rank").byteValue());
+			}
+
+			return "";
+		});
+
+		get("/admin/streaks/set/:id/:mode/:current/:max", (request, response) -> {
+			RankedMode mode = paramToMode(request, "mode");
+
+			if (mode != null) {
+				rankService.setStreak(
+						requestLong(request, "id"),
+						mode,
+						requestLong(request, "current").shortValue(),
+						requestLong(request, "max").shortValue()
+				);
+			}
+
+			return "";
+		});
+
 		exception(Exception.class, (exception, request, response) -> {
 			log.error("Error processing request: {} at {}", exception, exception.getStackTrace()[0]);
             response.status(500);
 		});
+	}
+
+	private RankedMode paramToMode(Request request, String paramName) {
+		String mode = request.params(paramName);
+
+		for (RankedMode rankedMode : RankedMode.values()) {
+			if (rankedMode.getUrl().equalsIgnoreCase(mode)) {
+				return rankedMode;
+			}
+		}
+
+		return null;
 	}
 
     private Long requestLong(Request request, String name) {

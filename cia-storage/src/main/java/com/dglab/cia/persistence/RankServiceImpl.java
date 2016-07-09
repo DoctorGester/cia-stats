@@ -272,4 +272,23 @@ public class RankServiceImpl implements RankService {
 				.map(this::convertPlayer)
 				.collect(Collectors.toList());
 	}
+
+	@Override
+	public void setRank(long steamId64, RankedMode mode, byte rank) {
+		PlayerRank playerRank = rankDao.findPlayerRank(steamId64, getCurrentSeason(), mode);
+		playerRank.setRank(rank);
+		rankDao.save(playerRank);
+	}
+
+	@Override
+	public void setStreak(long steamId64, RankedMode mode, short current, short max) {
+		PlayerRank playerRank = rankDao.findPlayerRank(steamId64, getCurrentSeason(), mode);
+		EliteStreak streak = playerRank.getStreak();
+
+		if (streak != null) {
+			streak.setCurrentStreak(current);
+			streak.setMaxStreak(max);
+			rankDao.save(playerRank);
+		}
+	}
 }

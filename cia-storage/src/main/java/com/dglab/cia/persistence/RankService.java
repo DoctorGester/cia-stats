@@ -21,4 +21,6 @@ public interface RankService {
 	RankUpdateDetails processMatchResults(long matchId);
 	Map<RankedMode, List<RankedPlayer>> getTopPlayers();
 	List<RankedPlayer> getTopPlayers(RankedMode mode);
+	void setRank(long steamId64, RankedMode mode, byte rank);
+	void setStreak(long steamId64, RankedMode mode, short current, short max);
 }
