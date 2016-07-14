@@ -49,7 +49,7 @@ public class ServiceRequest {
 
 			if (--triesLeft > 0) {
                 log.info("Retrying request to {}", url);
-				service.schedule(this::retry, 30, TimeUnit.SECONDS);
+				service.schedule(this::retry, 90, TimeUnit.SECONDS);
 			} else {
 				log.info("Not retrying anymore: {}", url);
 			}
