@@ -1,5 +1,8 @@
 package com.dglab.cia.database;
 
+import com.dglab.cia.json.MatchMap;
+import org.hibernate.annotations.ColumnDefault;
+
 import javax.persistence.*;
 import java.time.Instant;
 import java.util.Collection;
@@ -17,6 +20,7 @@ public class Match {
 	private Instant dateTime;
 	private byte players;
 	private byte winnerTeam;
+	private MatchMap map;
 
 	private Collection<PlayerMatchData> matchData = new HashSet<>();
 	private Collection<Round> rounds = new HashSet<>();
@@ -68,6 +72,11 @@ public class Match {
 		return version;
 	}
 
+	@ColumnDefault("0")
+	@Enumerated(EnumType.ORDINAL)
+	@Column(name = "map", nullable = false)
+	public MatchMap getMap() { return map; }
+
 	public void setVersion(String version) {
 		this.version = version;
 	}
@@ -98,5 +107,9 @@ public class Match {
 
 	public void setRoundData(Collection<Round> rounds) {
 		this.rounds = rounds;
+	}
+
+	public void setMap(MatchMap map) {
+		this.map = map;
 	}
 }

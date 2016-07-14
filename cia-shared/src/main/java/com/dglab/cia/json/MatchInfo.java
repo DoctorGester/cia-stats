@@ -16,16 +16,19 @@ public class MatchInfo {
 	private String version;
 	private Collection<PlayerInfo> players = new HashSet<>();
 	private Instant dateTime;
+	private MatchMap map;
     private byte winnerTeam;
 
 	@JsonCreator()
 	public MatchInfo(
 			@JsonProperty(value = "mode", required = true) String mode,
 			@JsonProperty(value = "version", required = true) String version,
-			@JsonProperty(value = "players", required = true) Collection<PlayerInfo> players) {
+			@JsonProperty(value = "players", required = true) Collection<PlayerInfo> players,
+			@JsonProperty(value = "map", required = true) MatchMap map) {
 		this.mode = mode;
 		this.version = version;
 		this.players = players;
+		this.map = map;
 	}
 
 	public MatchInfo() {
@@ -78,4 +81,12 @@ public class MatchInfo {
     public void setWinnerTeam(byte winnerTeam) {
         this.winnerTeam = winnerTeam;
     }
+
+	public MatchMap getMap() {
+		return map;
+	}
+
+	public void setMap(MatchMap map) {
+		this.map = map;
+	}
 }

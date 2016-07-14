@@ -4,7 +4,6 @@ package com.dglab.cia;
  * @author doc
  */
 public enum RankedMode {
-	FFA_FOUR((byte) 3, "ffa"),
 	TWO_TEAMS((byte) 1, "teams"),
 	DUEL((byte) 1, "duel");
 

@@ -44,6 +44,7 @@ public class MatchServiceImpl implements MatchService {
 		info.setVersion(match.getVersion());
 		info.setDateTime(match.getDateTime());
         info.setWinnerTeam(match.getWinnerTeam());
+		info.setMap(match.getMap());
 
 		for (PlayerMatchData playerMatchData : match.getMatchData()) {
 			PlayerInfo playerInfo = new PlayerInfo();
@@ -111,6 +112,7 @@ public class MatchServiceImpl implements MatchService {
 		match.setPlayers(matchInfo.getPlayerNumber());
 		match.setMode(matchInfo.getMode());
 		match.setVersion(matchInfo.getVersion());
+		match.setMap(matchInfo.getMap());
 		match.setDateTime(Instant.now(Clock.systemUTC()));
 
 		for (PlayerInfo info : matchInfo.getPlayers()) {

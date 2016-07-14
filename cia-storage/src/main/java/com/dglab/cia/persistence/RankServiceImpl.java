@@ -3,10 +3,7 @@ package com.dglab.cia.persistence;
 import com.dglab.cia.ConnectionState;
 import com.dglab.cia.RankedMode;
 import com.dglab.cia.database.*;
-import com.dglab.cia.json.RankAndStars;
-import com.dglab.cia.json.RankUpdateDetails;
-import com.dglab.cia.json.RankedPlayer;
-import com.dglab.cia.json.Streak;
+import com.dglab.cia.json.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +92,10 @@ public class RankServiceImpl implements RankService {
 	public RankedMode getMatchRankedMode(Match match) {
 		String mode = match.getMode();
 		byte players = match.getPlayers();
+
+		if (match.getMap() == MatchMap.UNRANKED) {
+			return null;
+		}
 
 		if ("2v2".equals(mode) && players == 4) {
 			return RankedMode.TWO_TEAMS;
