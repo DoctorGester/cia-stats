@@ -161,6 +161,12 @@ public class RankServiceImpl implements RankService {
 			return null;
 		}
 
+        int rounds = match.getRounds().size();
+
+        if (rounds <= 2) {
+            log.info("Match not scored because only {} rounds were played. Match ID {}", rounds, matchId);
+        }
+
 		if (checkRankedAbuse(match)) {
 			log.info("Ranked abuse detected! Match ID {}", matchId);
 			return null;
