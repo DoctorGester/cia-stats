@@ -20,7 +20,7 @@ public class ServiceRequest {
 	private static ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
     private static final Logger log = LoggerFactory.getLogger(ServiceRequest.class);
 
-	private int triesLeft = 5;
+	private int triesLeft = 20;
 	private Map<String, String> headers;
 	private byte[] body;
 	private String url;
