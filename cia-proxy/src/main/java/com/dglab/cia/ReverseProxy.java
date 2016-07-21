@@ -152,7 +152,7 @@ public class ReverseProxy {
 
 			try {
 				String ip = request.ip();
-				log.info(ip);
+				
 				if (whiteList.stream().noneMatch(range -> range.isInRange(ip))) {
 					log.info("Access rejected to " + ip);
 					halt(403);
