@@ -96,10 +96,14 @@ public class ReverseProxy {
 			}
 
 			lock.lock();
-			whiteList.clear();
-			whiteList.addAll(result);
-			whiteList.add(new IpRange("127.0.0.1", null));
-			lock.unlock();
+
+			try {
+				whiteList.clear();
+				whiteList.addAll(result);
+				whiteList.add(new IpRange("127.0.0.1", null));
+			} finally {
+				lock.unlock();
+			}
 
             log.info("IP white-list updated successfully, size: {}", whiteList.size());
 		} catch (Exception e) {
@@ -120,7 +124,7 @@ public class ReverseProxy {
 		Unirest.setTimeouts(1000, 6000);
 		Unirest.clearDefaultHeaders();
 
-		service.scheduleAtFixedRate(this::downloadAndParseWhiteList, 0, 2, TimeUnit.HOURS);
+		service.scheduleAtFixedRate(this::downloadAndParseWhiteList, 0, 1, TimeUnit.DAYS);
 
 		get("/*", ((request, response) -> {
 			String url = getRequestURL(request);
@@ -146,13 +150,16 @@ public class ReverseProxy {
 		post("/*", (request, response) -> {
             lock.lock();
 
-            String ip = request.ip();
-            if (whiteList.stream().noneMatch(range -> range.isInRange(ip))) {
-                log.info("Access rejected to " + ip);
-                halt(403);
-            }
-
-            lock.unlock();
+			try {
+				String ip = request.ip();
+				log.info(ip);
+				if (whiteList.stream().noneMatch(range -> range.isInRange(ip))) {
+					log.info("Access rejected to " + ip);
+					halt(403);
+				}
+			} finally {
+				lock.unlock();
+			}
 
             String url = getRequestURL(request);
 			Map<String, String> headers = request.headers().stream().collect(Collectors.toMap(h -> h, request::headers));
