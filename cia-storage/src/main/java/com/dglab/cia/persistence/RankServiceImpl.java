@@ -165,6 +165,7 @@ public class RankServiceImpl implements RankService {
 
         if (rounds <= 2) {
             log.info("Match not scored because only {} rounds were played. Match ID {}", rounds, matchId);
+			return null;
         }
 
 		if (checkRankedAbuse(match)) {
