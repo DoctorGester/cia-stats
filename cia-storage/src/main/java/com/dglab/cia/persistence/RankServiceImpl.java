@@ -235,14 +235,10 @@ public class RankServiceImpl implements RankService {
 				streakUpdated = oldRank.getStreak().getCurrent() != streak.getCurrentStreak();
 			}
 
-			if (!rankUpdated && !streakUpdated) {
-				previous.remove(steamId64);
-				continue;
+			if (rankUpdated || streakUpdated) {
+                updated.put(steamId64, convertRank(playerRank));
+                toUpdate.add(playerRank);
 			}
-
-			updated.put(steamId64, convertRank(playerRank));
-
-			toUpdate.add(playerRank);
 		}
 
 		rankDao.save(toUpdate);
