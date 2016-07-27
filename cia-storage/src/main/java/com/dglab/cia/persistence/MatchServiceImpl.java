@@ -196,15 +196,22 @@ public class MatchServiceImpl implements MatchService {
 	}
 
 	@Override
-	public void putWinner(MatchWinner winner) {
+	public boolean putWinner(MatchWinner winner) {
 		Match match = matchDao.getMatch(winner.getMatchId());
 
 		if (match == null) {
 			throw new IllegalArgumentException();
 		}
 
-		match.setWinnerTeam(winner.getWinnerTeam());
+		if (match.getWinnerTeam() == 0) {
 
-		matchDao.save(match);
+			match.setWinnerTeam(winner.getWinnerTeam());
+
+			matchDao.save(match);
+
+			return true;
+		}
+
+		return false;
 	}
 }

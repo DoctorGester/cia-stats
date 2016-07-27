@@ -113,9 +113,11 @@ public class StorageApplication {
 
 			log.info("Winner set {}", matchId);
 
-			matchService.putWinner(matchWinner);
+			if (matchService.putWinner(matchWinner)) {
+				return rankService.processMatchResults(matchId);
+			}
 
-			return rankService.processMatchResults(matchId);
+			return "";
 		}, jsonUtil.json());
 
 		before("/admin/*", (request, response) -> {

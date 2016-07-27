@@ -12,5 +12,5 @@ public interface MatchService {
     List<MatchHeader> getRecentPlayerMatches(long steamId64);
 	void putMatch(MatchInfo matchInfo);
 	void putRound(RoundInfo roundInfo);
-	void putWinner(MatchWinner winner);
+	boolean putWinner(MatchWinner winner);
 }
