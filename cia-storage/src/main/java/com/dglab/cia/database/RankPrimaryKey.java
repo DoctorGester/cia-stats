@@ -29,7 +29,7 @@ public class RankPrimaryKey implements Serializable {
         return season;
     }
 
-    @Column(name = "mode", nullable = false, updatable = false)
+    @Column(name = "\"MODE\"", nullable = false, updatable = false)
     @Enumerated(EnumType.ORDINAL)
     public RankedMode getMode() {
         return mode;

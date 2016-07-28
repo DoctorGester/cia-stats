@@ -26,7 +26,7 @@ public class Round {
 			return matchId;
 		}
 
-		@Column(name = "number", nullable = false, updatable = false)
+		@Column(name = "\"NUMBER\"", nullable = false, updatable = false)
 		public short getNumber() {
 			return number;
 		}

@@ -26,7 +26,7 @@ public class PlayerRank implements Serializable {
 	}
 
 	@ColumnDefault("30")
-	@Column(name = "rank", nullable = false)
+	@Column(name = "\"RANK\"", nullable = false)
 	public byte getRank() {
 		return rank;
 	}

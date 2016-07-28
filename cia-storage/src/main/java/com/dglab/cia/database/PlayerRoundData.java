@@ -30,7 +30,7 @@ public class PlayerRoundData implements Serializable {
 			return matchId;
 		}
 
-		@Column(name = "number", nullable = false, updatable = false)
+		@Column(name = "\"NUMBER\"", nullable = false, updatable = false)
 		public short getNumber() {
 			return number;
 		}
@@ -86,8 +86,8 @@ public class PlayerRoundData implements Serializable {
 					updatable = false
 			),
 			@JoinColumn(
-					name = "number",
-					referencedColumnName = "number",
+					name = "\"NUMBER\"",
+					referencedColumnName = "\"NUMBER\"",
 					nullable = false,
 					insertable = false,
 					updatable = false

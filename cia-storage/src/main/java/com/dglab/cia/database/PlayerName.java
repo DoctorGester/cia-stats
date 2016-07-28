@@ -20,7 +20,7 @@ public class PlayerName implements Serializable {
 		return steamId64;
 	}
 
-	@Column(name = "name")
+	@Column(name = "\"NAME\"")
 	public String getName() {
 		return name;
 	}

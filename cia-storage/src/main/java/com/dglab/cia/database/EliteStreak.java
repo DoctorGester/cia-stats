@@ -51,8 +51,8 @@ public class EliteStreak {
                     updatable = false
             ),
             @JoinColumn(
-                    name = "mode",
-                    referencedColumnName = "mode",
+                    name = "\"MODE\"",
+                    referencedColumnName = "\"MODE\"",
                     nullable = false,
                     insertable = false,
                     updatable = false

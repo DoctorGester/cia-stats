@@ -3,6 +3,7 @@ package com.dglab.cia;
 import com.dglab.cia.json.ObjectMapperFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariDataSource;
+import org.apache.commons.io.FileUtils;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,6 +19,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
+import java.io.File;
+import java.io.IOException;
 import java.util.Properties;
 
 
@@ -31,32 +34,16 @@ import java.util.Properties;
 public class PersistenceConfig {
 	@Bean
 	@Profile("readWrite")
-	public DataSource readWriteDataSource() {
-		HikariDataSource dataSource = new HikariDataSource();
+	public DataSource readWriteDataSource() throws IOException {
+        HikariDataSource dataSource = new HikariDataSource();
+        String password = FileUtils.readFileToString(new File("private.key"));
 
-		dataSource.setDataSourceClassName("org.hsqldb.jdbc.JDBCDataSource");
-		dataSource.addDataSourceProperty("url",
-				"file:data/database;" +
-				"shutdown=true;" +
-				"hsqldb.write_delay=false;" +
-				"hsqldb.default_table_type=cached;"
-		);
-		dataSource.addDataSourceProperty("user", "sa");
-		dataSource.addDataSourceProperty("password", "");
-
-		return dataSource;
-	}
-
-	@Bean
-	@Profile("read")
-	public DataSource readDataSource() {
-		HikariDataSource dataSource = new HikariDataSource();
-
-		dataSource.setDataSourceClassName("org.hsqldb.jdbc.JDBCDataSource");
-		dataSource.addDataSourceProperty("url", "file:data/database;shutdown=true;readonly=true;");
-		dataSource.addDataSourceProperty("user", "sa");
-		dataSource.addDataSourceProperty("password", "");
-		dataSource.setReadOnly(true);
+        dataSource.setDataSourceClassName("org.postgresql.ds.PGSimpleDataSource");
+        dataSource.addDataSourceProperty("user", "cia");
+        dataSource.addDataSourceProperty("password", password);
+        dataSource.addDataSourceProperty("databaseName", "ciadb");
+        dataSource.addDataSourceProperty("portNumber", "5432");
+        dataSource.addDataSourceProperty("serverName", "127.0.0.1");
 
 		return dataSource;
 	}
@@ -94,7 +81,7 @@ public class PersistenceConfig {
 		return new Properties() {
 			{
 				setProperty("hibernate.hbm2ddl.auto", "update");
-				setProperty("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
+				setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQL94Dialect");
 			}
 		};
 	}
@@ -104,7 +91,7 @@ public class PersistenceConfig {
 	public Properties readProperties() {
 		return new Properties() {
 			{
-				setProperty("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
+				setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQL94Dialect");
 			}
 		};
 	}

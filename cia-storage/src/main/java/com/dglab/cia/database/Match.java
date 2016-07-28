@@ -37,7 +37,7 @@ public class Match {
 		return matchId;
 	}
 
-	@Column(name = "mode", nullable = false)
+	@Column(name = "\"MODE\"", nullable = false)
 	public String getMode() {
 		return mode;
 	}
@@ -67,14 +67,14 @@ public class Match {
 		return dateTime;
 	}
 
-	@Column(name = "version", nullable = false)
+	@Column(name = "\"VERSION\"", nullable = false)
 	public String getVersion() {
 		return version;
 	}
 
 	@ColumnDefault("0")
 	@Enumerated(EnumType.ORDINAL)
-	@Column(name = "map", nullable = false)
+	@Column(name = "\"MAP\"", nullable = false)
 	public MatchMap getMap() { return map; }
 
 	public void setVersion(String version) {
