@@ -1,10 +1,10 @@
 package com.dglab.cia.persistence;
 
 import com.dglab.cia.RankedMode;
-import com.dglab.cia.database.*;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.dglab.cia.database.EliteStreak;
+import com.dglab.cia.database.PlayerMatchData;
+import com.dglab.cia.database.PlayerRank;
+import com.dglab.cia.database.RankPrimaryKey;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,9 +13,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.*;
 import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.SingularAttribute;
-import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author doc
@@ -86,6 +85,28 @@ public class RankDao {
 
 		return rank;
 	}
+
+	public Collection<Integer> findPlayerRankOneSeasons(long steamId64, byte currentSeason) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<PlayerRank> query = builder.createQuery(PlayerRank.class);
+        EntityType<PlayerRank> entity = entityManager.getMetamodel().entity(PlayerRank.class);
+
+        Root<PlayerRank> root = query.from(entity);
+        query.select(root);
+        query.where(
+                builder.and(
+                        builder.equal(root.get("pk").get("steamId64"), steamId64),
+                        builder.notEqual(root.get("pk").get("season"), currentSeason),
+                        builder.equal(root.get("rank"), 1)
+                )
+        );
+
+        return entityManager
+                .createQuery(query)
+                .getResultList()
+                .stream()
+                .map(rank -> (int) rank.getPk().getSeason()).collect(Collectors.toSet());
+    }
 
 	public List<PlayerRank> findTopPlayers(byte season, RankedMode mode, int amount) {
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();

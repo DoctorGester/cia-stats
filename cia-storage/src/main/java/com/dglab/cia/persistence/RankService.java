@@ -4,6 +4,7 @@ import com.dglab.cia.RankedMode;
 import com.dglab.cia.database.Match;
 import com.dglab.cia.json.RankAndStars;
 import com.dglab.cia.json.RankUpdateDetails;
+import com.dglab.cia.json.RankedAchievements;
 import com.dglab.cia.json.RankedPlayer;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public interface RankService {
 	Map<Byte, Map<RankedMode, RankAndStars>> getPlayerRankHistory(long steamId64);
 	RankedMode getMatchRankedMode(Match match);
 	Map<Long, RankAndStars> getMatchRanks(long matchId);
+	Map<Long, RankedAchievements> getRankedAchievements(long matchId);
 	RankUpdateDetails processMatchResults(long matchId);
 	Map<RankedMode, List<RankedPlayer>> getTopPlayers();
 	List<RankedPlayer> getTopPlayers(RankedMode mode);

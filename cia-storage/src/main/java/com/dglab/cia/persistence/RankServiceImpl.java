@@ -29,6 +29,9 @@ public class RankServiceImpl implements RankService {
 	@Autowired
 	private MatchDao matchDao;
 
+    private byte previousSeason = -1;
+    private Map<RankedMode, List<PlayerRank>> previousTopPlayers;
+
 	private RankAndStars convertRank(PlayerRank rank) {
 		RankAndStars rankAndStars = new RankAndStars(rank.getRank(), rank.getStars());
 
@@ -53,6 +56,18 @@ public class RankServiceImpl implements RankService {
 
 		return player;
 	}
+
+    private synchronized Map<RankedMode, List<PlayerRank>> getPreviousTopPlayers() {
+        byte previousSeason = (byte) (getCurrentSeason() - 1);
+
+        if (previousSeason != this.previousSeason) {
+            previousTopPlayers = rankDao.findTopPlayers(previousSeason, 3);
+
+            this.previousSeason = previousSeason;
+        }
+
+        return previousTopPlayers;
+    }
 
 	@Override
 	public Map<RankedMode, RankAndStars> getPlayerRanks(long steamId64) {
@@ -112,7 +127,41 @@ public class RankServiceImpl implements RankService {
 		return null;
 	}
 
-	@Override
+    @Override
+    public Map<Long, RankedAchievements> getRankedAchievements(long matchId) {
+        Match match = matchDao.getMatch(matchId);
+
+        if (match == null) {
+            return null;
+        }
+
+        byte season = getCurrentSeason();
+
+        Map<Long, RankedAchievements> result = new HashMap<>();
+
+        for (PlayerMatchData player : match.getMatchData()) {
+            long steamId64 = player.getPk().getSteamId64();
+
+            Collection<Integer> seasons = rankDao.findPlayerRankOneSeasons(steamId64, season);
+
+            RankedAchievements rankedAchievements = new RankedAchievements();
+            rankedAchievements.setAchievedSeasons(seasons);
+            rankedAchievements.setWasTopPlayer(getPreviousTopPlayers()
+                    .values()
+                    .stream()
+                    .flatMap(Collection::stream)
+                    .filter(r -> r.getPk().getSteamId64() == steamId64)
+                    .findAny()
+                    .isPresent()
+            );
+
+            result.put(steamId64, rankedAchievements);
+        }
+
+        return result;
+    }
+
+    @Override
 	public Map<Long, RankAndStars> getMatchRanks(long matchId) {
 		Match match = matchDao.getMatch(matchId);
 
@@ -131,10 +180,9 @@ public class RankServiceImpl implements RankService {
 
 		for (PlayerMatchData player : match.getMatchData()) {
 			long steamId64 = player.getPk().getSteamId64();
+			PlayerRank rank = rankDao.findPlayerRank(steamId64, season, matchRankedMode);
 
-			PlayerRank rank = rankDao.findPlayerRank(player.getPk().getSteamId64(), season, matchRankedMode);
-
-			result.put(steamId64, convertRank(rank));
+            result.put(steamId64, convertRank(rank));
 		}
 
 		return result;

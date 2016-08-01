@@ -89,7 +89,11 @@ public class StorageApplication {
 
 			matchService.putMatch(matchInfo);
 
-			return rankService.getMatchRanks(matchId);
+			RanksAndAchievements achievements = new RanksAndAchievements();
+            achievements.setRanks(rankService.getMatchRanks(matchId));
+            achievements.setAchievements(rankService.getRankedAchievements(matchId));
+
+			return achievements;
 		}, jsonUtil.json());
 
 		post("/match/:id/:round", (request, response) -> {
