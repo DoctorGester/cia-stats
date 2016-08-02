@@ -1,6 +1,6 @@
 package com.dglab.cia.database;
 
-import com.dglab.cia.RankedMode;
+import com.dglab.cia.json.RankedMode;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;

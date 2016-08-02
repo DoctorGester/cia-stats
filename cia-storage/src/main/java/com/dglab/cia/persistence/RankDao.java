@@ -1,6 +1,6 @@
 package com.dglab.cia.persistence;
 
-import com.dglab.cia.RankedMode;
+import com.dglab.cia.json.RankedMode;
 import com.dglab.cia.database.EliteStreak;
 import com.dglab.cia.database.PlayerMatchData;
 import com.dglab.cia.database.PlayerRank;

@@ -1,11 +1,7 @@
 package com.dglab.cia.persistence;
 
-import com.dglab.cia.RankedMode;
+import com.dglab.cia.json.*;
 import com.dglab.cia.database.Match;
-import com.dglab.cia.json.RankAndStars;
-import com.dglab.cia.json.RankUpdateDetails;
-import com.dglab.cia.json.RankedAchievements;
-import com.dglab.cia.json.RankedPlayer;
 
 import java.util.List;
 import java.util.Map;
@@ -22,6 +18,7 @@ public interface RankService {
 	Map<Long, RankedAchievements> getRankedAchievements(long matchId);
 	RankUpdateDetails processMatchResults(long matchId);
 	Map<RankedMode, List<RankedPlayer>> getTopPlayers();
+    RankedInfo getRankedInfo();
 	List<RankedPlayer> getTopPlayers(RankedMode mode);
 	void setRank(long steamId64, RankedMode mode, byte rank);
 	void setStreak(long steamId64, RankedMode mode, short current, short max);

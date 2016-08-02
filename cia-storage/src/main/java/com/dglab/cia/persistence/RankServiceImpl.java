@@ -1,7 +1,7 @@
 package com.dglab.cia.persistence;
 
 import com.dglab.cia.ConnectionState;
-import com.dglab.cia.RankedMode;
+import com.dglab.cia.json.RankedMode;
 import com.dglab.cia.database.*;
 import com.dglab.cia.json.*;
 import org.slf4j.Logger;
@@ -9,9 +9,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -56,6 +58,12 @@ public class RankServiceImpl implements RankService {
 
 		return player;
 	}
+
+    private Map<RankedMode, List<RankedPlayer>> convertPlayers(Map<RankedMode, List<PlayerRank>> players) {
+        return players.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry ->
+                entry.getValue().stream().map(this::convertPlayer).collect(Collectors.toList())
+        ));
+    }
 
     private synchronized Map<RankedMode, List<PlayerRank>> getPreviousTopPlayers() {
         byte previousSeason = (byte) (getCurrentSeason() - 1);
@@ -332,7 +340,6 @@ public class RankServiceImpl implements RankService {
 		return sameSetAmount > 2;
 	}
 
-
 	private EliteStreak updateEliteStreak(PlayerRank rank, boolean won) {
 		EliteStreak streak = rank.getStreak();
 
@@ -349,12 +356,29 @@ public class RankServiceImpl implements RankService {
 	@Override
 	public Map<RankedMode, List<RankedPlayer>> getTopPlayers() {
         Map<RankedMode, List<PlayerRank>> topPlayers = rankDao.findTopPlayers(getCurrentSeason(), 5);
-        return topPlayers.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry ->
-            entry.getValue().stream().map(this::convertPlayer).collect(Collectors.toList())
-        ));
+        return convertPlayers(topPlayers);
 	}
 
-	@Override
+    @Override
+    public RankedInfo getRankedInfo() {
+        Instant seasonEnd = ZonedDateTime
+                .now(ZoneOffset.UTC)
+                .with(TemporalAdjusters.firstDayOfNextMonth())
+                .toLocalDate()
+                .atStartOfDay(ZoneOffset.UTC)
+                .toInstant();
+
+        RankedInfo info = new RankedInfo();
+
+        info.setCurrentSeason(getCurrentSeason());
+        info.setPreviousTopPlayers(convertPlayers(getPreviousTopPlayers()));
+        info.setSeasonEndTime(seasonEnd);
+        info.setTopPlayers(getTopPlayers());
+
+        return info;
+    }
+
+    @Override
 	public List<RankedPlayer> getTopPlayers(RankedMode mode) {
 		return rankDao
 				.findTopPlayers(getCurrentSeason(), mode, 50)
