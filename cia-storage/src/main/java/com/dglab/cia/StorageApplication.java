@@ -3,6 +3,8 @@ package com.dglab.cia;
 import com.dglab.cia.json.*;
 import com.dglab.cia.persistence.MatchService;
 import com.dglab.cia.persistence.RankService;
+import com.dglab.cia.persistence.StatsDao;
+import com.dglab.cia.persistence.StatsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +29,9 @@ public class StorageApplication {
     private static Logger log = LoggerFactory.getLogger(StorageApplication.class);
 
     private AnnotationConfigApplicationContext context;
-	private MatchService matchService;
-	private RankService rankService;
+    private StatsService statsService;
+    private MatchService matchService;
+    private RankService rankService;
 	private ObjectMapper mapper;
 	private JsonUtil jsonUtil;
 
@@ -41,6 +44,7 @@ public class StorageApplication {
 		context.register(PersistenceConfig.class);
 		context.refresh();
 
+        statsService = context.getBean(StatsService.class);
 		matchService = context.getBean(MatchService.class);
 		rankService = context.getBean(RankService.class);
 		mapper = context.getBean(ObjectMapper.class);
@@ -78,6 +82,10 @@ public class StorageApplication {
 
         get("/ranks/info", (request, response) -> {
             return rankService.getRankedInfo();
+        }, jsonUtil.json());
+
+        get("/stats/winrates/general", (request, response) -> {
+            return statsService.getGeneralWinRates();
         }, jsonUtil.json());
 
 		post("/match/:id", (request, response) -> {
@@ -163,6 +171,8 @@ public class StorageApplication {
 			log.error("Error processing request: {} at {}", exception, exception.getStackTrace()[0]);
             response.status(500);
 		});
+
+        //context.getBean(StatsDao.class).recalculateStats();
 	}
 
 	private RankedMode paramToMode(Request request, String paramName) {
