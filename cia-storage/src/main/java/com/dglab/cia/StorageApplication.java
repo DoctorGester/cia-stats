@@ -84,8 +84,11 @@ public class StorageApplication {
             return rankService.getRankedInfo();
         }, jsonUtil.json());
 
-        get("/stats/winrates/general", (request, response) -> {
-            return statsService.getGeneralWinRates();
+        get("/", (request, response) -> {
+            AllStats stats = new AllStats();
+            stats.setGeneralWinrates(statsService.getGeneralWinRates());
+
+            return stats;
         }, jsonUtil.json());
 
 		post("/match/:id", (request, response) -> {

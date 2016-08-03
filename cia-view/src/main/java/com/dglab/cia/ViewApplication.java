@@ -1,5 +1,7 @@
 package com.dglab.cia;
 
+import com.dglab.cia.json.AllStats;
+import com.dglab.cia.json.HeroWinRateAndGames;
 import com.dglab.cia.json.ObjectMapperFactory;
 import com.dglab.cia.json.RankedPlayer;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -36,9 +38,13 @@ import spark.utils.IOUtils;
 
 import java.io.*;
 import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static spark.Spark.*;
@@ -57,6 +63,7 @@ public class ViewApplication {
 		threadPool(4);
 
 		mapGet("/ranks/top/:mode", "ranks/top/byMode", new TypeReference<List<RankedPlayer>>(){});
+        mapGet("/", "home", new TypeReference<AllStats>(){});
 
         // What a hack
         get("/public/*", ((request, response) -> {
@@ -194,6 +201,7 @@ public class ViewApplication {
 
 			HashMap<Object, Object> model = new HashMap<>();
 			model.put("model", result);
+            model.put("stringUtils", StringUtils.class);
 
 			return new ModelAndView(model, view);
 		}), jadeTemplateEngine);
@@ -202,13 +210,29 @@ public class ViewApplication {
     private JadeTemplateEngine createTemplateEngine() {
         JadeConfiguration configuration = new JadeConfiguration();
         configuration.setTemplateLoader(new TemplateLoader() {
+            private Path getDebugPath(String name) {
+                return Paths.get("src/main/resources/templates/" + name);
+            }
+
             @Override
             public long getLastModified(String name) throws IOException {
+                Path debugPath = getDebugPath(name + ".jade");
+
+                if (Files.exists(debugPath)) {
+                    return Files.getLastModifiedTime(debugPath).to(TimeUnit.NANOSECONDS);
+                }
+
                 return -1;
             }
 
             @Override
             public Reader getReader(String name) throws IOException {
+                Path debugPath = getDebugPath(name);
+
+                if (Files.exists(debugPath)) {
+                    return Files.newBufferedReader(debugPath);
+                }
+
                 return new InputStreamReader(getClass().getResourceAsStream("/templates/" + name));
             }
         });

@@ -1,0 +1,25 @@
+doctype html
+html
+    head
+        block head
+            link(rel="stylesheet", href="/public/styles/pure-min.css", type="text/css")
+            link(rel="stylesheet", href="/public/styles/ez-plug-min.css", type="text/css")
+            link(rel="stylesheet", href="/public/styles/main.css", type="text/css")
+            link(rel="icon", type="image/png", sizes="32x32", href="/public/images/favicon.png")
+            meta(name="viewport", content="width=device-width, initial-scale=1")
+            title Crumbling Island Arena Website
+    body
+        div.header
+            div.home-menu.pure-menu.pure-menu-horizontal.pure-menu-fixed
+                a.pure-menu-heading(href="/") Crumbling Island Arena
+                ul.pure-menu-list
+                    li.pure-menu-item
+                        a.pure-menu-link(href="/") Home
+                    li.pure-menu-item
+                        a.pure-menu-link(href="/ranks/top/teams") Leaderboards
+                    li.pure-menu-item
+                        a.pure-menu-link(href="#") Heroes
+                    li.pure-menu-item
+                        a.pure-menu-link(href="#") Matches
+        div.ez-wr.content-margin.page-content
+            block content

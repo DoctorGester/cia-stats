@@ -1,0 +1,54 @@
+extends /base.jade
+
+block append head
+    script(type="text/javascript", src="http://code.highcharts.com/highcharts.js")
+    script(type="text/javascript", src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js")
+
+block content
+    div.ez-box
+        h2.content-head.is-center Crumbling island arena stats
+    div.ez-wr
+        div#container(style="width:100%;height:400px;")
+
+    - var s = "";
+    - var f = true;
+    - for(data : model.generalWinrates) { s = s + (f ? " " : ", ") + "['" + data.hero + "', " + data.winRate + ", " + data.games + "]"; f = false; };
+    - var seriesString = s
+
+    script.
+        var data = [#{seriesString}];
+        data = _.sortBy(data, function(point) {
+            return point[1];
+        });
+        
+        _.each(data, function(point) {
+            point[0] = point[0].substring("npc_dota_hero_".length);
+            point[1] *= 100;
+        });
+
+        var games = _.reduce(data, function(a, b) { return a + b[2]; }, 0);
+
+        Highcharts.chart('container', {
+            chart: {
+                type: "column"
+            },
+            credits: {
+                enabled: false
+            },
+            yAxis: { 
+                min: 0,
+                max: 100
+            },
+            tooltip: {
+                formatter: function() {
+                    return '<b>' + this.point.name + '</b>: ' + this.y.toFixed(1) + ' %';
+                }
+            },
+            title: { text: "Winrates"},
+            subtitle: { text: "based on " + games + " rounds"},
+            plotOptions: {column: {colorByPoint: true}},
+            series: [{
+                showInLegend: false,
+                data: data
+            }]
+        });
