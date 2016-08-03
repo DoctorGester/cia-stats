@@ -233,6 +233,10 @@ public class ViewApplication {
                     return Files.newBufferedReader(debugPath);
                 }
 
+                if (name.startsWith("/")) {
+                    name = name.substring(1);
+                }
+
                 return new InputStreamReader(getClass().getResourceAsStream("/templates/" + name));
             }
         });
