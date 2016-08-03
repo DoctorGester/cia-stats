@@ -26,17 +26,7 @@ public class StatsServiceImpl implements StatsService {
 
     @PostConstruct
     private void start() {
-        long hours = computeNextDelay().toHours();
-        if (hours > 2) {
-            executorService.schedule(() -> {
-                statsDao.recalculateStats();
-                scheduleExecution();
-            }, 1, TimeUnit.MINUTES);
-
-            log.info("{} hours to next stats recalculation, scheduling in 1 minute", hours);
-        } else {
-            scheduleExecution();
-        }
+        scheduleExecution();
     }
 
     private void scheduleExecution() {
