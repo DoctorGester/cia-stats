@@ -8,7 +8,8 @@ block content
     div.ez-box
         h2.content-head.is-center Crumbling island arena stats
     div.ez-wr
-        div#container(style="width:100%;height:400px;")
+        div#winRates.stats-graph
+        div#games.stats-graph
 
     - var s = "";
     - var f = true;
@@ -17,23 +18,45 @@ block content
 
     script.
         var data = [#{seriesString}];
-        data = _.sortBy(data, function(point) {
+        var markers = _.sortBy(data, function(point) {
             return point[1];
         });
         
-        _.each(data, function(point) {
+        _.each(markers, function(point) {
             point[0] = point[0].substring("npc_dota_hero_".length);
             point[1] *= 100;
         });
 
-        var games = _.reduce(data, function(a, b) { return a + b[2]; }, 0);
+        var games = _.reduce(markers, function(a, b) { return a + b[2]; }, 0);
+        var template = "http://cdn.dota2.com/apps/dota2/images/heroes/$_icon.png";
 
-        Highcharts.chart('container', {
+        var heroIconFormatter = function () {
+            return '<img style="width: 24px; height: 24px;" src="' + template.replace("\$", this.point.name) + '">';
+        };
+
+        var heroIconPlotOptions = {
+            column: {
+                colorByPoint: true,
+                dataLabels: {
+                    enabled: true,
+                    useHTML: true,
+                    formatter: heroIconFormatter,
+                    y: 26
+                }
+            }
+        };
+
+        Highcharts.chart('winRates', {
             chart: {
                 type: "column"
             },
             credits: {
                 enabled: false
+            },
+            xAxis: {
+                labels: {
+                    enabled: false
+                }
             },
             yAxis: { 
                 min: 0,
@@ -44,11 +67,47 @@ block content
                     return '<b>' + this.point.name + '</b>: ' + this.y.toFixed(1) + ' %';
                 }
             },
-            title: { text: "Winrates"},
+            title: {
+                text: "Winrates"
+            },
             subtitle: { text: "based on " + games + " rounds"},
-            plotOptions: {column: {colorByPoint: true}},
+            plotOptions: heroIconPlotOptions,
             series: [{
                 showInLegend: false,
-                data: data
+                data: markers
+            }]
+        });
+
+        markers = _.sortBy(data, function (point) {
+            return point[2];
+        });
+
+        markers = _.map(markers, function(point) {
+           return {
+               y: point[2],
+               name: point[0]
+           };
+        });
+
+        Highcharts.chart('games', {
+            xAxis: {
+                labels: {
+                    enabled: false
+                }
+            },
+            chart: {
+                type: "column"
+            },
+            credits: {
+                enabled: false
+            },
+            title: {
+                text: "Rounds played"
+            },
+            plotOptions: heroIconPlotOptions,
+            series: [{
+                showInLegend: false,
+                data: markers,
+                name: "Rounds played"
             }]
         });
