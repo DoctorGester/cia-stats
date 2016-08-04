@@ -2,7 +2,9 @@ package com.dglab.cia.persistence;
 
 import com.dglab.cia.database.*;
 import com.dglab.cia.json.HeroWinRateAndGames;
+import com.dglab.cia.json.MatchDateCount;
 import com.dglab.cia.json.MatchMap;
+import org.apache.commons.lang.NotImplementedException;
 import org.hibernate.*;
 import org.hibernate.criterion.Restrictions;
 import org.slf4j.Logger;
@@ -16,7 +18,10 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.*;
 import javax.persistence.metamodel.EntityType;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalField;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -47,7 +52,7 @@ public class StatsDao {
         map.put(key, ++integer);
     }
 
-    public void recalculateStats() {
+    public void recalculateWinRates() {
         log.info("Started calculating stats");
 
         Map<HeroWinRateKey, Integer> heroWins = new HashMap<>();
@@ -207,5 +212,55 @@ public class StatsDao {
         query.groupBy(root.get("pk").get("heroName"));
 
         return entityManager.createQuery(query).getResultList();
+    }
+
+    public void recalculateTodayGameCounts() {
+        Instant midnight = ZonedDateTime
+                .now(ZoneOffset.UTC)
+                .withHour(0)
+                .withMinute(0)
+                .withSecond(0)
+                .toInstant();
+
+        Map<MatchKey, Integer> matches = new HashMap<>();
+        Session session = entityManager.unwrap(Session.class);
+
+        // Vendor-locked
+        ScrollableResults results = session
+                .createCriteria(Match.class)
+                .add(Restrictions.gt("players", 1))
+                .add(Restrictions.gt("dateTime", midnight))
+                .setReadOnly(true)
+                .scroll(ScrollMode.FORWARD_ONLY);
+
+        while (results.next()) {
+            Match match = (Match) results.get()[0];
+
+            MatchKey key = new MatchKey();
+            key.setMap(match.getMap());
+            key.setMode(match.getMode());
+            key.setPlayers(match.getPlayers());
+
+            Integer integer = matches.get(key);
+
+            if (integer == null) {
+                integer = 0;
+            }
+
+            matches.put(key, ++integer);
+            session.evict(match);
+        }
+
+        matches.forEach((key, amount) -> {
+            MatchCount matchCount = new MatchCount();
+            matchCount.setPk(key);
+            matchCount.setMatches(amount);
+
+            entityManager.merge(matchCount);
+        });
+    }
+
+    public List<MatchCount> getLastMatchCounts() {
+        throw new NotImplementedException();
     }
 }

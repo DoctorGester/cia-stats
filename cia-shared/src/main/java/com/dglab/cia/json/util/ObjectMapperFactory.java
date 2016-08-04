@@ -1,4 +1,4 @@
-package com.dglab.cia.json;
+package com.dglab.cia.json.util;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;

@@ -1,6 +1,6 @@
 package com.dglab.cia;
 
-import com.dglab.cia.json.ObjectMapperFactory;
+import com.dglab.cia.json.util.ObjectMapperFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.io.FileUtils;
@@ -15,6 +15,7 @@ import org.springframework.dao.annotation.PersistenceExceptionTranslationPostPro
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.persistence.EntityManagerFactory;
@@ -30,6 +31,7 @@ import java.util.Properties;
 
 @Configuration
 @EnableTransactionManagement
+@EnableScheduling
 @ComponentScan({"com.dglab.cia.persistence"})
 public class PersistenceConfig {
 	@Bean
