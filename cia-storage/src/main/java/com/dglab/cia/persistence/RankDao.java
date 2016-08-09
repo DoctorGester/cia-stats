@@ -40,7 +40,7 @@ public class RankDao {
 	public Collection<PlayerRank> findPlayerRanks(long steamId64, byte season) {
 		Collection<PlayerRank> result = new ArrayList<>();
 
-		for (RankedMode rankedMode : RankedMode.values()) {
+		for (RankedMode rankedMode : RankedMode.realValues()) {
 			PlayerRank rank = findPlayerRank(steamId64, season, rankedMode);
 
 			if (rank != null) {
@@ -135,7 +135,7 @@ public class RankDao {
     public Map<RankedMode, List<PlayerRank>> findTopPlayers(byte season, int amount) {
         Map<RankedMode, List<PlayerRank>> result = new HashMap<>();
 
-        for (RankedMode rankedMode : RankedMode.values()) {
+        for (RankedMode rankedMode : RankedMode.realValues()) {
             List<PlayerRank> topPlayers = findTopPlayers(season, rankedMode, amount);
 
             if (!topPlayers.isEmpty()) {

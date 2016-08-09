@@ -179,7 +179,7 @@ public class StorageApplication {
 	private RankedMode paramToMode(Request request, String paramName) {
 		String mode = request.params(paramName);
 
-		for (RankedMode rankedMode : RankedMode.values()) {
+		for (RankedMode rankedMode : RankedMode.realValues()) {
 			if (rankedMode.getUrl().equalsIgnoreCase(mode)) {
 				return rankedMode;
 			}
