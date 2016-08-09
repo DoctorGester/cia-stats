@@ -260,7 +260,7 @@ public class RankServiceImpl implements RankService {
 			RankAndStars oldRank = convertRank(playerRank);
 			previous.put(steamId64, oldRank);
 
-            boolean won = player.getTeam() == match.getWinnerTeam() && !(abandoned || notPlayed >= 2);
+            boolean won = player.getTeam() == match.getWinnerTeam() && !(abandoned || notPlayed > 2);
 
             if (playerRank.getRank() == 1) {
 				updateEliteStreak(playerRank, won);

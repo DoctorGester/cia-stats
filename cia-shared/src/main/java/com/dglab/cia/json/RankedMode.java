@@ -23,4 +23,8 @@ public enum RankedMode {
 	public String getUrl() {
 		return url;
 	}
+
+	public static RankedMode[] realValues() {
+        return new RankedMode[] { TWO_TEAMS, DUEL };
+    }
 }
