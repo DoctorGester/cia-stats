@@ -6,7 +6,11 @@ import com.dglab.cia.json.MatchDateCount;
 import com.dglab.cia.json.MatchMap;
 import org.apache.commons.lang.NotImplementedException;
 import org.hibernate.*;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.type.LocalDateType;
+import org.hibernate.type.StandardBasicTypes;
+import org.hibernate.type.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
@@ -18,6 +22,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.*;
 import javax.persistence.metamodel.EntityType;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -215,21 +220,23 @@ public class StatsDao {
     }
 
     public void recalculateTodayGameCounts() {
-        Instant midnight = ZonedDateTime
+        LocalDate today = ZonedDateTime
                 .now(ZoneOffset.UTC)
+                .withMonth(7)
+                .withDayOfMonth(16)
                 .withHour(0)
                 .withMinute(0)
                 .withSecond(0)
-                .toInstant();
+                .toLocalDate();
 
         Map<MatchKey, Integer> matches = new HashMap<>();
         Session session = entityManager.unwrap(Session.class);
 
-        // Vendor-locked
+        // Vendor-locked (hibernate + postgres)
         ScrollableResults results = session
                 .createCriteria(Match.class)
-                .add(Restrictions.gt("players", 1))
-                .add(Restrictions.gt("dateTime", midnight))
+                .add(Restrictions.gt("players", (byte) 1))
+                .add(Restrictions.sqlRestriction("dateTime::DATE = ?", today, LocalDateType.INSTANCE))
                 .setReadOnly(true)
                 .scroll(ScrollMode.FORWARD_ONLY);
 
