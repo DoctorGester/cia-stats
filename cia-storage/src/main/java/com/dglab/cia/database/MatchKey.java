@@ -12,7 +12,7 @@ import java.io.Serializable;
  * @author doc
  */
 @Embeddable
-public class MatchKey  implements Serializable {
+public class MatchKey implements Serializable {
     private String mode;
     private byte players;
     private MatchMap map;
