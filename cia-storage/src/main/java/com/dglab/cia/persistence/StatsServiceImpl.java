@@ -4,6 +4,7 @@ import com.dglab.cia.json.HeroWinRateAndGames;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,7 @@ public class StatsServiceImpl implements StatsService {
 	private StatsDao statsDao;
 
     // Every day at midnight
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 0 1 * * *")
     private void winRatesTask() {
         statsDao.recalculateWinRates();
     }
