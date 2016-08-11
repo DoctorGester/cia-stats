@@ -174,6 +174,8 @@ public class StorageApplication {
 			log.error("Error processing request: {} at {}", exception, exception.getStackTrace()[0]);
             response.status(500);
 		});
+
+        context.getBean(StatsDao.class).recalculateWinRates();
 	}
 
 	private RankedMode paramToMode(Request request, String paramName) {

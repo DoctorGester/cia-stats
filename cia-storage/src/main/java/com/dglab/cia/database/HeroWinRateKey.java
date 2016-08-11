@@ -59,7 +59,6 @@ public class HeroWinRateKey implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
 
         HeroWinRateKey that = (HeroWinRateKey) o;
 
@@ -67,13 +66,11 @@ public class HeroWinRateKey implements Serializable {
         if (heroName != null ? !heroName.equals(that.heroName) : that.heroName != null) return false;
         if (mode != null ? !mode.equals(that.mode) : that.mode != null) return false;
         return map == that.map;
-
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (heroName != null ? heroName.hashCode() : 0);
+        int result = heroName != null ? heroName.hashCode() : 0;
         result = 31 * result + (mode != null ? mode.hashCode() : 0);
         result = 31 * result + (int) players;
         result = 31 * result + (map != null ? map.hashCode() : 0);

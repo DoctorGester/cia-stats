@@ -21,7 +21,7 @@ public class StatsServiceImpl implements StatsService {
 	private StatsDao statsDao;
 
     // Every day at midnight
-    @Scheduled(cron = "0 0 1 * * *")
+    @Scheduled(cron = "0 0 0 * * *")
     private void winRatesTask() {
         statsDao.recalculateWinRates();
     }
