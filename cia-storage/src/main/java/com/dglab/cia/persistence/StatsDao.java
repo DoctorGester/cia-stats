@@ -70,7 +70,8 @@ public class StatsDao {
                             "on m.matchid = pmd.matchid " +
                             "and playerAmount > 1 " +
                             "and datetime >= current_date - cast('7 day' as INTERVAL)\n" +
-                    "where pr.\"RANK\" = '1'"
+                    "where pr.\"RANK\" = '1'\n" +
+                    "group by m.matchid"
                 ).addEntity(Match.class);
 
         query.setReadOnly(true);
