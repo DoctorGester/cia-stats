@@ -1,6 +1,7 @@
 extends /base.jade
 
 block append head
+    script(type="text/javascript", src="/public/scripts/stats.js")
     script(type="text/javascript", src="http://code.highcharts.com/highcharts.js")
     script(type="text/javascript", src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js")
 
@@ -9,25 +10,20 @@ block content
         h2.content-head.is-center Crumbling island arena stats
     div.ez-wr
         div#winRates.stats-graph
+        div#rankOneWinRates.stats-graph
         div#games.stats-graph
 
     - var s = "";
     - var f = true;
     - for(data : model.generalWinrates) { s = s + (f ? " " : ", ") + "['" + data.hero + "', " + data.winRate + ", " + data.games + "]"; f = false; };
-    - var seriesString = s
+    - var generalSeriesString = s
+    - s = ""
+    - f = true
+    - for(data : model.rankOneWinrates) { s = s + (f ? " " : ", ") + "['" + data.hero + "', " + data.winRate + ", " + data.games + "]"; f = false; };
+    - var rankOneSeriesString = s
 
     script.
-        var data = [#{seriesString}];
-        var markers = _.sortBy(data, function(point) {
-            return point[1];
-        });
-        
-        _.each(markers, function(point) {
-            point[0] = point[0].substring("npc_dota_hero_".length);
-            point[1] *= 100;
-        });
-
-        var games = _.reduce(markers, function(a, b) { return a + b[2]; }, 0);
+        var data = [#{generalSeriesString}];
         var template = "http://cdn.dota2.com/apps/dota2/images/heroes/$_icon.png";
 
         var heroIconFormatter = function () {
@@ -46,42 +42,11 @@ block content
             }
         };
 
-        Highcharts.chart('winRates', {
-            chart: {
-                type: "column"
-            },
-            credits: {
-                enabled: false
-            },
-            xAxis: {
-                labels: {
-                    enabled: false
-                }
-            },
-            yAxis: { 
-                min: 0,
-                max: 100
-            },
-            tooltip: {
-                formatter: function() {
-                    return '<b>' + this.point.name + '</b>: ' + this.y.toFixed(1) + ' %';
-                }
-            },
-            title: {
-                text: "Winrates"
-            },
-            subtitle: { text: "based on " + games + " rounds"},
-            plotOptions: heroIconPlotOptions,
-            series: [{
-                showInLegend: false,
-                data: markers
-            }]
-        });
+        createWinRateGraph("winRates", "General winrates", data);
+        createWinRateGraph("rankOneWinRates", "Rank 1 winrates", [#{rankOneSeriesString}]);
 
-        markers = _.sortBy(data, function (point) {
-            return point[2];
-        });
-
+        var markers = getMarkersFromData(data, 2);
+        console.log(data);
         markers = _.map(markers, function(point) {
            return {
                y: point[2],
