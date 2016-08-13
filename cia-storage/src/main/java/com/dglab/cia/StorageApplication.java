@@ -97,10 +97,10 @@ public class StorageApplication {
 			MatchInfo matchInfo = requestObject(request, MatchInfo.class);
 			matchInfo.setMatchId(matchId);
 
-			log.info("Match started {}", matchId);
-
-            for (PlayerInfo player : matchInfo.getPlayers()) {
-                log.info("Match {} player with {} in team {}", matchId, player.getSteamId64(), player.getTeam());
+            if (matchInfo.getPlayers().stream().mapToInt(PlayerInfo::getTeam).sum() == 0) {
+                log.info("Initial match registration {}", matchId);
+            } else {
+                log.info("Match started {}", matchId);
             }
 
 			matchService.putMatch(matchInfo);
