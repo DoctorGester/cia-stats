@@ -10,4 +10,7 @@ import java.util.Map;
  */
 public interface StatsService {
 	List<HeroWinRateAndGames> getGeneralWinRates();
+    List<HeroWinRateAndGames> getRankOneWinRates();
+    void runAllWinRatesRecalculation();
+    void runRankOneWinRatesRecalculation();
 }

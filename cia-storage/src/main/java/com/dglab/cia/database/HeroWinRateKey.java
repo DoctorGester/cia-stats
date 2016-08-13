@@ -1,6 +1,7 @@
 package com.dglab.cia.database;
 
 import com.dglab.cia.json.MatchMap;
+import com.dglab.cia.json.RankRange;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -17,6 +18,7 @@ public class HeroWinRateKey implements Serializable {
     private String mode;
     private byte players;
     private MatchMap map;
+    private RankRange rankRange;
 
     @Column(name = "playerAmount", nullable = false, updatable = false)
     public byte getPlayers() {
@@ -32,6 +34,16 @@ public class HeroWinRateKey implements Serializable {
     @Enumerated(EnumType.ORDINAL)
     public MatchMap getMap() {
         return map;
+    }
+
+    @Column(name = "rankRange", nullable = false, updatable = false)
+    @Enumerated(EnumType.ORDINAL)
+    public RankRange getRankRange() {
+        return rankRange;
+    }
+
+    public void setRankRange(RankRange rankRange) {
+        this.rankRange = rankRange;
     }
 
     public void setMode(String mode) {
@@ -65,7 +77,8 @@ public class HeroWinRateKey implements Serializable {
         if (players != that.players) return false;
         if (heroName != null ? !heroName.equals(that.heroName) : that.heroName != null) return false;
         if (mode != null ? !mode.equals(that.mode) : that.mode != null) return false;
-        return map == that.map;
+        if (map != that.map) return false;
+        return rankRange == that.rankRange;
     }
 
     @Override
@@ -74,6 +87,7 @@ public class HeroWinRateKey implements Serializable {
         result = 31 * result + (mode != null ? mode.hashCode() : 0);
         result = 31 * result + (int) players;
         result = 31 * result + (map != null ? map.hashCode() : 0);
+        result = 31 * result + (rankRange != null ? rankRange.hashCode() : 0);
         return result;
     }
 }

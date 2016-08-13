@@ -87,6 +87,7 @@ public class StorageApplication {
         get("/", (request, response) -> {
             AllStats stats = new AllStats();
             stats.setGeneralWinrates(statsService.getGeneralWinRates());
+            stats.setRankOneWinrates(statsService.getRankOneWinRates());
 
             return stats;
         }, jsonUtil.json());
@@ -170,12 +171,26 @@ public class StorageApplication {
 			return "";
 		});
 
+        get("/admin/stats/recalculate/:stat", (request, response) -> {
+            String stat = request.params("stat");
+
+            switch (stat) {
+                case "allWinRates":
+                    statsService.runAllWinRatesRecalculation();
+                    break;
+
+                case "rankOneWinRates":
+                    statsService.runRankOneWinRatesRecalculation();
+                    break;
+            }
+
+            return "";
+        });
+
 		exception(Exception.class, (exception, request, response) -> {
 			log.error("Error processing request: {} at {}", exception, exception.getStackTrace()[0]);
             response.status(500);
 		});
-
-        context.getBean(StatsDao.class).recalculateWinRates();
 	}
 
 	private RankedMode paramToMode(Request request, String paramName) {

@@ -15,6 +15,7 @@ import org.springframework.dao.annotation.PersistenceExceptionTranslationPostPro
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -32,6 +33,7 @@ import java.util.Properties;
 @Configuration
 @EnableTransactionManagement
 @EnableScheduling
+@EnableAsync
 @ComponentScan({"com.dglab.cia.persistence"})
 public class PersistenceConfig {
 	@Bean

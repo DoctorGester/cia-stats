@@ -4,6 +4,7 @@ import com.dglab.cia.database.*;
 import com.dglab.cia.json.HeroWinRateAndGames;
 import com.dglab.cia.json.MatchDateCount;
 import com.dglab.cia.json.MatchMap;
+import com.dglab.cia.json.RankRange;
 import org.apache.commons.lang.NotImplementedException;
 import org.hibernate.*;
 import org.hibernate.criterion.Projections;
@@ -41,12 +42,13 @@ public class StatsDao {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-    private void increaseHeroGames(String hero, Match match, Map<HeroWinRateKey, Integer> map) {
+    private void increaseHeroGames(String hero, Match match, RankRange rankRange, Map<HeroWinRateKey, Integer> map) {
         HeroWinRateKey key = new HeroWinRateKey();
         key.setHeroName(hero);
         key.setMap(match.getMap());
         key.setMode(match.getMode());
         key.setPlayers(match.getPlayers());
+        key.setRankRange(rankRange);
 
         Integer integer = map.get(key);
 
@@ -57,16 +59,26 @@ public class StatsDao {
         map.put(key, ++integer);
     }
 
-    public void recalculateWinRates() {
-        log.info("Started calculating stats");
+    // Vendor-locked
+    public void recalculateRankOneWinRates() {
+        Session session = entityManager.unwrap(Session.class);
+        Query query = session.createSQLQuery(
+                "select * from player_ranks as pr\n" +
+                "join player_match_data as pmd on pmd.steamId64 = pr.steamId64\n" +
+                "join matches as m " +
+                        "on m.matchid = pmd.matchid " +
+                        "and playerAmount > 1 " +
+                        "and datetime >= NOW()::DATE - '7 day'::INTERVAL\n" +
+                "join player_round_data as prd on prd.steamId64 = pr.steamId64\n" +
+                "where pr.\"RANK\" = '1'");
 
-        Map<HeroWinRateKey, Integer> heroWins = new HashMap<>();
-        Map<HeroWinRateKey, Integer> heroLosses = new HashMap<>();
+        recalculateWinRates(session, query.scroll(ScrollMode.FORWARD_ONLY), RankRange.RANK_ONE);
+    }
 
+    public void recalculateAllWinRates() {
         Session session = entityManager.unwrap(Session.class);
 
-        // Vendor-locked
-        ScrollableResults results = session
+        Criteria criteria = session
                 .createCriteria(Match.class)
                 .add(Restrictions.or(
                         Restrictions.eq("players", (byte) 2),
@@ -74,8 +86,16 @@ public class StatsDao {
                         Restrictions.eq("players", (byte) 6)
                 ))
                 .add(Restrictions.gt("dateTime", Instant.now().minus(7, ChronoUnit.DAYS)))
-                .setReadOnly(true)
-                .scroll(ScrollMode.FORWARD_ONLY);
+                .setReadOnly(true);
+
+        recalculateWinRates(session, criteria.scroll(ScrollMode.FORWARD_ONLY), RankRange.ALL);
+    }
+
+    public void recalculateWinRates(Session session, ScrollableResults results, RankRange rankRange) {
+        log.info("Started calculating win-rates");
+
+        Map<HeroWinRateKey, Integer> heroWins = new HashMap<>();
+        Map<HeroWinRateKey, Integer> heroLosses = new HashMap<>();
 
         int count = 0;
 
@@ -107,9 +127,9 @@ public class StatsDao {
                     String hero = roundData.getHero();
 
                     if (Objects.equals(round.getWinner(), team)) {
-                        increaseHeroGames(hero, match, heroWins);
+                        increaseHeroGames(hero, match, rankRange, heroWins);
                     } else {
-                        increaseHeroGames(hero, match, heroLosses);
+                        increaseHeroGames(hero, match, rankRange, heroLosses);
                     }
 
                     session.evict(roundData);
@@ -142,7 +162,7 @@ public class StatsDao {
             entityManager.merge(winRate);
         }
 
-        log.info("Finished calculating stats");
+        log.info("Finished calculating win-rates");
     }
 
     private <T, N> Predicate createRestriction(CriteriaBuilder b, Root<N> root, String property, Collection<T> values) {
@@ -178,13 +198,14 @@ public class StatsDao {
         return getHeroWinRates(builder, query, root, restrictions);
     }
 
-    public List<HeroWinRateAndGames> getHeroWinRates() {
+    public List<HeroWinRateAndGames> getHeroWinRates(RankRange range) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<HeroWinRateAndGames> query = builder.createQuery(HeroWinRateAndGames.class);
         EntityType<HeroWinRate> entity = entityManager.getMetamodel().entity(HeroWinRate.class);
         Root<HeroWinRate> root = query.from(entity);
 
-        return getHeroWinRates(builder, query, root, Collections.singleton(
+        return getHeroWinRates(builder, query, root, Arrays.asList(
+                builder.equal(root.get("ok").get("rankRange"), range),
                 builder.or(
                     builder.and(
                             builder.equal(root.get("pk").get("mode"), "2v2"),

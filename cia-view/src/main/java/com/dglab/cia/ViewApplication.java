@@ -98,6 +98,7 @@ public class ViewApplication {
 		before("/admin/*", new RequiresAuthenticationFilter(setupAuth(), "DirectBasicAuthClient"));
 		mapGet("/admin/ranks/set/:id/:mode/:rank");
 		mapGet("/admin/streaks/set/:id/:mode/:current/:max");
+        mapGet("/admin/stats/recalculate/:stat");
 	}
 
 	private Config setupAuth() {

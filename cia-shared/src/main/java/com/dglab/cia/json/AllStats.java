@@ -7,6 +7,15 @@ import java.util.List;
  */
 public class AllStats {
     private List<HeroWinRateAndGames> generalWinrates;
+    private List<HeroWinRateAndGames> rankOneWinrates;
+
+    public List<HeroWinRateAndGames> getRankOneWinrates() {
+        return rankOneWinrates;
+    }
+
+    public void setRankOneWinrates(List<HeroWinRateAndGames> rankOneWinrates) {
+        this.rankOneWinrates = rankOneWinrates;
+    }
 
     public List<HeroWinRateAndGames> getGeneralWinrates() {
         return generalWinrates;
