@@ -62,14 +62,16 @@ public class StatsDao {
     // Vendor-locked
     public void recalculateRankOneWinRates() {
         Session session = entityManager.unwrap(Session.class);
-        Query query = session.createSQLQuery(
-                "select m from player_ranks as pr\n" +
-                "join player_match_data as pmd on pmd.steamId64 = pr.steamId64\n" +
-                "join matches as m " +
-                        "on m.matchid = pmd.matchid " +
-                        "and playerAmount > 1 " +
-                        "and datetime >= current_date - cast('7 day' as INTERVAL)\n" +
-                "where pr.\"RANK\" = '1'");
+        Query query = session
+                .createSQLQuery(
+                    "select m.* from player_ranks as pr\n" +
+                    "join player_match_data as pmd on pmd.steamId64 = pr.steamId64\n" +
+                    "join matches as m " +
+                            "on m.matchid = pmd.matchid " +
+                            "and playerAmount > 1 " +
+                            "and datetime >= current_date - cast('7 day' as INTERVAL)\n" +
+                    "where pr.\"RANK\" = '1'"
+                ).addEntity(Match.class);
 
         query.setReadOnly(true);
 
