@@ -205,7 +205,7 @@ public class StatsDao {
         Root<HeroWinRate> root = query.from(entity);
 
         return getHeroWinRates(builder, query, root, Arrays.asList(
-                builder.equal(root.get("ok").get("rankRange"), range),
+                builder.equal(root.get("pk").get("rankRange"), range),
                 builder.or(
                     builder.and(
                             builder.equal(root.get("pk").get("mode"), "2v2"),
