@@ -68,7 +68,7 @@ public class StatsDao {
                 "join matches as m " +
                         "on m.matchid = pmd.matchid " +
                         "and playerAmount > 1 " +
-                        "and datetime >= NOW()::DATE - '7 day'::INTERVAL\n" +
+                        "and datetime >= current_date - cast('7 day' as INTERVAL)\n" +
                 "join player_round_data as prd on prd.steamId64 = pr.steamId64\n" +
                 "where pr.\"RANK\" = '1'");
 
