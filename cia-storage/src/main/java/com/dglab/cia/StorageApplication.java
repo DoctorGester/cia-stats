@@ -106,6 +106,7 @@ public class StorageApplication {
 			matchService.putMatch(matchInfo);
 
 			RanksAndAchievements achievements = new RanksAndAchievements();
+			achievements.setCurrentSeason(rankService.getCurrentSeason());
             achievements.setRanks(rankService.getMatchRanks(matchId));
             achievements.setAchievements(rankService.getRankedAchievements(matchId));
 
@@ -156,15 +157,14 @@ public class StorageApplication {
 			return "";
 		});
 
-		get("/admin/streaks/set/:id/:mode/:current/:max", (request, response) -> {
+		get("/admin/elo/set/:id/:mode/:elo", (request, response) -> {
 			RankedMode mode = paramToMode(request, "mode");
 
 			if (mode != null) {
-				rankService.setStreak(
+				rankService.setElo(
 						requestLong(request, "id"),
 						mode,
-						requestLong(request, "current").shortValue(),
-						requestLong(request, "max").shortValue()
+						requestLong(request, "elo").shortValue()
 				);
 			}
 

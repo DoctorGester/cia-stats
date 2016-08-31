@@ -61,7 +61,7 @@ public class ViewApplication {
             String path = request.splat()[0];
             try (InputStream stream = getClass().getResourceAsStream("/public/" + path)) {
                 if (path.contains("/")) {
-                    path = path.substring(path.lastIndexOf('/') + 1);
+                    path = path.substring(path.indexOf('/') + 1);
                 }
 
                 byte[] data = IOUtils.toByteArray(stream);
@@ -97,7 +97,7 @@ public class ViewApplication {
 
 		before("/admin/*", new RequiresAuthenticationFilter(setupAuth(), "DirectBasicAuthClient"));
 		mapGet("/admin/ranks/set/:id/:mode/:rank");
-		mapGet("/admin/streaks/set/:id/:mode/:current/:max");
+		mapGet("/admin/elo/set/:id/:mode/:elo");
         mapGet("/admin/stats/recalculate/:stat");
 	}
 

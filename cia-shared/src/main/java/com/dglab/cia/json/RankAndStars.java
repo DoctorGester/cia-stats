@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class RankAndStars {
 	private byte rank;
 	private byte stars;
-	private Streak streak;
+	private Short elo;
 
 	@JsonCreator
 	public RankAndStars(
@@ -35,11 +35,11 @@ public class RankAndStars {
 		this.stars = stars;
 	}
 
-	public Streak getStreak() {
-		return streak;
+	public Short getElo() {
+		return elo;
 	}
 
-	public void setStreak(Streak streak) {
-		this.streak = streak;
+	public void setElo(Short elo) {
+		this.elo = elo;
 	}
 }

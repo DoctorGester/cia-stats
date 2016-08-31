@@ -6,8 +6,17 @@ import java.util.Map;
  * @author doc
  */
 public class RanksAndAchievements {
+    private byte currentSeason;
     private Map<Long, RankAndStars> ranks;
     private Map<Long, RankedAchievements> achievements;
+
+    public byte getCurrentSeason() {
+        return currentSeason;
+    }
+
+    public void setCurrentSeason(byte currentSeason) {
+        this.currentSeason = currentSeason;
+    }
 
     public Map<Long, RankAndStars> getRanks() {
         return ranks;

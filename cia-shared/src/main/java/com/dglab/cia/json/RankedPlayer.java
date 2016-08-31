@@ -13,7 +13,7 @@ public class RankedPlayer {
 	private byte rank;
     private String name;
     private String avatarUrl;
-	private Streak streak;
+	private Short elo;
 
 	public RankedPlayer() {}
 
@@ -46,12 +46,12 @@ public class RankedPlayer {
 		this.rank = rank;
 	}
 
-	public Streak getStreak() {
-		return streak;
+	public Short getElo() {
+		return elo;
 	}
 
-	public void setStreak(Streak streak) {
-		this.streak = streak;
+	public void setElo(Short elo) {
+		this.elo = elo;
 	}
 
     public String getAvatarUrl() {

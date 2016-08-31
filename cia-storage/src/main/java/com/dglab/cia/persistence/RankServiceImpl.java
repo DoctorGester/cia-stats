@@ -15,6 +15,8 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -37,10 +39,10 @@ public class RankServiceImpl implements RankService {
 	private RankAndStars convertRank(PlayerRank rank) {
 		RankAndStars rankAndStars = new RankAndStars(rank.getRank(), rank.getStars());
 
-		EliteStreak streak = rank.getStreak();
+		EliteElo elo = rank.getElo();
 
-		if (streak != null) {
-			rankAndStars.setStreak(new Streak(streak.getCurrentStreak(), streak.getMaxStreak()));
+		if (elo != null) {
+			rankAndStars.setElo(elo.getElo());
 		}
 
 		return rankAndStars;
@@ -49,7 +51,7 @@ public class RankServiceImpl implements RankService {
 	private RankedPlayer convertPlayer(PlayerRank rank) {
 		RankAndStars rankAndStars = convertRank(rank);
 		RankedPlayer player = new RankedPlayer(rank.getPk().getSteamId64(), rankAndStars.getRank());
-		player.setStreak(rankAndStars.getStreak());
+		player.setElo(rankAndStars.getElo());
 
         if (rank.getName() != null) {
             player.setName(rank.getName().getName());
@@ -143,14 +145,12 @@ public class RankServiceImpl implements RankService {
             return null;
         }
 
-        byte season = getCurrentSeason();
-
         Map<Long, RankedAchievements> result = new HashMap<>();
 
         for (PlayerMatchData player : match.getMatchData()) {
             long steamId64 = player.getPk().getSteamId64();
 
-            Collection<Integer> seasons = rankDao.findPlayerRankOneSeasons(steamId64, season);
+            Collection<Integer> seasons = rankDao.findPlayerRankOneSeasons(steamId64);
 
             RankedAchievements rankedAchievements = new RankedAchievements();
             rankedAchievements.setAchievedSeasons(seasons);
@@ -202,6 +202,17 @@ public class RankServiceImpl implements RankService {
 		return (byte) between;
 	}
 
+    private int getPlayerElo(PlayerMatchData player, byte season, RankedMode mode) {
+        PlayerRank playerRank = rankDao.findPlayerRank(player.getPk().getSteamId64(), season, mode);
+        EliteElo elo = playerRank.getElo();
+
+        if (playerRank.getRank() == 1 && elo != null) {
+            return elo.getElo();
+        }
+
+        return (30 - playerRank.getRank()) * 30;
+    }
+
 	@Override
 	public RankUpdateDetails processMatchResults(long matchId) {
 		Match match = matchDao.getMatch(matchId);
@@ -234,7 +245,20 @@ public class RankServiceImpl implements RankService {
 
 		List<PlayerRank> toUpdate = new ArrayList<>();
 
-		for (PlayerMatchData player : match.getMatchData()) {
+        Map<Byte, Double> teamAverageElo = match.getMatchData().stream()
+                .collect(
+                        Collectors.groupingBy(PlayerMatchData::getTeam)
+                ).entrySet().stream()
+                .collect(
+                        Collectors.toMap(
+                                Map.Entry::getKey,
+                                value -> value.getValue().stream().mapToInt(
+                                        player -> getPlayerElo(player, season, matchRankedMode)
+                                ).average().orElse(STARTING_ELO)
+                        )
+                );
+
+        for (PlayerMatchData player : match.getMatchData()) {
 			List<PlayerRoundData> playerData = match
 					.getRounds()
 					.stream()
@@ -253,7 +277,7 @@ public class RankServiceImpl implements RankService {
 
 			long steamId64 = player.getPk().getSteamId64();
 			PlayerRank playerRank = rankDao.findPlayerRank(steamId64, season, matchRankedMode);
-			EliteStreak streak = playerRank.getStreak();
+			EliteElo elo = playerRank.getElo();
 
 			int stars = playerRank.getStars();
 
@@ -263,7 +287,15 @@ public class RankServiceImpl implements RankService {
             boolean won = player.getTeam() == match.getWinnerTeam() && !(abandoned || notPlayed > 2);
 
             if (playerRank.getRank() == 1) {
-				updateEliteStreak(playerRank, won);
+                Optional<Byte> enemyTeam
+                        = teamAverageElo.keySet().stream().filter(team -> player.getTeam() != team).findFirst();
+
+                if (enemyTeam.isPresent()) {
+                    double playerAverageElo = teamAverageElo.get(player.getTeam());
+                    double enemyAverageElo = teamAverageElo.get(enemyTeam.get());
+
+                    updateElo(elo::getElo, elo::setElo, won, playerAverageElo, enemyAverageElo);
+                }
             } else {
                 stars = stars + (won ? 1 : -1);
             }
@@ -285,13 +317,13 @@ public class RankServiceImpl implements RankService {
 			}
 
 			boolean rankUpdated = oldRank.getRank() != playerRank.getRank() || oldRank.getStars() != playerRank.getStars();
-			boolean streakUpdated = false;
+			boolean eloUpdated = false;
 
-			if (oldRank.getStreak() != null) {
-				streakUpdated = oldRank.getStreak().getCurrent() != streak.getCurrentStreak();
+			if (oldRank.getElo() != null) {
+				eloUpdated = oldRank.getElo() != elo.getElo();
 			}
 
-			if (rankUpdated || streakUpdated) {
+			if (rankUpdated || eloUpdated) {
                 updated.put(steamId64, convertRank(playerRank));
                 toUpdate.add(playerRank);
 			}
@@ -340,17 +372,18 @@ public class RankServiceImpl implements RankService {
 		return sameSetAmount > 2;
 	}
 
-	private EliteStreak updateEliteStreak(PlayerRank rank, boolean won) {
-		EliteStreak streak = rank.getStreak();
+	private void updateElo(Supplier<Short> elo, Consumer<Short> consumer, boolean won, double playerAverage, double enemyAverage) {
+        Short previousElo = elo.get();
 
-		if (won) {
-			streak.setCurrentStreak((short) (streak.getCurrentStreak() + 1));
-			streak.setMaxStreak((short) Math.max(streak.getMaxStreak(), streak.getCurrentStreak()));
-		} else {
-			streak.setCurrentStreak((short) 0);
-		}
+        int gameResult = won ? 1 : 0;
+        double chanceToWin = 1 / (1 + Math.pow(10, (enemyAverage - playerAverage) / 900));
+        long eloDelta = Math.round(50 * (gameResult - chanceToWin));
 
-		return streak;
+        if (won) {
+            eloDelta = Math.max(eloDelta, 5);
+        }
+
+        consumer.accept((short) Math.max(previousElo + eloDelta, 0));
 	}
 
 	@Override
@@ -395,13 +428,12 @@ public class RankServiceImpl implements RankService {
 	}
 
 	@Override
-	public void setStreak(long steamId64, RankedMode mode, short current, short max) {
+	public void setElo(long steamId64, RankedMode mode, short elo) {
 		PlayerRank playerRank = rankDao.findPlayerRank(steamId64, getCurrentSeason(), mode);
-		EliteStreak streak = playerRank.getStreak();
+		EliteElo playerElo = playerRank.getElo();
 
-		if (streak != null) {
-			streak.setCurrentStreak(current);
-			streak.setMaxStreak(max);
+		if (playerElo != null) {
+			playerElo.setElo(elo);
 			rankDao.save(playerRank);
 		}
 	}

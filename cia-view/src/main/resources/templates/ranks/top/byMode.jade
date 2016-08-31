@@ -17,9 +17,9 @@ block content
                             | #{player.steamId64}
                 div.ez-last.ez-oh
                     - var rankImage = 101 - player.rank
-                    div.rank-image-container
+                    div.rank-image-container(class=player.elo ? "elite-rank-container" : "")
                         img.rank-image(src="/public/images/ranks/#{rankImage}.png")
-                        if player.streak
-                            span.rank-number.elite-number +#{player.streak.max}
+                        if player.elo
+                            span.rank-number.elite-number #{player.elo}
                         else
                             span.rank-number.normal-number #{player.rank}
