@@ -387,6 +387,8 @@ public class RankServiceImpl implements RankService {
 
         if (won) {
             eloDelta = Math.max(eloDelta, 5);
+        } else {
+            eloDelta = Math.min(eloDelta, -5);
         }
 
         consumer.accept((short) Math.max(previousElo + eloDelta, 0));
