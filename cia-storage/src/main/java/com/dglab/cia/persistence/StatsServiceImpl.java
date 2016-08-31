@@ -35,12 +35,6 @@ public class StatsServiceImpl implements StatsService {
         statsDao.recalculateRankOneWinRates();
     }
 
-    // Every 10 minutes
-    @Scheduled(cron = "0 */10 * * * *")
-    private void gameCountsTask() {
-        statsDao.recalculateTodayGameCounts();
-    }
-
 	@Override
 	public List<HeroWinRateAndGames> getGeneralWinRates() {
 		return statsDao.getHeroWinRates(RankRange.ALL);
