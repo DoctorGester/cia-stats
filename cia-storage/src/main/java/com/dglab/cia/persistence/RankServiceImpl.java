@@ -333,6 +333,12 @@ public class RankServiceImpl implements RankService {
 
         log.info("Updated ranks for match {}", matchId);
 
+        // Adding starting ELO values to all players who just reached rank 1
+        updated.entrySet().stream()
+                .filter(e -> e.getValue().getRank() == 1)
+                .filter(e -> previous.containsKey(e.getKey()) && previous.get(e.getKey()).getRank() > 1)
+                .forEach(e -> e.getValue().setElo(STARTING_ELO));
+
 		RankUpdateDetails details = new RankUpdateDetails();
 		details.setPrevious(previous);
 		details.setUpdated(updated);
