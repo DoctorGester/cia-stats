@@ -48,6 +48,17 @@ public class MatchDao {
 		return match;
 	}
 
+	public long getMatchCount(long steamId64) {
+		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<Long> query = builder.createQuery(Long.class);
+
+        Root<PlayerMatchData> root = query.from(PlayerMatchData.class);
+        query.select(builder.count(root));
+		query.where(builder.equal(root.get("pk").get("steamId64"), steamId64));
+
+        return entityManager.createQuery(query).getSingleResult();
+	}
+
     public List<Match> getRecentPlayerMatches(long steamId64, int amount) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Match> query = builder.createQuery(Match.class);

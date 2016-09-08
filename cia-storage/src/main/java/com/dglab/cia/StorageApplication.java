@@ -3,7 +3,6 @@ package com.dglab.cia;
 import com.dglab.cia.json.*;
 import com.dglab.cia.persistence.MatchService;
 import com.dglab.cia.persistence.RankService;
-import com.dglab.cia.persistence.StatsDao;
 import com.dglab.cia.persistence.StatsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
@@ -109,6 +108,7 @@ public class StorageApplication {
 			achievements.setCurrentSeason(rankService.getCurrentSeason());
             achievements.setRanks(rankService.getMatchRanks(matchId));
             achievements.setAchievements(rankService.getRankedAchievements(matchId));
+			achievements.setGamesPlayed(matchService.getMatchesPlayed(matchInfo));
 
 			return achievements;
 		}, jsonUtil.json());
