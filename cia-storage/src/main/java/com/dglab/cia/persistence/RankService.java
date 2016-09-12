@@ -10,6 +10,8 @@ import java.util.Map;
  * @author doc
  */
 public interface RankService {
+	short STARTING_ELO = 1000;
+
 	byte getCurrentSeason();
 	Map<RankedMode, RankAndStars> getPlayerRanks(long steamId64);
 	Map<Byte, Map<RankedMode, RankAndStars>> getPlayerRankHistory(long steamId64);
@@ -21,5 +23,5 @@ public interface RankService {
     RankedInfo getRankedInfo();
 	List<RankedPlayer> getTopPlayers(RankedMode mode);
 	void setRank(long steamId64, RankedMode mode, byte rank);
-	void setStreak(long steamId64, RankedMode mode, short current, short max);
+	void setElo(long steamId64, RankedMode mode, short elo);
 }

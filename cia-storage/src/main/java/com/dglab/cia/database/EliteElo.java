@@ -1,7 +1,5 @@
 package com.dglab.cia.database;
 
-import org.hibernate.annotations.ColumnDefault;
-
 import javax.persistence.*;
 
 /**
@@ -10,11 +8,10 @@ import javax.persistence.*;
  * Time: 20:37
  */
 @Entity
-@Table(name = "elite_streaks")
-public class EliteStreak {
+@Table(name = "elite_elo")
+public class EliteElo {
     private RankPrimaryKey pk;
-    private short currentStreak;
-    private short maxStreak;
+    private short elo;
     private PlayerRank rank;
 
     @EmbeddedId
@@ -22,16 +19,9 @@ public class EliteStreak {
         return pk;
     }
 
-    @ColumnDefault("0")
     @Column(nullable = false)
-    public short getCurrentStreak() {
-        return currentStreak;
-    }
-
-    @ColumnDefault("0")
-    @Column(nullable = false)
-    public short getMaxStreak() {
-        return maxStreak;
+    public short getElo() {
+        return elo;
     }
 
     @OneToOne
@@ -70,11 +60,7 @@ public class EliteStreak {
         this.pk = pk;
     }
 
-    public void setCurrentStreak(short currentStreak) {
-        this.currentStreak = currentStreak;
-    }
-
-    public void setMaxStreak(short maxStreak) {
-        this.maxStreak = maxStreak;
+    public void setElo(short elo) {
+        this.elo = elo;
     }
 }

@@ -18,7 +18,7 @@ public class PlayerRank implements Serializable {
 	private byte rank;
 	private byte stars;
     private PlayerName name;
-    private EliteStreak streak;
+    private EliteElo elo;
 
 	@EmbeddedId
 	public RankPrimaryKey getPk() {
@@ -37,8 +37,8 @@ public class PlayerRank implements Serializable {
 	}
 
     @OneToOne(mappedBy = "rank", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    public EliteStreak getStreak() {
-        return streak;
+    public EliteElo getElo() {
+        return elo;
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -69,7 +69,7 @@ public class PlayerRank implements Serializable {
 		this.pk = pk;
 	}
 
-    public void setStreak(EliteStreak streak) {
-        this.streak = streak;
+    public void setElo(EliteElo elo) {
+        this.elo = elo;
     }
 }

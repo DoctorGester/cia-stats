@@ -9,10 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -28,6 +25,15 @@ public class MatchServiceImpl implements MatchService {
 
 	@Autowired
 	private PlayerNameService playerNameService;
+
+	public Map<Long, Long> getMatchesPlayed(MatchInfo info) {
+        return info.getPlayers()
+                .stream()
+                .collect(Collectors.toMap(
+                        PlayerInfo::getSteamId64,
+                        player -> matchDao.getMatchCount(player.getSteamId64())
+                ));
+    }
 
 	@Override
 	public MatchDetails getMatchDetails(long matchId) {

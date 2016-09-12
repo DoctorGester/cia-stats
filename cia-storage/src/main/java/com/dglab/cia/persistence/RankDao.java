@@ -1,7 +1,7 @@
 package com.dglab.cia.persistence;
 
 import com.dglab.cia.json.RankedMode;
-import com.dglab.cia.database.EliteStreak;
+import com.dglab.cia.database.EliteElo;
 import com.dglab.cia.database.PlayerMatchData;
 import com.dglab.cia.database.PlayerRank;
 import com.dglab.cia.database.RankPrimaryKey;
@@ -79,14 +79,14 @@ public class RankDao {
 			save(rank);
 		}
 
-		if (checkRankStreak(rank)) {
+		if (checkRankElo(rank)) {
 			save(rank);
 		}
 
 		return rank;
 	}
 
-	public Collection<Integer> findPlayerRankOneSeasons(long steamId64, byte currentSeason) {
+	public Collection<Integer> findPlayerRankOneSeasons(long steamId64) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<PlayerRank> query = builder.createQuery(PlayerRank.class);
         EntityType<PlayerRank> entity = entityManager.getMetamodel().entity(PlayerRank.class);
@@ -96,7 +96,6 @@ public class RankDao {
         query.where(
                 builder.and(
                         builder.equal(root.get("pk").get("steamId64"), steamId64),
-                        builder.notEqual(root.get("pk").get("season"), currentSeason),
                         builder.equal(root.get("rank"), 1)
                 )
         );
@@ -122,12 +121,12 @@ public class RankDao {
                 )
         );
 
-		Join<PlayerRank, EliteStreak> join = root.join(entity.getSingularAttribute("streak", EliteStreak.class), JoinType.LEFT);
+		Join<PlayerRank, EliteElo> join = root.join(entity.getSingularAttribute("elo", EliteElo.class), JoinType.LEFT);
 
-		query.orderBy(builder.asc(root.get("rank")), builder.desc(join.get("maxStreak")));
+		query.orderBy(builder.asc(root.get("rank")), builder.desc(join.get("elo")));
 
 		List<PlayerRank> result = entityManager.createQuery(query).setMaxResults(amount).getResultList();
-		result.stream().filter(this::checkRankStreak).forEach(this::save);
+		result.stream().filter(this::checkRankElo).forEach(this::save);
 
 		return result;
 	}
@@ -147,7 +146,7 @@ public class RankDao {
     }
 
 	public void save(PlayerRank rank) {
-		checkRankStreak(rank);
+		checkRankElo(rank);
 
 		entityManager.merge(rank);
 	}
@@ -156,15 +155,16 @@ public class RankDao {
 		ranks.forEach(this::save);
 	}
 
-	private boolean checkRankStreak(PlayerRank rank) {
+	private boolean checkRankElo(PlayerRank rank) {
 		if (rank.getRank() == 1) {
-			EliteStreak streak = rank.getStreak();
+			EliteElo elo = rank.getElo();
 
-			if (streak == null) {
-				streak = new EliteStreak();
-				streak.setPk(rank.getPk());
+			if (elo == null) {
+				elo = new EliteElo();
+				elo.setElo(RankService.STARTING_ELO);
+				elo.setPk(rank.getPk());
 
-				rank.setStreak(streak);
+				rank.setElo(elo);
 
 				return true;
 			}
