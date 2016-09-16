@@ -1,6 +1,11 @@
 import org.ajoberstar.grgit.*
 
 buildscript {
+    ext {
+        querydslVersion = '4.1.4'
+        springVersion = '4.2.6.+'
+    }
+
     repositories {
         mavenCentral()
     }
@@ -10,7 +15,7 @@ buildscript {
     }
 }
 
-task pullSources {
+task pullSources << {
     logger.info("Pulling " + project.name)
 
     def dir = file('clone')
@@ -20,6 +25,12 @@ task pullSources {
     } else {
         Grgit.open(dir: dir).pull()
     }
+
+    project.subprojects.each {
+        it.compileJava.source 'clone/' + it.name + '/src/main/java'
+
+        System.out.println(file('clone/' + it.name + '/src/main/java'))
+    }
 }
 
 subprojects {
@@ -27,6 +38,14 @@ subprojects {
     apply plugin: 'application'
     group 'dg-lab'
     version '1.0-SNAPSHOT'
+
+    mainClassName = "com.dglab.cia.Main"
+
+    /*idea {
+        module {
+            sourceDirs += file('generated/')
+        }
+    }*/
 
     configurations.all {
         exclude group: 'commons-logging', module: 'commons-logging'
@@ -43,7 +62,6 @@ subprojects {
 
     task compilePulled(type: JavaCompile, dependsOn: pullSources) {
         System.out.println(file('../clone/' + project.name + '/src/main/java'))
-
         source = file('../clone/' + project.name + '/src/main/java')
         destinationDir = file('build/classes/main')
         sourceCompatibility = '1.8'
@@ -95,14 +113,6 @@ subprojects {
 def shared = project(':cia-shared')
 
 project(':cia-shared') {
-    sourceSets {
-        main {
-            java {
-                srcDir '../clone/' + project.name + '/src/main/java'
-            }
-        }
-    }
-
     dependencies {
         testCompile group: 'junit', name: 'junit', version: '4.11'
 
@@ -110,6 +120,8 @@ project(':cia-shared') {
         compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.7.+'
         compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.7.+'
     }
+
+    task publish(dependsOn: bigJar) << {}
 }
 
 project(':cia-proxy') {
@@ -138,10 +150,17 @@ project(':cia-storage') {
         compile group: 'org.hibernate', name: 'hibernate-java8', version: '5.1.+'
         compile group: 'org.hibernate', name: 'hibernate-hikaricp', version: '5.1.+'
         compile group: 'org.hibernate.javax.persistence', name: 'hibernate-jpa-2.1-api'
-        compile(group: 'org.springframework', name: 'spring-context', version: '4.2.6.+')
-        compile group: 'org.springframework', name: 'spring-tx', version: '4.2.6.+'
-        compile group: 'org.springframework', name: 'spring-orm', version: '4.2.6.+'
-        compile group: 'com.github.koraktor', name: 'steam-condenser', version: '1.3.+'
+
+        compile "com.querydsl:querydsl-root:$querydslVersion"
+        compile "com.querydsl:querydsl-jpa:$querydslVersion"
+        compile "com.querydsl:querydsl-apt:$querydslVersion:jpa"
+
+        compile 'org.springframework.data:spring-data-jpa:1.10.+'
+
+        compile group: 'org.springframework', name: 'spring-context', version: "$springVersion"
+        compile group: 'org.springframework', name: 'spring-tx', version: "$springVersion"
+        compile group: 'org.springframework', name: 'spring-orm', version: "$springVersion"
+        compile group: 'com.github.koraktor', name: 'steam-data-jpa', version: '1.10.+'
         compile group: 'com.lukaspradel', name: 'steam-web-api', version: '1.2'
 
         compile shared
