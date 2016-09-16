@@ -29,7 +29,7 @@ public class PlayerNameServiceImpl implements PlayerNameService {
     private Logger log = LoggerFactory.getLogger(PlayerNameService.class);
 
 	@Autowired
-	private PlayerNameDao playerNameDao;
+	private PlayerNameRepository playerNameRepository;
 
 	private ExecutorService executorService = Executors.newFixedThreadPool(16);
     private SteamWebApiClient api;
@@ -66,7 +66,7 @@ public class PlayerNameServiceImpl implements PlayerNameService {
                     playerName.setName(player.getPersonaname());
                     playerName.setAvatarUrl(player.getAvatarmedium());
 
-                    playerNameDao.update(playerName);
+                    playerNameRepository.save(playerName);
                 }
             } catch (SteamApiException e) {
                 log.warn("Steam API exception {}", e.toString());
