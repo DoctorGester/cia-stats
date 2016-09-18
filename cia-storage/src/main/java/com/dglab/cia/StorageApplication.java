@@ -1,9 +1,7 @@
 package com.dglab.cia;
 
 import com.dglab.cia.json.*;
-import com.dglab.cia.persistence.MatchService;
-import com.dglab.cia.persistence.RankService;
-import com.dglab.cia.persistence.StatsService;
+import com.dglab.cia.persistence.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +9,10 @@ import org.slf4j.impl.SimpleLogger;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import spark.Request;
 
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static spark.Spark.*;
 
@@ -30,8 +32,10 @@ public class StorageApplication {
     private AnnotationConfigApplicationContext context;
     private StatsService statsService;
     private MatchService matchService;
+    private QuestService questService;
     private RankService rankService;
-	private ObjectMapper mapper;
+    private PassService passService;
+    private ObjectMapper mapper;
 	private JsonUtil jsonUtil;
 
 	public StorageApplication() {
@@ -45,7 +49,9 @@ public class StorageApplication {
 
         statsService = context.getBean(StatsService.class);
 		matchService = context.getBean(MatchService.class);
+        questService = context.getBean(QuestService.class);
 		rankService = context.getBean(RankService.class);
+        passService = context.getBean(PassService.class);
 		mapper = context.getBean(ObjectMapper.class);
 		jsonUtil = context.getBean(JsonUtil.class);
 
@@ -129,17 +135,47 @@ public class StorageApplication {
 		post("/winner/:id", (request, response) -> {
 			long matchId = requestLong(request, "id");
 
-			MatchWinner matchWinner = requestObject(request, MatchWinner.class);
-			matchWinner.setMatchId(matchId);
+			MatchResult matchResult = requestObject(request, MatchResult.class);
+			matchResult.setMatchId(matchId);
 
-			log.info("Winner set {}", matchId);
+			if (matchService.putWinner(matchResult)) {
+                log.info("Winner set {}", matchId);
 
-			if (matchService.putWinner(matchWinner)) {
-				return rankService.processMatchResults(matchId);
-			}
+                MatchResults matchResults = new MatchResults();
+                RankUpdateDetails details = rankService.processMatchResults(matchId);
+                Map<Long, Integer> questProgress = matchResult.getQuestProgress();
+
+                if (questProgress != null) {
+                    matchResults.setQuestResults(questService.updateQuestBatch(questProgress));
+                }
+
+                matchResults.setRankDetails(details);
+
+                return matchResults;
+            }
 
 			return "";
 		}, jsonUtil.json());
+
+        post("/quests/update", (request, response) -> {
+            PassPlayers players = requestObject(request, PassPlayers.class);
+
+            Map<Long, List<PassQuest>> quests = players.getPlayers().stream().collect(
+                    Collectors.toMap(id -> id, id -> questService.updatePlayerQuests(id))
+            );
+
+            return quests;
+        }, jsonUtil.json());
+
+        post("/quests/reroll/:id", (request, response) -> {
+            long questId = requestLong(request, "id");
+
+            return questService.rerollQuest(questId);
+        });
+
+        get("/pass/top", (request, response) -> {
+            return passService.getTopPlayers();
+        }, jsonUtil.json());
 
 		before("/admin/*", (request, response) -> {
 			if (!"127.0.0.1".equals(request.ip())) {

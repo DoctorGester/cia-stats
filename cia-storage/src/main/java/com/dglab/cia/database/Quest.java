@@ -15,6 +15,7 @@ public class Quest {
     private short progress;
     private String hero;
     private String secondaryHero;
+    private boolean isNew = false;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -70,5 +71,13 @@ public class Quest {
 
     public void setSecondaryHero(String secondaryHero) {
         this.secondaryHero = secondaryHero;
+    }
+
+    public void setNew(boolean aNew) {
+        isNew = aNew;
+    }
+
+    public boolean isNew() {
+        return isNew;
     }
 }

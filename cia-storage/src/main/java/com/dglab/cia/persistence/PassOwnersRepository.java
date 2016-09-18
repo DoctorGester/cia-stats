@@ -9,5 +9,5 @@ import java.util.List;
  * @author doc
  */
 public interface PassOwnersRepository extends JpaRepository<PassOwner, Long> {
-    List<PassOwner> findTop10ByExperience();
+    List<PassOwner> findTop5ByOrderByExperienceDesc();
 }

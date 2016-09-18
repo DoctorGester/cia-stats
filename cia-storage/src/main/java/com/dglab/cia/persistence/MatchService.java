@@ -14,5 +14,5 @@ public interface MatchService {
 	Map<Long, Long> getMatchesPlayed(MatchInfo info);
 	void putMatch(MatchInfo matchInfo);
 	void putRound(RoundInfo roundInfo);
-	boolean putWinner(MatchWinner winner);
+	boolean putWinner(MatchResult winner);
 }

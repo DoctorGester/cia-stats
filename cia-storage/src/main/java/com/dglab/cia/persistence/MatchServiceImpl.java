@@ -202,7 +202,7 @@ public class MatchServiceImpl implements MatchService {
 	}
 
 	@Override
-	public boolean putWinner(MatchWinner winner) {
+	public boolean putWinner(MatchResult winner) {
 		Match match = matchDao.getMatch(winner.getMatchId());
 
 		if (match == null) {
