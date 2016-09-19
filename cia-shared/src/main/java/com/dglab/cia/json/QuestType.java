@@ -10,7 +10,9 @@ public enum QuestType {
     DEAL_DAMAGE(100, 200),
     EARN_MVP(10, 200),
     EARN_FIRST_BLOOD(12, 150),
-    MAKE_KILLS(20, 150);
+    MAKE_KILLS(20, 150),
+    CAST_SPELLS(200, 100),
+    RESTORE_HEALTH(40, 150);
 
     private final int goal;
     private final int reward;

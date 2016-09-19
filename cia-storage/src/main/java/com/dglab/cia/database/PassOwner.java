@@ -13,7 +13,6 @@ import java.time.Instant;
 public class PassOwner {
     private long steamId64;
     private int experience;
-    private Instant lastActivity;
     private Instant lastQuestUpdate;
     private PlayerName name;
     private boolean isNew = false;
@@ -34,15 +33,6 @@ public class PassOwner {
 
     public void setExperience(int experience) {
         this.experience = experience;
-    }
-
-    @Column(nullable = false)
-    public Instant getLastActivity() {
-        return lastActivity;
-    }
-
-    public void setLastActivity(Instant lastActivity) {
-        this.lastActivity = lastActivity;
     }
 
     @Column(nullable = false)
@@ -70,6 +60,7 @@ public class PassOwner {
         this.name = name;
     }
 
+    @Transient
     public boolean isNew() {
         return isNew;
     }

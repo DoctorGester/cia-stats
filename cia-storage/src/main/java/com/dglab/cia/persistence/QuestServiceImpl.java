@@ -3,9 +3,12 @@ package com.dglab.cia.persistence;
 import com.dglab.cia.database.PassOwner;
 import com.dglab.cia.database.Quest;
 import com.dglab.cia.database.QuestReroll;
+import com.dglab.cia.json.Hero;
 import com.dglab.cia.json.PassQuest;
 import com.dglab.cia.json.PlayerQuestResult;
 import com.dglab.cia.json.QuestType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,6 +29,8 @@ import java.util.stream.Collectors;
  */
 @Service
 public class QuestServiceImpl implements QuestService {
+    private static final Logger log = LoggerFactory.getLogger(QuestServiceImpl.class);
+
     @Autowired
     private PassService passService;
 
@@ -42,6 +47,8 @@ public class QuestServiceImpl implements QuestService {
         List<Quest> quests = questsRepository.findBySteamId64(steamId64);
         Instant now = Instant.now(Clock.systemUTC());
 
+        log.info("Updating quests for {}", steamId64);
+
         if (quests.size() < 3) {
             int questsToGenerate = 3;
 
@@ -50,8 +57,12 @@ public class QuestServiceImpl implements QuestService {
                 ZonedDateTime nextMidnight = ZonedDateTime.now(utc).toLocalDate().atStartOfDay(utc).plusDays(1);
                 long daysPassed = ChronoUnit.DAYS.between(player.getLastQuestUpdate(), nextMidnight);
 
-                questsToGenerate = (int) Math.max(daysPassed, 3);
+                log.info("Days passed {}", daysPassed);
+
+                questsToGenerate = (int) Math.min(daysPassed, 3 - quests.size());
             }
+
+            log.info("Generating {} new quests", questsToGenerate);
 
             for (int i = 0; i < questsToGenerate; i++) {
                 Quest quest = new Quest();
@@ -65,8 +76,6 @@ public class QuestServiceImpl implements QuestService {
 
             player.setLastQuestUpdate(now);
         }
-
-        player.setLastActivity(now);
 
         return quests.stream().map(this::convertQuest).collect(Collectors.toList());
     }
@@ -130,6 +139,8 @@ public class QuestServiceImpl implements QuestService {
     public PassQuest rerollQuest(long questId) {
         Quest quest = questsRepository.findOne(questId);
 
+        log.info("Quest reroll requested for quest {}", questId);
+
         if (quest == null) {
             return null;
         }
@@ -150,23 +161,37 @@ public class QuestServiceImpl implements QuestService {
         generateNewQuestForPlayer(questsRepository.findBySteamId64(steamId64), quest);
         quest.setProgress((short) 0);
 
+        log.info("Generated new quest of type {}", quest.getQuestType());
+
         return convertQuest(quest);
     }
 
     @Scheduled(cron = "0 0 0 * * *")
     @Async
     public void resetRerolls() {
+        log.info("Resetting rerolls");
         rerollsRepository.truncate();
     }
 
     private void generateNewQuestForPlayer(List<Quest> quests, Quest quest) {
-        List<QuestType> questTypes = Arrays.asList(QuestType.values());
+        List<QuestType> questTypes = new ArrayList<>(Arrays.asList(QuestType.values()));
         questTypes.removeAll(quests.stream().map(Quest::getQuestType).collect(Collectors.toList()));
 
-        QuestType nextType = questTypes.get(ThreadLocalRandom.current().nextInt(questTypes.size()));
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        QuestType nextType = questTypes.get(random.nextInt(questTypes.size()));
 
         quest.setQuestType(nextType);
         quest.setProgress((short) 0);
+
+        List<Hero> heroPool = new ArrayList<>(Arrays.asList(Hero.values()));
+
+        switch (nextType) {
+            case PLAY_ROUNDS_AS_OR:
+                quest.setSecondaryHero(heroPool.remove(random.nextInt(heroPool.size())));
+            case PLAY_ROUNDS_AS:
+                quest.setHero(heroPool.remove(random.nextInt(heroPool.size())));
+                break;
+        }
     }
 
     private PassQuest convertQuest(Quest quest) {
@@ -177,6 +202,10 @@ public class QuestServiceImpl implements QuestService {
         passQuest.setType(quest.getQuestType());
         passQuest.setProgress(quest.getProgress());
         passQuest.setIsNew(quest.isNew());
+        passQuest.setHero(quest.getHero());
+        passQuest.setSecondaryHero(quest.getSecondaryHero());
+        passQuest.setReward(quest.getQuestType().getReward());
+        passQuest.setGoal(quest.getQuestType().getGoal());
 
         return passQuest;
     }

@@ -30,7 +30,6 @@ public class PassServiceImpl implements PassService {
             owner = new PassOwner();
             owner.setSteamId64(steamId64);
             owner.setExperience(0);
-            owner.setLastActivity(now);
             owner.setLastQuestUpdate(now);
             owner.setNew(true);
 

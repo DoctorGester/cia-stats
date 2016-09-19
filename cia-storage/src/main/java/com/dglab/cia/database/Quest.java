@@ -1,5 +1,6 @@
 package com.dglab.cia.database;
 
+import com.dglab.cia.json.Hero;
 import com.dglab.cia.json.QuestType;
 
 import javax.persistence.*;
@@ -13,8 +14,8 @@ public class Quest {
     private long steamId64;
     private QuestType questType;
     private short progress;
-    private String hero;
-    private String secondaryHero;
+    private Hero hero;
+    private Hero secondaryHero;
     private boolean isNew = false;
 
     @Id
@@ -56,20 +57,22 @@ public class Quest {
     }
 
     @Column
-    public String getHero() {
+    @Enumerated(EnumType.STRING)
+    public Hero getHero() {
         return hero;
     }
 
-    public void setHero(String hero) {
+    public void setHero(Hero hero) {
         this.hero = hero;
     }
 
     @Column
-    public String getSecondaryHero() {
+    @Enumerated(EnumType.STRING)
+    public Hero getSecondaryHero() {
         return secondaryHero;
     }
 
-    public void setSecondaryHero(String secondaryHero) {
+    public void setSecondaryHero(Hero secondaryHero) {
         this.secondaryHero = secondaryHero;
     }
 
@@ -77,6 +80,7 @@ public class Quest {
         isNew = aNew;
     }
 
+    @Transient
     public boolean isNew() {
         return isNew;
     }
