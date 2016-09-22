@@ -9,6 +9,7 @@ import java.util.List;
  * @author doc
  */
 public interface PassService {
+    PassOwner get(long steamId64);
     PassOwner getOrCreate(long steamId64);
     List<PassPlayer> getTopPlayers();
     void awardExperience(long steamId64, int experience);

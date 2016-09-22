@@ -10,6 +10,7 @@ public class RanksAndAchievements {
     private Map<Long, RankAndStars> ranks;
     private Map<Long, RankedAchievements> achievements;
     private Map<Long, Long> gamesPlayed;
+    private Map<Long, Integer> passExperience;
 
     public byte getCurrentSeason() {
         return currentSeason;
@@ -41,5 +42,13 @@ public class RanksAndAchievements {
 
     public void setGamesPlayed(Map<Long, Long> gamesPlayed) {
         this.gamesPlayed = gamesPlayed;
+    }
+
+    public Map<Long, Integer> getPassExperience() {
+        return passExperience;
+    }
+
+    public void setPassExperience(Map<Long, Integer> passExperience) {
+        this.passExperience = passExperience;
     }
 }

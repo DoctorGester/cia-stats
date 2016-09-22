@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * @author doc
  */
-public class PassPlayers {
+public class PlayerList {
     private List<Long> players;
 
     public List<Long> getPlayers() {

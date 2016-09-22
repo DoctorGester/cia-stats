@@ -80,13 +80,14 @@ public class QuestServiceImpl implements QuestService {
         return quests.stream().map(this::convertQuest).collect(Collectors.toList());
     }
 
-    public int updateQuestProgress(Quest quest, short progress) {
+    private int updateQuestProgress(Quest quest, short progress) {
         quest.setProgress(progress);
 
         if (progress >= quest.getQuestType().getGoal()) {
             int reward = quest.getQuestType().getReward();
 
             passService.awardExperience(quest.getSteamId64(), reward);
+            questsRepository.delete(quest);
 
             return reward;
         }

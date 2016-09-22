@@ -26,6 +26,10 @@ public class MatchServiceImpl implements MatchService {
 	@Autowired
 	private PlayerNameService playerNameService;
 
+    @Autowired
+    private PassService passService;
+
+	@Override
 	public Map<Long, Long> getMatchesPlayed(MatchInfo info) {
         return info.getPlayers()
                 .stream()
@@ -35,7 +39,20 @@ public class MatchServiceImpl implements MatchService {
                 ));
     }
 
-	@Override
+    @Override
+    public Map<Long, Integer> getPassExperience(MatchInfo info) {
+        return info.getPlayers()
+                .stream()
+                .map(PlayerInfo::getSteamId64)
+                .map(passService::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(
+                        PassOwner::getSteamId64,
+                        PassOwner::getExperience
+                ));
+    }
+
+    @Override
 	public MatchDetails getMatchDetails(long matchId) {
 		Match match = matchDao.getMatch(matchId);
 

@@ -21,6 +21,12 @@ public class PassServiceImpl implements PassService {
 
     @Override
     @Transactional
+    public PassOwner get(long steamId64) {
+        return repository.findOne(steamId64);
+    }
+
+    @Override
+    @Transactional
     public PassOwner getOrCreate(long steamId64) {
         PassOwner owner = repository.findOne(steamId64);
 

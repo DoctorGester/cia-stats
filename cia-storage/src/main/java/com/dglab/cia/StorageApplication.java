@@ -40,7 +40,7 @@ public class StorageApplication {
 
 	public StorageApplication() {
 		port(5141);
-		threadPool(4);
+		threadPool(16);
 
 		context = new AnnotationConfigApplicationContext();
 		context.getEnvironment().setActiveProfiles("readWrite");
@@ -97,6 +97,21 @@ public class StorageApplication {
             return stats;
         }, jsonUtil.json());
 
+        post("/match/info/:id", (request, response) -> {
+            long matchId = requestLong(request, "id");
+            MatchInfo matchInfo = requestObject(request, MatchInfo.class);
+            matchInfo.setMatchId(matchId);
+
+            RanksAndAchievements achievements = new RanksAndAchievements();
+            achievements.setCurrentSeason(rankService.getCurrentSeason());
+            achievements.setRanks(rankService.getMatchRanks(matchId));
+            achievements.setAchievements(rankService.getRankedAchievements(matchId));
+            achievements.setGamesPlayed(matchService.getMatchesPlayed(matchInfo));
+            achievements.setPassExperience(matchService.getPassExperience(matchInfo));
+
+            return achievements;
+        }, jsonUtil.json());
+
 		post("/match/:id", (request, response) -> {
 			long matchId = requestLong(request, "id");
 			MatchInfo matchInfo = requestObject(request, MatchInfo.class);
@@ -110,13 +125,7 @@ public class StorageApplication {
 
 			matchService.putMatch(matchInfo);
 
-			RanksAndAchievements achievements = new RanksAndAchievements();
-			achievements.setCurrentSeason(rankService.getCurrentSeason());
-            achievements.setRanks(rankService.getMatchRanks(matchId));
-            achievements.setAchievements(rankService.getRankedAchievements(matchId));
-			achievements.setGamesPlayed(matchService.getMatchesPlayed(matchInfo));
-
-			return achievements;
+			return "";
 		}, jsonUtil.json());
 
 		post("/match/:id/:round", (request, response) -> {
@@ -158,7 +167,7 @@ public class StorageApplication {
 		}, jsonUtil.json());
 
         post("/quests/update", (request, response) -> {
-            PassPlayers players = requestObject(request, PassPlayers.class);
+            PlayerList players = requestObject(request, PlayerList.class);
 
             Map<Long, List<PassQuest>> quests = players.getPlayers().stream().collect(
                     Collectors.toMap(id -> id, id -> questService.updatePlayerQuests(id))
