@@ -121,7 +121,7 @@ public class ReverseProxy {
 		port(3637);
 		threadPool(16);
 
-		Unirest.setTimeouts(1000, 6000);
+		Unirest.setTimeouts(3000, 6000);
 		Unirest.clearDefaultHeaders();
 
 		service.scheduleAtFixedRate(this::downloadAndParseWhiteList, 0, 1, TimeUnit.DAYS);
