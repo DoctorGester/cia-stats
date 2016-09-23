@@ -5,7 +5,6 @@ import com.dglab.cia.database.Quest;
 import com.dglab.cia.database.QuestReroll;
 import com.dglab.cia.json.Hero;
 import com.dglab.cia.json.PassQuest;
-import com.dglab.cia.json.PlayerQuestResult;
 import com.dglab.cia.json.QuestType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,59 +79,29 @@ public class QuestServiceImpl implements QuestService {
         return quests.stream().map(this::convertQuest).collect(Collectors.toList());
     }
 
-    private int updateQuestProgress(Quest quest, short progress) {
+    @Override
+    @Transactional
+    public PassQuest updateQuestProgress(long questId, short progress) {
+        Quest quest = questsRepository.findOne(questId);
+
+        if (quest == null) {
+            return null;
+        }
+
         quest.setProgress(progress);
 
         if (progress >= quest.getQuestType().getGoal()) {
+            log.info("Quest {} of type {} completed by {}", quest.getId(), quest.getQuestType(), quest.getSteamId64());
+
             int reward = quest.getQuestType().getReward();
 
             passService.awardExperience(quest.getSteamId64(), reward);
             questsRepository.delete(quest);
 
-            return reward;
+            return convertQuest(quest);
         }
 
-        return 0;
-    }
-
-    @Override
-    @Transactional
-    public Map<Long, PlayerQuestResult> updateQuestBatch(Map<Long, Integer> progress) {
-        Map<Long, PlayerQuestResult> results = new HashMap<>();
-
-        for (Map.Entry<Long, Integer> entry : progress.entrySet()) {
-            Quest quest = questsRepository.findOne(entry.getKey());
-
-            if (quest == null) {
-                continue;
-            }
-
-            int reward = updateQuestProgress(quest, entry.getValue().shortValue());
-
-            PlayerQuestResult result = results.get(quest.getSteamId64());
-
-            if (result == null) {
-                result = new PlayerQuestResult();
-                result.setExperience(passService.getOrCreate(quest.getSteamId64()).getExperience());
-
-                results.put(quest.getSteamId64(), result);
-            }
-
-            result.setEarnedExperience(result.getEarnedExperience() + reward);
-
-            if (reward > 0) {
-                List<PassQuest> completedQuests = result.getCompletedQuests();
-
-                if (completedQuests == null) {
-                    completedQuests = new ArrayList<>();
-                    result.setCompletedQuests(completedQuests);
-                }
-
-                completedQuests.add(convertQuest(quest));
-            }
-        }
-
-        return results;
+        return null;
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.dglab.cia.json;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,16 +14,19 @@ public class MatchResult {
 	private byte winnerTeam;
     private final int gameLength;
     private final Map<Long, Integer> questProgress;
+    private final List<Long> passPlayers;
 
     @JsonCreator()
 	public MatchResult(
 			@JsonProperty(value = "winnerTeam", required = true) byte winnerTeam,
             @JsonProperty(value = "gameLength", required = true) int gameLength,
-            @JsonProperty(value = "questProgress") Map<Long, Integer> questProgress
+            @JsonProperty(value = "questProgress") Map<Long, Integer> questProgress,
+            @JsonProperty(value = "passPlayers") List<Long> passPlayers
     ) {
 		this.winnerTeam = winnerTeam;
         this.gameLength = gameLength;
         this.questProgress = questProgress;
+        this.passPlayers = passPlayers;
     }
 
 	public long getMatchId() {
@@ -47,5 +51,9 @@ public class MatchResult {
 
     public Map<Long, Integer> getQuestProgress() {
         return questProgress;
+    }
+
+    public List<Long> getPassPlayers() {
+        return passPlayers;
     }
 }

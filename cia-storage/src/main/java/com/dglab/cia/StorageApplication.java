@@ -9,7 +9,6 @@ import org.slf4j.impl.SimpleLogger;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import spark.Request;
 
-
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -147,7 +146,7 @@ public class StorageApplication {
 			MatchResult matchResult = requestObject(request, MatchResult.class);
 			matchResult.setMatchId(matchId);
 
-			if (matchService.putWinner(matchResult)) {
+			if (matchService.putMatchResult(matchResult)) {
                 log.info("Winner set {}", matchId);
 
                 MatchResults matchResults = new MatchResults();
@@ -155,7 +154,11 @@ public class StorageApplication {
                 Map<Long, Integer> questProgress = matchResult.getQuestProgress();
 
                 if (questProgress != null) {
-                    matchResults.setQuestResults(questService.updateQuestBatch(questProgress));
+                    matchResults.setQuestResults(passService.processMatchUpdate(
+                            matchResult.getPassPlayers(),
+                            questProgress,
+                            matchResult.getGameLength()
+                    ));
                 }
 
                 matchResults.setRankDetails(details);

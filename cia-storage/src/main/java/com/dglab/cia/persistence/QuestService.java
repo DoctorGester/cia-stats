@@ -1,10 +1,8 @@
 package com.dglab.cia.persistence;
 
 import com.dglab.cia.json.PassQuest;
-import com.dglab.cia.json.PlayerQuestResult;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author doc
@@ -12,6 +10,6 @@ import java.util.Map;
 public interface QuestService {
     List<PassQuest> updatePlayerQuests(long steamId64);
     PassQuest rerollQuest(long quest);
-    Map<Long, PlayerQuestResult> updateQuestBatch(Map<Long, Integer> progress);
+    PassQuest updateQuestProgress(long questId, short progress);
     void resetRerolls();
 }
