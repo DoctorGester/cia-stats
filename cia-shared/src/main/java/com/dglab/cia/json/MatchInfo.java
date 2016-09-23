@@ -18,6 +18,7 @@ public class MatchInfo {
 	private Instant dateTime;
 	private MatchMap map;
     private byte winnerTeam;
+	private Integer gameLength;
 
 	@JsonCreator()
 	public MatchInfo(
@@ -89,4 +90,12 @@ public class MatchInfo {
 	public void setMap(MatchMap map) {
 		this.map = map;
 	}
+
+    public Integer getGameLength() {
+        return gameLength;
+    }
+
+    public void setGameLength(Integer gameLength) {
+        this.gameLength = gameLength;
+    }
 }

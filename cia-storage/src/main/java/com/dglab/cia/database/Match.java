@@ -21,6 +21,7 @@ public class Match {
 	private byte players;
 	private byte winnerTeam;
 	private MatchMap map;
+	private Integer gameLength;
 
 	private Collection<PlayerMatchData> matchData = new HashSet<>();
 	private Collection<Round> rounds = new HashSet<>();
@@ -77,7 +78,16 @@ public class Match {
 	@Column(name = "\"MAP\"", nullable = false)
 	public MatchMap getMap() { return map; }
 
-	public void setVersion(String version) {
+    @Column(name = "gameLength")
+    public Integer getGameLength() {
+        return gameLength;
+    }
+
+    public void setGameLength(Integer gameLength) {
+        this.gameLength = gameLength;
+    }
+
+    public void setVersion(String version) {
 		this.version = version;
 	}
 

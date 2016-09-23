@@ -15,5 +15,5 @@ public interface MatchService {
 	Map<Long, Integer> getPassExperience(MatchInfo info);
 	void putMatch(MatchInfo matchInfo);
 	void putRound(RoundInfo roundInfo);
-	boolean putWinner(MatchResult winner);
+	boolean putMatchResult(MatchResult result);
 }

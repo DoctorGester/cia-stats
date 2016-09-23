@@ -68,6 +68,7 @@ public class MatchServiceImpl implements MatchService {
 		info.setDateTime(match.getDateTime());
         info.setWinnerTeam(match.getWinnerTeam());
 		info.setMap(match.getMap());
+        info.setGameLength(match.getGameLength());
 
 		for (PlayerMatchData playerMatchData : match.getMatchData()) {
 			PlayerInfo playerInfo = new PlayerInfo();
@@ -219,16 +220,16 @@ public class MatchServiceImpl implements MatchService {
 	}
 
 	@Override
-	public boolean putWinner(MatchResult winner) {
-		Match match = matchDao.getMatch(winner.getMatchId());
+	public boolean putMatchResult(MatchResult result) {
+		Match match = matchDao.getMatch(result.getMatchId());
 
 		if (match == null) {
 			throw new IllegalArgumentException();
 		}
 
 		if (match.getWinnerTeam() == 0) {
-
-			match.setWinnerTeam(winner.getWinnerTeam());
+            match.setGameLength(result.getGameLength());
+			match.setWinnerTeam(result.getWinnerTeam());
 
 			matchDao.save(match);
 
