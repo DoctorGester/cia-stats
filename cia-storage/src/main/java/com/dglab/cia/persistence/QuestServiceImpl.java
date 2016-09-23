@@ -4,8 +4,10 @@ import com.dglab.cia.database.PassOwner;
 import com.dglab.cia.database.Quest;
 import com.dglab.cia.database.QuestReroll;
 import com.dglab.cia.json.Hero;
+import com.dglab.cia.json.HeroWinRateAndGames;
 import com.dglab.cia.json.PassQuest;
 import com.dglab.cia.json.QuestType;
+import com.dglab.cia.util.ExpiringObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +23,10 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author doc
@@ -38,6 +43,11 @@ public class QuestServiceImpl implements QuestService {
 
     @Autowired
     private QuestsRepository questsRepository;
+
+    @Autowired
+    private StatsService statsService;
+
+    private ExpiringObject<List<HeroWinRateAndGames>> cachedWinRates;
 
     @Override
     @Transactional
@@ -143,6 +153,30 @@ public class QuestServiceImpl implements QuestService {
         rerollsRepository.truncate();
     }
 
+    private synchronized Map<Hero, Double> getHeroWeights() {
+        if (cachedWinRates == null) {
+            cachedWinRates = new ExpiringObject<>(statsService::getGeneralWinRates, ChronoUnit.DAYS, 1);
+        }
+
+        List<HeroWinRateAndGames> heroWinRates = cachedWinRates.get();
+
+        Map<Hero, Long> heroGames = heroWinRates.stream().collect(Collectors.toMap(
+                h -> Hero.valueOf(h.getHero().substring("npc_dota_hero_".length())),
+                HeroWinRateAndGames::getGames
+        ));
+
+        double sum = heroGames.values().stream().mapToLong(Long::longValue).sum();
+        return heroGames.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, g -> g.getValue() / sum));
+    }
+
+    // https://en.wikipedia.org/wiki/Exponential_distribution
+    public static <E> E weightedRandomValue(Stream<Map.Entry<E, Double>> weights, Random random) {
+        return weights
+                .map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), -Math.log(random.nextDouble()) / e.getValue()))
+                .min((e0,e1)-> e0.getValue().compareTo(e1.getValue()))
+                .orElseThrow(IllegalArgumentException::new).getKey();
+    }
+
     private void generateNewQuestForPlayer(List<Quest> quests, Quest quest) {
         List<QuestType> questTypes = new ArrayList<>(Arrays.asList(QuestType.values()));
         questTypes.removeAll(quests.stream().map(Quest::getQuestType).collect(Collectors.toList()));
@@ -153,13 +187,19 @@ public class QuestServiceImpl implements QuestService {
         quest.setQuestType(nextType);
         quest.setProgress((short) 0);
 
-        List<Hero> heroPool = new ArrayList<>(Arrays.asList(Hero.values()));
+        Map<Hero, Double> heroPool = getHeroWeights();
+
+        Consumer<Consumer<Hero>> heroSetter = (consumer) -> {
+            Hero hero = weightedRandomValue(heroPool.entrySet().stream(), random);
+            consumer.accept(hero);
+            heroPool.remove(hero);
+        };
 
         switch (nextType) {
             case PLAY_ROUNDS_AS_OR:
-                quest.setSecondaryHero(heroPool.remove(random.nextInt(heroPool.size())));
+                heroSetter.accept(quest::setSecondaryHero);
             case PLAY_ROUNDS_AS:
-                quest.setHero(heroPool.remove(random.nextInt(heroPool.size())));
+                heroSetter.accept(quest::setHero);
                 break;
         }
     }
