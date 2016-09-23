@@ -170,7 +170,7 @@ public class QuestServiceImpl implements QuestService {
     }
 
     // https://en.wikipedia.org/wiki/Exponential_distribution
-    public static <E> E weightedRandomValue(Stream<Map.Entry<E, Double>> weights, Random random) {
+    private <E> E weightedRandomValue(Stream<Map.Entry<E, Double>> weights, Random random) {
         return weights
                 .map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), -Math.log(random.nextDouble()) / e.getValue()))
                 .min((e0,e1)-> e0.getValue().compareTo(e1.getValue()))
