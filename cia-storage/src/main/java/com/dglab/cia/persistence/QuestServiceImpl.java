@@ -23,7 +23,6 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -161,9 +160,17 @@ public class QuestServiceImpl implements QuestService {
         List<HeroWinRateAndGames> heroWinRates = cachedWinRates.get();
 
         Map<Hero, Long> heroGames = heroWinRates.stream().collect(Collectors.toMap(
-                h -> Hero.valueOf(h.getHero().substring("npc_dota_hero_".length())),
+                h -> Hero.valueOf(h.getHero().substring("npc_dota_hero_".length()).toUpperCase()),
                 HeroWinRateAndGames::getGames
         ));
+
+        double avg = heroGames.values().stream().mapToLong(l -> l).average().orElse(1);
+
+        for (Hero hero : Hero.values()) {
+            if (!heroGames.containsKey(hero)) {
+                heroGames.put(hero, (long) avg);
+            }
+        }
 
         double sum = heroGames.values().stream().mapToLong(Long::longValue).sum();
         return heroGames.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, g -> g.getValue() / sum));
