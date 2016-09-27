@@ -1,5 +1,3 @@
-import org.ajoberstar.grgit.*
-
 buildscript {
     ext {
         querydslVersion = '4.1.4'
@@ -8,28 +6,6 @@ buildscript {
 
     repositories {
         mavenCentral()
-    }
-
-    dependencies {
-        classpath 'org.ajoberstar:grgit:1.7.0'
-    }
-}
-
-task pullSources << {
-    logger.info("Pulling " + project.name)
-
-    def dir = file('clone')
-
-    if (!dir.exists()) {
-        Grgit.clone(dir: dir, uri: 'https://github.com/doctorgester/cia-stats')
-    } else {
-        Grgit.open(dir: dir).pull()
-    }
-
-    project.subprojects.each {
-        it.compileJava.source 'clone/' + it.name + '/src/main/java'
-
-        System.out.println(file('clone/' + it.name + '/src/main/java'))
     }
 }
 
@@ -60,17 +36,7 @@ subprojects {
         compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.+'
     }
 
-    task compilePulled(type: JavaCompile, dependsOn: pullSources) {
-        System.out.println(file('../clone/' + project.name + '/src/main/java'))
-        source = file('../clone/' + project.name + '/src/main/java')
-        destinationDir = file('build/classes/main')
-        sourceCompatibility = '1.8'
-        targetCompatibility = '1.8'
-        dependencyCacheDir = file('dependency-cache')
-        classpath = configurations.compile
-    }
-
-    task bigJar(type: Jar, dependsOn: compilePulled) {
+    task bigJar(type: Jar) {
         manifest {
             attributes 'Main-Class': 'com.dglab.cia.Main'
         }
