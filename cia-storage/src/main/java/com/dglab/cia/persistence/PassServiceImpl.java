@@ -64,8 +64,11 @@ public class PassServiceImpl implements PassService {
             PassPlayer passPlayer = new PassPlayer();
             passPlayer.setSteamId64(owner.getSteamId64());
             passPlayer.setExperience(owner.getExperience());
-            passPlayer.setName(owner.getName().getName());
-            passPlayer.setAvatarUrl(owner.getName().getAvatarUrl());
+
+            if (owner.getName() != null) {
+                passPlayer.setName(owner.getName().getName());
+                passPlayer.setAvatarUrl(owner.getName().getAvatarUrl());
+            }
 
             return passPlayer;
         }).collect(Collectors.toList());
