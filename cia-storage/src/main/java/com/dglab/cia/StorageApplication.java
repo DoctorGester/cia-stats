@@ -101,11 +101,16 @@ public class StorageApplication {
             MatchInfo matchInfo = requestObject(request, MatchInfo.class);
             matchInfo.setMatchId(matchId);
 
+            long startTime = System.currentTimeMillis();
+
             RanksAndAchievements achievements = new RanksAndAchievements();
             achievements.setCurrentSeason(rankService.getCurrentSeason());
             achievements.setAchievements(rankService.getRankedAchievements(matchInfo));
             achievements.setGamesPlayed(matchService.getMatchesPlayed(matchInfo));
             achievements.setPassExperience(matchService.getPassExperience(matchInfo));
+
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            log.info("Match/Info request took {} ms", elapsedTime);
 
             return achievements;
         }, jsonUtil.json());
@@ -115,6 +120,8 @@ public class StorageApplication {
 			MatchInfo matchInfo = requestObject(request, MatchInfo.class);
 			matchInfo.setMatchId(matchId);
 
+            long startTime = System.currentTimeMillis();
+
             if (matchInfo.getPlayers().stream().mapToInt(PlayerInfo::getTeam).sum() == 0) {
                 log.info("Initial match registration {}", matchId);
             } else {
@@ -122,6 +129,9 @@ public class StorageApplication {
             }
 
 			matchService.putMatch(matchInfo);
+
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            log.info("Match registration request took {} ms", elapsedTime);
 
 			return "";
 		}, jsonUtil.json());
