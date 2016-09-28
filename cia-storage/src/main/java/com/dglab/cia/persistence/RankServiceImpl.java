@@ -138,17 +138,11 @@ public class RankServiceImpl implements RankService {
 	}
 
     @Override
-    public Map<Long, RankedAchievements> getRankedAchievements(long matchId) {
-        Match match = matchDao.getMatch(matchId);
-
-        if (match == null) {
-            return null;
-        }
-
+    public Map<Long, RankedAchievements> getRankedAchievements(MatchInfo matchInfo) {
         Map<Long, RankedAchievements> result = new HashMap<>();
 
-        for (PlayerMatchData player : match.getMatchData()) {
-            long steamId64 = player.getPk().getSteamId64();
+        for (PlayerInfo player : matchInfo.getPlayers()) {
+            long steamId64 = player.getSteamId64();
 
             Collection<Integer> seasons = rankDao.findPlayerRankOneSeasons(steamId64);
 

@@ -17,7 +17,7 @@ public interface RankService {
 	Map<Byte, Map<RankedMode, RankAndStars>> getPlayerRankHistory(long steamId64);
 	RankedMode getMatchRankedMode(Match match);
 	Map<Long, RankAndStars> getMatchRanks(long matchId);
-	Map<Long, RankedAchievements> getRankedAchievements(long matchId);
+	Map<Long, RankedAchievements> getRankedAchievements(MatchInfo matchInfo);
 	RankUpdateDetails processMatchResults(long matchId);
 	Map<RankedMode, List<RankedPlayer>> getTopPlayers();
     RankedInfo getRankedInfo();

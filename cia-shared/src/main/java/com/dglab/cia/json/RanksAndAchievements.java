@@ -7,7 +7,6 @@ import java.util.Map;
  */
 public class RanksAndAchievements {
     private byte currentSeason;
-    private Map<Long, RankAndStars> ranks;
     private Map<Long, RankedAchievements> achievements;
     private Map<Long, Long> gamesPlayed;
     private Map<Long, Integer> passExperience;
@@ -18,14 +17,6 @@ public class RanksAndAchievements {
 
     public void setCurrentSeason(byte currentSeason) {
         this.currentSeason = currentSeason;
-    }
-
-    public Map<Long, RankAndStars> getRanks() {
-        return ranks;
-    }
-
-    public void setRanks(Map<Long, RankAndStars> ranks) {
-        this.ranks = ranks;
     }
 
     public Map<Long, RankedAchievements> getAchievements() {

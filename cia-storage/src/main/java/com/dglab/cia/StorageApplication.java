@@ -103,8 +103,7 @@ public class StorageApplication {
 
             RanksAndAchievements achievements = new RanksAndAchievements();
             achievements.setCurrentSeason(rankService.getCurrentSeason());
-            achievements.setRanks(rankService.getMatchRanks(matchId));
-            achievements.setAchievements(rankService.getRankedAchievements(matchId));
+            achievements.setAchievements(rankService.getRankedAchievements(matchInfo));
             achievements.setGamesPlayed(matchService.getMatchesPlayed(matchInfo));
             achievements.setPassExperience(matchService.getPassExperience(matchInfo));
 
