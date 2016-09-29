@@ -51,18 +51,20 @@ subprojects {
         with jar
     }
 
-    ext.runProcess = { int port ->
+    ext.killProcess = { int port ->
         try {
             def idGetter = new ProcessBuilder('fuser', + port + '/tcp')
             def process = idGetter.start()
             def id = process.text
             process.waitFor()
 
-            new ProcessBuilder('kill', '-KILL', id).start()
+            new ProcessBuilder('kill', '1', id).start()
         } catch (Exception e) {
             println(e.getMessage())
         }
+    }
 
+    ext.runProcess = { int port ->
         def builder = new ProcessBuilder(
                 'java',
                 '-jar',
@@ -99,6 +101,10 @@ project(':cia-proxy') {
         compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.+'
     }
 
+    task kill() << {
+        killProcess(3637)
+    }
+
     task publish(dependsOn: bigJar) << {
         runProcess(3637)
     }
@@ -128,6 +134,10 @@ project(':cia-storage') {
         compile shared
     }
 
+    task kill() << {
+        killProcess(5141)
+    }
+
     task publish(dependsOn: bigJar) << {
         runProcess(5141)
     }
@@ -155,6 +165,10 @@ project(':cia-view') {
         compile group: 'org.pac4j', name: 'pac4j-http', version: '1.8.3'
 
         compile shared
+    }
+
+    task kill() << {
+        killProcess(80)
     }
 
     task publish(dependsOn: bigJar) << {
