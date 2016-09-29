@@ -32,7 +32,7 @@ public class PassServiceImpl implements PassService {
     private QuestService questService;
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public PassOwner get(long steamId64) {
         return repository.findOne(steamId64);
     }

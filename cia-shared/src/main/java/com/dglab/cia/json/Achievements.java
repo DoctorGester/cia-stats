@@ -5,7 +5,7 @@ import java.util.Map;
 /**
  * @author doc
  */
-public class RanksAndAchievements {
+public class Achievements {
     private byte currentSeason;
     private Map<Long, RankedAchievements> achievements;
     private Map<Long, Long> gamesPlayed;

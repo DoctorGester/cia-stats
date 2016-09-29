@@ -29,6 +29,7 @@ public class StorageApplication {
     private static Logger log = LoggerFactory.getLogger(StorageApplication.class);
 
     private AnnotationConfigApplicationContext context;
+    private CoordinatorService coordinatorService;
     private StatsService statsService;
     private MatchService matchService;
     private QuestService questService;
@@ -46,6 +47,7 @@ public class StorageApplication {
 		context.register(PersistenceConfig.class);
 		context.refresh();
 
+        coordinatorService = context.getBean(CoordinatorService.class);
         statsService = context.getBean(StatsService.class);
 		matchService = context.getBean(MatchService.class);
         questService = context.getBean(QuestService.class);
@@ -102,15 +104,9 @@ public class StorageApplication {
             matchInfo.setMatchId(matchId);
 
             long startTime = System.currentTimeMillis();
+            Achievements achievements = coordinatorService.getAchievements(matchInfo);
 
-            RanksAndAchievements achievements = new RanksAndAchievements();
-            achievements.setCurrentSeason(rankService.getCurrentSeason());
-            achievements.setAchievements(rankService.getRankedAchievements(matchInfo));
-            achievements.setGamesPlayed(matchService.getMatchesPlayed(matchInfo));
-            achievements.setPassExperience(matchService.getPassExperience(matchInfo));
-
-            long elapsedTime = System.currentTimeMillis() - startTime;
-            log.info("Match/Info request took {} ms", elapsedTime);
+            log.info("Match/Info request took {} ms", System.currentTimeMillis() - startTime);
 
             return achievements;
         }, jsonUtil.json());

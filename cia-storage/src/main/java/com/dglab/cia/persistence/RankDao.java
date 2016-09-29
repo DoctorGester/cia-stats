@@ -86,6 +86,7 @@ public class RankDao {
 		return rank;
 	}
 
+	@Transactional(readOnly = true)
 	public Collection<Integer> findPlayerRankOneSeasons(long steamId64) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<PlayerRank> query = builder.createQuery(PlayerRank.class);

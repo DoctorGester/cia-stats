@@ -11,7 +11,7 @@ import java.io.Serializable;
  */
 
 @Entity
-@Table(name = "player_match_data")
+@Table(name = "player_match_data", indexes = @Index(columnList = "steamId64", name = "id_index"))
 public class PlayerMatchData implements Serializable {
 	private Match match;
 	private Pk pk;
