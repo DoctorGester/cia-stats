@@ -72,7 +72,9 @@ public class Round {
 		return match;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "round", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "round", orphanRemoval = true, cascade = {
+	    CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE
+	})
 	public Collection<PlayerRoundData> getPlayerRoundData() {
 		return playerRoundData;
 	}

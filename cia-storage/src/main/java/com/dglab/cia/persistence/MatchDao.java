@@ -3,7 +3,9 @@ package com.dglab.cia.persistence;
 import com.dglab.cia.database.Match;
 import com.dglab.cia.database.PlayerMatchData;
 import com.dglab.cia.database.Round;
-import org.hibernate.Hibernate;
+import org.hibernate.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,8 @@ import java.util.List;
 @Repository
 @Transactional(propagation = Propagation.REQUIRED)
 public class MatchDao {
+    private static final Logger log = LoggerFactory.getLogger(MatchDao.class);
+
 	@PersistenceContext
 	private EntityManager entityManager;
 
@@ -60,6 +64,29 @@ public class MatchDao {
         query.orderBy(builder.desc(root.get("dateTime")));
 
         return entityManager.createQuery(query).setMaxResults(amount).getResultList();
+    }
+
+    public void deleteOldMatches() {
+        Session session = entityManager.unwrap(Session.class);
+        Query query = session
+                .createSQLQuery(
+                        "select * from matches as m where m.datetime <= current_date - cast('10 day' as INTERVAL)"
+                ).addEntity(Match.class);
+
+        ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
+
+        int count = 0;
+
+        while (results.next()) {
+            Match match = (Match) results.get()[0];
+
+            session.delete(match);
+            session.evict(match);
+
+            if (++count > 0 && count % 1000 == 0) {
+                log.info("Deleted {} matches", count);
+            }
+        }
     }
 
 	public List<Match> getPlayerMatchesInADay(long steamId64) {

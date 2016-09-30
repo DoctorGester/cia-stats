@@ -72,8 +72,6 @@ public class StorageApplication {
 		mapper = context.getBean(ObjectMapper.class);
 		jsonUtil = context.getBean(JsonUtil.class);
 
-        enableStatistics();
-
         before((request, response) -> requestTimeMap.put(request.raw(), System.currentTimeMillis()));
 
         after((request, response) -> {
@@ -292,6 +290,12 @@ public class StorageApplication {
             return "";
         });
 
+        get("/admin/matches/cleanup", (request, response) -> {
+            matchService.deleteOldMatches();
+
+            return "";
+        });
+
 		exception(Exception.class, (exception, request, response) -> {
 			log.error("Error processing request: {} at {}", exception, exception.getStackTrace()[0]);
             response.status(500);
@@ -324,34 +328,5 @@ public class StorageApplication {
 		String data = request.raw().getParameter("data");
 		return mapper.readValue(data, type);
 	}
-
-	private void enableStatistics() {
-        EntityManagerFactory entityManagerFactory = context.getBean(EntityManagerFactory.class);
-        SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
-
-        try {
-            MBeanServer mbeanServer
-                    = ManagementFactory.getPlatformMBeanServer();
-            ObjectName on
-                    = new ObjectName("Hibernate:type=statistics,application=hibernatestatistics");
-
-            StatisticsService mBean = new DelegatingStatisticsService(sessionFactory.getStatistics());
-            mBean.setStatisticsEnabled(true);
-            mbeanServer.registerMBean(mBean, on);
-        } catch (MalformedObjectNameException | InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            Map<String, String> params = new HashMap<>();
-            params.put("host", "*");
-
-            JolokiaServerConfig config = new JolokiaServerConfig(params);
-            JolokiaServer jolokiaServer = new JolokiaServer(config, true);
-            jolokiaServer.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
 }

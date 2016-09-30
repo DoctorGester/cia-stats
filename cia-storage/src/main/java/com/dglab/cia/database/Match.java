@@ -12,7 +12,7 @@ import java.util.HashSet;
  * @author doc
  */
 @Entity
-@Table(name = "matches", indexes = @Index(columnList = "matchId", name = "match_id_index"))
+@Table(name = "matches")
 public class Match {
 	private long matchId;
 	private String mode;
@@ -55,12 +55,16 @@ public class Match {
 		return winnerTeam;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "match", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "match", orphanRemoval = true, cascade = {
+	    CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE
+	})
 	public Collection<PlayerMatchData> getMatchData() {
 		return matchData;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "match", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "match", orphanRemoval = true, cascade = {
+	    CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE
+	})
 	public Collection<Round> getRounds() {
 		return rounds;
 	}

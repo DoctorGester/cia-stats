@@ -3,8 +3,6 @@ package com.dglab.cia;
 import com.dglab.cia.json.util.ObjectMapperFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariDataSource;
-import net.ttddyy.dsproxy.listener.SLF4JLogLevel;
-import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.io.FileUtils;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +38,7 @@ import java.util.Properties;
 @ComponentScan({"com.dglab.cia.persistence"})
 public class PersistenceConfig {
 	@Bean
-	public DataSource actualDataSource() throws IOException {
+	public DataSource readWriteDataSource() throws IOException {
         HikariDataSource dataSource = new HikariDataSource();
         String password = FileUtils.readFileToString(new File("private.key"));
 
@@ -53,15 +51,6 @@ public class PersistenceConfig {
 
 		return dataSource;
 	}
-
-    @Bean
-    public DataSource dataSource(DataSource actualDataSource) {
-        return ProxyDataSourceBuilder
-                .create(actualDataSource)
-                .name("Proxy")
-                .logQueryBySlf4j(SLF4JLogLevel.INFO)
-                .build();
-    }
 
 	@Bean
 	@Autowired
