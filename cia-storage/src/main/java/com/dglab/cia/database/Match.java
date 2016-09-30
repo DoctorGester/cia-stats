@@ -55,15 +55,15 @@ public class Match {
 		return winnerTeam;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "match", orphanRemoval = true, cascade = {
-	    CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "match", cascade = {
+	    CascadeType.PERSIST, CascadeType.MERGE
 	})
 	public Collection<PlayerMatchData> getMatchData() {
 		return matchData;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "match", orphanRemoval = true, cascade = {
-	    CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "match", cascade = {
+	    CascadeType.PERSIST, CascadeType.MERGE
 	})
 	public Collection<Round> getRounds() {
 		return rounds;
