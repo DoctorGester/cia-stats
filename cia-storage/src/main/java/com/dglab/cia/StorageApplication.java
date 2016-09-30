@@ -4,6 +4,7 @@ import com.dglab.cia.json.*;
 import com.dglab.cia.persistence.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.map.PassiveExpiringMap;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.impl.SimpleLogger;
@@ -45,7 +46,7 @@ public class StorageApplication {
             new PassiveExpiringMap<>(new PassiveExpiringMap.ConstantTimeToLiveExpirationPolicy<>(1, TimeUnit.MINUTES))
     );
 
-    private Map<String, List<Long>> urlRequestTimes = new ConcurrentHashMap<>();
+    private Map<String, Queue<Long>> urlRequestTimes = new ConcurrentHashMap<>();
 
 	public StorageApplication() {
 		port(5141);
@@ -74,10 +75,10 @@ public class StorageApplication {
                 long resultTime = System.currentTimeMillis() - time;
 
                 String url = request.requestMethod() + request.uri().replaceAll("/\\d+", "/#");
-                List<Long> times = urlRequestTimes.get(url);
+                Queue<Long> times = urlRequestTimes.get(url);
 
-                if (times == null || times.size() > 1000) {
-                    times = new ArrayList<>();
+                if (times == null) {
+                    times = new CircularFifoQueue<>(1024);
                     urlRequestTimes.put(url, times);
                 }
 
