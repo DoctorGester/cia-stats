@@ -3,14 +3,17 @@ package com.dglab.cia;
 import com.dglab.cia.json.*;
 import com.dglab.cia.persistence.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.impl.SimpleLogger;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import spark.Request;
 
-import java.util.List;
-import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static spark.Spark.*;
@@ -38,9 +41,15 @@ public class StorageApplication {
     private ObjectMapper mapper;
 	private JsonUtil jsonUtil;
 
+    private Map<HttpServletRequest, Long> requestTimeMap = Collections.synchronizedMap(
+            new PassiveExpiringMap<>(new PassiveExpiringMap.ConstantTimeToLiveExpirationPolicy<>(1, TimeUnit.MINUTES))
+    );
+
+    private Map<String, List<Long>> urlRequestTimes = new ConcurrentHashMap<>();
+
 	public StorageApplication() {
 		port(5141);
-		threadPool(16);
+		threadPool(32);
 
 		context = new AnnotationConfigApplicationContext();
 		context.getEnvironment().setActiveProfiles("readWrite");
@@ -55,6 +64,26 @@ public class StorageApplication {
         passService = context.getBean(PassService.class);
 		mapper = context.getBean(ObjectMapper.class);
 		jsonUtil = context.getBean(JsonUtil.class);
+
+        before((request, response) -> requestTimeMap.put(request.raw(), System.currentTimeMillis()));
+
+        after((request, response) -> {
+            Long time = requestTimeMap.get(request.raw());
+
+            if (time != null) {
+                long resultTime = System.currentTimeMillis() - time;
+
+                String url = request.requestMethod() + request.uri().replaceAll("/\\d+", "/#");
+                List<Long> times = urlRequestTimes.get(url);
+
+                if (times == null || times.size() > 1000) {
+                    times = new ArrayList<>();
+                    urlRequestTimes.put(url, times);
+                }
+
+                times.add(resultTime);
+            }
+        });
 
 		get("/match/:id", (request, response) -> {
 			return matchService.getMatchDetails(requestLong(request, "id"));
@@ -88,6 +117,15 @@ public class StorageApplication {
 
         get("/ranks/info", (request, response) -> {
             return rankService.getRankedInfo();
+        }, jsonUtil.json());
+
+        get("/requests", (request, response) -> {
+            return urlRequestTimes.entrySet().stream().collect(
+                    Collectors.toMap(
+                            Map.Entry::getKey,
+                            e -> e.getValue().stream().mapToLong(Long::longValue).average().orElse(-1)
+                    )
+            );
         }, jsonUtil.json());
 
         get("/", (request, response) -> {
