@@ -16,6 +16,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -47,6 +48,15 @@ public class QuestServiceImpl implements QuestService {
     private StatsService statsService;
 
     private ExpiringObject<List<HeroWinRateAndGames>> cachedWinRates;
+
+    @PostConstruct
+    private void createCachedObject() {
+        cachedWinRates = new ExpiringObject<>(
+                statsService::getGeneralWinRates,
+                ChronoUnit.DAYS,
+                1
+        );
+    }
 
     @Override
     @Transactional
@@ -153,10 +163,6 @@ public class QuestServiceImpl implements QuestService {
     }
 
     private synchronized Map<Hero, Double> getHeroWeights() {
-        if (cachedWinRates == null) {
-            cachedWinRates = new ExpiringObject<>(statsService::getGeneralWinRates, ChronoUnit.DAYS, 1);
-        }
-
         List<HeroWinRateAndGames> heroWinRates = cachedWinRates.get();
 
         Map<Hero, Long> heroGames = heroWinRates.stream().collect(Collectors.toMap(

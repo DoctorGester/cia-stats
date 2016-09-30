@@ -91,10 +91,10 @@ public class PassServiceImpl implements PassService {
     @Override
     @Transactional
     public Map<Long, PlayerQuestResult> processMatchUpdate(long matchId, QuestProgressReport progress) {
-        /*if (progress.getGameLength() < 90) {
+        if (progress.getGameLength() < 90) {
             log.info("Insufficient game length to process rewards ({})", progress.getGameLength());
             return null;
-        }*/
+        }
 
         Match match = matchDao.getMatch(matchId);
 

@@ -21,7 +21,7 @@ public class ExpiringObject<T> {
         this.unit = unit;
         this.time = time;
 
-        update();
+        lastUpdated = Instant.now();
     }
 
     private void update() {

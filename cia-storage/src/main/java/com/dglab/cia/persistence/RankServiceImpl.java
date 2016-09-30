@@ -4,6 +4,7 @@ import com.dglab.cia.ConnectionState;
 import com.dglab.cia.json.RankedMode;
 import com.dglab.cia.database.*;
 import com.dglab.cia.json.*;
+import com.dglab.cia.util.ExpiringObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,12 @@ public class RankServiceImpl implements RankService {
 
     private byte previousSeason = -1;
     private Map<RankedMode, List<PlayerRank>> previousTopPlayers;
+
+    private ExpiringObject<RankedInfo> cachedRankedInfo = new ExpiringObject<>(
+            this::getRankedInfoInternal,
+            ChronoUnit.MINUTES,
+            30
+    );
 
 	private RankAndStars convertRank(PlayerRank rank) {
 		RankAndStars rankAndStars = new RankAndStars(rank.getRank(), rank.getStars());
@@ -401,6 +408,10 @@ public class RankServiceImpl implements RankService {
 
     @Override
     public RankedInfo getRankedInfo() {
+        return cachedRankedInfo.get();
+    }
+
+    private RankedInfo getRankedInfoInternal() {
         Instant seasonEnd = ZonedDateTime
                 .now(ZoneOffset.UTC)
                 .with(TemporalAdjusters.firstDayOfNextMonth())
