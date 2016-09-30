@@ -35,7 +35,7 @@ import java.util.Properties;
 @EnableScheduling
 @EnableAsync
 @EnableJpaRepositories({"com.dglab.cia.persistence"})
-@ComponentScan({"com.dglab.cia.persistence"})
+@ComponentScan(value = {"com.dglab.cia.persistence"}, lazyInit = true)
 public class PersistenceConfig {
 	@Bean
 	public DataSource readWriteDataSource() throws IOException {
