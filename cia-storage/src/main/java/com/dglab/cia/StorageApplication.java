@@ -344,7 +344,10 @@ public class StorageApplication {
         }
 
         try {
-            JolokiaServerConfig config = new JolokiaServerConfig(new HashMap<>());
+            Map<String, String> params = new HashMap<>();
+            params.put("host", "*");
+
+            JolokiaServerConfig config = new JolokiaServerConfig(params);
             JolokiaServer jolokiaServer = new JolokiaServer(config, true);
             jolokiaServer.start();
         } catch (IOException e) {
