@@ -22,6 +22,8 @@ public class Match {
 	private byte winnerTeam;
 	private MatchMap map;
 	private Integer gameLength;
+    private Boolean ranksUpdated;
+    private Boolean questsUpdated;
 
 	private Collection<PlayerMatchData> matchData = new HashSet<>();
 	private Collection<Round> rounds = new HashSet<>();
@@ -81,6 +83,24 @@ public class Match {
     @Column(name = "gameLength")
     public Integer getGameLength() {
         return gameLength;
+    }
+
+    @Column(name = "questsUpdated")
+    public Boolean getQuestsUpdated() {
+        return questsUpdated;
+    }
+
+    @Column(name = "ranksUpdated")
+    public Boolean getRanksUpdated() {
+        return ranksUpdated;
+    }
+
+    public void setRanksUpdated(Boolean ranksUpdated) {
+        this.ranksUpdated = ranksUpdated;
+    }
+
+    public void setQuestsUpdated(Boolean questsUpdated) {
+        this.questsUpdated = questsUpdated;
     }
 
     public void setGameLength(Integer gameLength) {

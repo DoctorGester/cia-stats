@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
@@ -56,6 +57,7 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
+    @Transactional(readOnly = true)
 	public MatchDetails getMatchDetails(long matchId) {
 		Match match = matchDao.getMatch(matchId);
 
@@ -126,6 +128,7 @@ public class MatchServiceImpl implements MatchService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
 	public void putMatch(MatchInfo matchInfo) {
 		Collection<PlayerMatchData> playerMatchData = new HashSet<>();
 
@@ -175,6 +178,7 @@ public class MatchServiceImpl implements MatchService {
 	}
 
 	@Override
+    @Transactional(propagation = Propagation.REQUIRED)
 	public void putRound(RoundInfo roundInfo) {
 		Match match = matchDao.getMatch(roundInfo.getMatchId());
 
@@ -223,6 +227,7 @@ public class MatchServiceImpl implements MatchService {
 	}
 
 	@Override
+    @Transactional(propagation = Propagation.REQUIRED)
 	public boolean putMatchResult(MatchResult result) {
 		Match match = matchDao.getMatch(result.getMatchId());
 

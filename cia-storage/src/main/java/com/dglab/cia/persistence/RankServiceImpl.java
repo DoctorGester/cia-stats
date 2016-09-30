@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -166,6 +167,7 @@ public class RankServiceImpl implements RankService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
 	public Map<Long, RankAndStars> getMatchRanks(long matchId) {
 		Match match = matchDao.getMatch(matchId);
 
@@ -210,6 +212,7 @@ public class RankServiceImpl implements RankService {
     }
 
 	@Override
+    @Transactional(propagation = Propagation.REQUIRED)
 	public RankUpdateDetails processMatchResults(long matchId) {
 		Match match = matchDao.getMatch(matchId);
 

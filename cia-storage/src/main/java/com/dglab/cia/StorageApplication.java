@@ -156,16 +156,6 @@ public class StorageApplication {
 
                 MatchResults matchResults = new MatchResults();
                 RankUpdateDetails details = rankService.processMatchResults(matchId);
-                Map<Long, Integer> questProgress = matchResult.getQuestProgress();
-
-                if (questProgress != null) {
-                    matchResults.setQuestResults(passService.processMatchUpdate(
-                            matchResult.getPassPlayers(),
-                            questProgress,
-                            matchResult.getGameLength()
-                    ));
-                }
-
                 matchResults.setRankDetails(details);
 
                 return matchResults;
@@ -173,6 +163,17 @@ public class StorageApplication {
 
 			return "";
 		}, jsonUtil.json());
+
+        post("/quests/report/:id", (request, response) -> {
+            long matchId = requestLong(request, "id");
+            QuestProgressReport progress = requestObject(request, QuestProgressReport.class);
+
+            if (progress != null) {
+                return passService.processMatchUpdate(matchId ,progress);
+            }
+
+            return "";
+        }, jsonUtil.json());
 
         post("/quests/update", (request, response) -> {
             PlayerList players = requestObject(request, PlayerList.class);

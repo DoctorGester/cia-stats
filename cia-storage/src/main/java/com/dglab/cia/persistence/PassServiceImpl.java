@@ -1,9 +1,12 @@
 package com.dglab.cia.persistence;
 
+import com.dglab.cia.database.Match;
 import com.dglab.cia.database.PassOwner;
 import com.dglab.cia.json.PassPlayer;
 import com.dglab.cia.json.PassQuest;
 import com.dglab.cia.json.PlayerQuestResult;
+import com.dglab.cia.json.QuestProgressReport;
+import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +33,9 @@ public class PassServiceImpl implements PassService {
 
     @Autowired
     private QuestService questService;
+
+    @Autowired
+    private MatchDao matchDao;
 
     @Override
     @Transactional(readOnly = true)
@@ -84,16 +90,28 @@ public class PassServiceImpl implements PassService {
 
     @Override
     @Transactional
-    public Map<Long, PlayerQuestResult> processMatchUpdate(List<Long> passPlayers, Map<Long, Integer> progress, int gameLength) {
-        if (gameLength < 90) {
-            log.info("Insufficient game length to process rewards ({})", gameLength);
+    public Map<Long, PlayerQuestResult> processMatchUpdate(long matchId, QuestProgressReport progress) {
+        /*if (progress.getGameLength() < 90) {
+            log.info("Insufficient game length to process rewards ({})", progress.getGameLength());
+            return null;
+        }*/
+
+        Match match = matchDao.getMatch(matchId);
+
+        if (match == null) {
+            log.info("Could not find a match with id {}", matchId);
+            return null;
+        }
+
+        if (BooleanUtils.isTrue(match.getQuestsUpdated())) {
+            log.info("Quests already updated for match {}", matchId);
             return null;
         }
 
         Map<Long, PlayerQuestResult> result = new HashMap<>();
 
-        int award = (int) Math.ceil(Math.min(gameLength * EXPERIENCE_PER_SECOND, 100));
-        for (Long passPlayer : passPlayers) {
+        int award = (int) Math.ceil(Math.min(progress.getGameLength() * EXPERIENCE_PER_SECOND, 100));
+        for (Long passPlayer : progress.getPassPlayers()) {
             PassOwner passOwner = getOrCreate(passPlayer);
 
             PlayerQuestResult questResult = new PlayerQuestResult();
@@ -105,7 +123,7 @@ public class PassServiceImpl implements PassService {
             awardExperience(passPlayer, award);
         }
 
-        for (Map.Entry<Long, Integer> entry : progress.entrySet()) {
+        for (Map.Entry<Long, Integer> entry : progress.getQuestProgress().entrySet()) {
             PassQuest quest = questService.updateQuestProgress(entry.getKey(), entry.getValue().shortValue());
 
             if (quest == null) {
@@ -130,7 +148,9 @@ public class PassServiceImpl implements PassService {
             completedQuests.add(quest);
         }
 
-        log.info("Awarded {} experience", award);
+        log.info("Awarded {} experience for match {}", award, matchId);
+
+        match.setQuestsUpdated(true);
 
         return result;
     }
