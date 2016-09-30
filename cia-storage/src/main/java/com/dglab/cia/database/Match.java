@@ -12,7 +12,7 @@ import java.util.HashSet;
  * @author doc
  */
 @Entity
-@Table(name = "matches")
+@Table(name = "matches", indexes = @Index(columnList = "matchId", name = "match_id_index"))
 public class Match {
 	private long matchId;
 	private String mode;
