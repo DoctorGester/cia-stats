@@ -8,7 +8,7 @@ import java.io.Serializable;
  */
 
 @Entity
-@Table(name = "player_names")
+@Table(name = "player_names", indexes = @Index(columnList = "steamId64", name = "steam_id_index"))
 public class PlayerName implements Serializable {
 	private long steamId64;
 	private String name;
