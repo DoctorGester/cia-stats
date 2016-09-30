@@ -137,6 +137,8 @@ project(':cia-storage') {
         compile group: 'org.jolokia', name: 'jolokia-core', version: '1.3.4'
         compile group: 'org.jolokia', name: 'jolokia-jvm', version: '1.3.4'
 
+        compile group: 'net.ttddyy', name: 'datasource-proxy', version: '1.3.1'
+
         compile shared
     }
 

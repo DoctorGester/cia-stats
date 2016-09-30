@@ -60,7 +60,6 @@ public class StorageApplication {
 		threadPool(32);
 
 		context = new AnnotationConfigApplicationContext();
-		context.getEnvironment().setActiveProfiles("readWrite");
 		context.register(PersistenceConfig.class);
 		context.refresh();
 

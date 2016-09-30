@@ -3,6 +3,8 @@ package com.dglab.cia;
 import com.dglab.cia.json.util.ObjectMapperFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariDataSource;
+import net.ttddyy.dsproxy.listener.SLF4JLogLevel;
+import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.apache.commons.io.FileUtils;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +12,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -39,8 +40,7 @@ import java.util.Properties;
 @ComponentScan({"com.dglab.cia.persistence"})
 public class PersistenceConfig {
 	@Bean
-	@Profile("readWrite")
-	public DataSource readWriteDataSource() throws IOException {
+	public DataSource actualDataSource() throws IOException {
         HikariDataSource dataSource = new HikariDataSource();
         String password = FileUtils.readFileToString(new File("private.key"));
 
@@ -53,6 +53,15 @@ public class PersistenceConfig {
 
 		return dataSource;
 	}
+
+    @Bean
+    public DataSource dataSource(DataSource actualDataSource) {
+        return ProxyDataSourceBuilder
+                .create(actualDataSource)
+                .name("Proxy")
+                .logQueryBySlf4j(SLF4JLogLevel.INFO)
+                .build();
+    }
 
 	@Bean
 	@Autowired
@@ -82,22 +91,10 @@ public class PersistenceConfig {
 	}
 
 	@Bean(name = "dataSourceProperties")
-	@Profile("readWrite")
 	public Properties readWriteProperties() {
 		return new Properties() {
 			{
 				setProperty("hibernate.hbm2ddl.auto", "update");
-				setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQL94Dialect");
-                setProperty("hibernate.generate_statistics", "true");
-			}
-		};
-	}
-
-	@Bean(name = "dataSourceProperties")
-	@Profile("read")
-	public Properties readProperties() {
-		return new Properties() {
-			{
 				setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQL94Dialect");
 			}
 		};
