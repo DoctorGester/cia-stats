@@ -67,26 +67,10 @@ public class MatchDao {
     }
 
     public void deleteOldMatches() {
-        Session session = entityManager.unwrap(Session.class);
-        Query query = session
-                .createSQLQuery(
-                        "select * from matches as m where m.datetime <= current_date - cast('10 day' as INTERVAL)"
-                ).addEntity(Match.class);
-
-        ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
-
-        int count = 0;
-
-        while (results.next()) {
-            Match match = (Match) results.get()[0];
-
-            session.delete(match);
-            session.evict(match);
-
-            if (++count > 0 && count % 1000 == 0) {
-                log.info("Deleted {} matches", count);
-            }
-        }
+        entityManager.createNativeQuery("delete from player_round_data R using matches M where M.matchid = R.matchid and M.datetime <= current_date - cast('10 day' as INTERVAL)").executeUpdate();
+        entityManager.createNativeQuery("delete from rounds R using matches M where M.matchid = R.matchid and M.datetime <= current_date - cast('10 day' as INTERVAL)").executeUpdate();
+        entityManager.createNativeQuery("delete from player_match_data R using matches M where M.matchid = R.matchid and M.datetime <= current_date - cast('10 day' as INTERVAL)").executeUpdate();
+        entityManager.createNativeQuery("delete from matches M where M.datetime <= current_date - cast('10 day' as INTERVAL)").executeUpdate();
     }
 
 	public List<Match> getPlayerMatchesInADay(long steamId64) {
