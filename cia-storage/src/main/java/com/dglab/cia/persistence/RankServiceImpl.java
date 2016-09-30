@@ -42,7 +42,7 @@ public class RankServiceImpl implements RankService {
     private ExpiringObject<RankedInfo> cachedRankedInfo = new ExpiringObject<>(
             this::getRankedInfoInternal,
             ChronoUnit.MINUTES,
-            30
+            10
     );
 
 	private RankAndStars convertRank(PlayerRank rank) {

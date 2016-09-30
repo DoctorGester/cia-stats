@@ -2,10 +2,8 @@ package com.dglab.cia.persistence;
 
 import com.dglab.cia.database.Match;
 import com.dglab.cia.database.PassOwner;
-import com.dglab.cia.json.PassPlayer;
-import com.dglab.cia.json.PassQuest;
-import com.dglab.cia.json.PlayerQuestResult;
-import com.dglab.cia.json.QuestProgressReport;
+import com.dglab.cia.json.*;
+import com.dglab.cia.util.ExpiringObject;
 import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +35,12 @@ public class PassServiceImpl implements PassService {
 
     @Autowired
     private MatchDao matchDao;
+
+    private ExpiringObject<List<PassPlayer>> cachedTop = new ExpiringObject<>(
+            this::getTopPlayersInternal,
+            ChronoUnit.MINUTES,
+            10
+    );
 
     @Override
     @Transactional(readOnly = true)
@@ -66,6 +71,10 @@ public class PassServiceImpl implements PassService {
     @Override
     @Transactional
     public List<PassPlayer> getTopPlayers() {
+        return cachedTop.get();
+    }
+
+    private List<PassPlayer> getTopPlayersInternal() {
         return repository.findTop5ByOrderByExperienceDesc().stream().map(owner -> {
             PassPlayer passPlayer = new PassPlayer();
             passPlayer.setSteamId64(owner.getSteamId64());
