@@ -124,7 +124,7 @@ public class StorageApplication {
             return urlRequestTimes.entrySet().stream().collect(
                     Collectors.toMap(
                             Map.Entry::getKey,
-                            e -> e.getValue().stream().mapToLong(Long::longValue).average().orElse(-1)
+                            e -> Math.floor(e.getValue().stream().mapToLong(Long::longValue).average().orElse(-1))
                     )
             );
         }, jsonUtil.json());
