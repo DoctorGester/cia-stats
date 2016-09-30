@@ -108,6 +108,8 @@ project(':cia-proxy') {
     task publish(dependsOn: bigJar) << {
         runProcess(3637)
     }
+
+    compileJava.dependsOn(kill)
 }
 
 project(':cia-storage') {
@@ -141,17 +143,11 @@ project(':cia-storage') {
     task publish(dependsOn: bigJar) << {
         runProcess(5141)
     }
+
+    compileJava.dependsOn(kill)
 }
 
 project(':cia-view') {
-    sourceSets {
-        main {
-            resources {
-                srcDir '../clone/' + project.name + '/src/main/resources'
-            }
-        }
-    }
-
     dependencies {
         testCompile group: 'junit', name: 'junit', version: '4.11'
 
@@ -174,4 +170,6 @@ project(':cia-view') {
     task publish(dependsOn: bigJar) << {
         runProcess(80)
     }
+
+    compileJava.dependsOn(kill)
 }
