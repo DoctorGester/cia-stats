@@ -169,7 +169,11 @@ public class StorageApplication {
             QuestProgressReport progress = requestObject(request, QuestProgressReport.class);
 
             if (progress != null) {
-                return passService.processMatchUpdate(matchId ,progress);
+                Map<Long, PlayerQuestResult> result = passService.processMatchUpdate(matchId, progress);
+
+                if (result != null) {
+                    return result;
+                }
             }
 
             return "";

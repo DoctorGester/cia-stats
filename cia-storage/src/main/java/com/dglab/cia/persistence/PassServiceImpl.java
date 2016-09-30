@@ -148,7 +148,9 @@ public class PassServiceImpl implements PassService {
             completedQuests.add(quest);
         }
 
-        log.info("Awarded {} experience for match {}", award, matchId);
+        if (progress.getPassPlayers().size() > 0) {
+            log.info("Awarded {} experience for match {}", award, matchId);
+        }
 
         match.setQuestsUpdated(true);
 
