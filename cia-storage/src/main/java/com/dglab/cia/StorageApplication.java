@@ -5,13 +5,20 @@ import com.dglab.cia.persistence.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
+import org.hibernate.SessionFactory;
+import org.jolokia.jvmagent.JolokiaServer;
+import org.jolokia.jvmagent.JolokiaServerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.impl.SimpleLogger;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import spark.Request;
 
+import javax.management.*;
+import javax.persistence.EntityManagerFactory;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -65,6 +72,8 @@ public class StorageApplication {
         passService = context.getBean(PassService.class);
 		mapper = context.getBean(ObjectMapper.class);
 		jsonUtil = context.getBean(JsonUtil.class);
+
+        enableStatistics();
 
         before((request, response) -> requestTimeMap.put(request.raw(), System.currentTimeMillis()));
 
@@ -316,5 +325,31 @@ public class StorageApplication {
 		String data = request.raw().getParameter("data");
 		return mapper.readValue(data, type);
 	}
+
+	private void enableStatistics() {
+        EntityManagerFactory entityManagerFactory = context.getBean(EntityManagerFactory.class);
+        SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
+
+        try {
+            MBeanServer mbeanServer
+                    = ManagementFactory.getPlatformMBeanServer();
+            ObjectName on
+                    = new ObjectName("Hibernate:type=statistics,application=hibernatestatistics");
+
+            StatisticsService mBean = new DelegatingStatisticsService(sessionFactory.getStatistics());
+            mBean.setStatisticsEnabled(true);
+            mbeanServer.registerMBean(mBean, on);
+        } catch (MalformedObjectNameException | InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            JolokiaServerConfig config = new JolokiaServerConfig(new HashMap<>());
+            JolokiaServer jolokiaServer = new JolokiaServer(config, true);
+            jolokiaServer.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }

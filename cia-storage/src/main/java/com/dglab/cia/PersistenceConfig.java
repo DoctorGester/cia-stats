@@ -88,6 +88,7 @@ public class PersistenceConfig {
 			{
 				setProperty("hibernate.hbm2ddl.auto", "update");
 				setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQL94Dialect");
+                setProperty("hibernate.generate_statistics", "true");
 			}
 		};
 	}
