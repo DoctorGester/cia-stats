@@ -99,6 +99,7 @@ public class ViewApplication {
 		mapGet("/admin/ranks/set/:id/:mode/:rank");
 		mapGet("/admin/elo/set/:id/:mode/:elo");
         mapGet("/admin/stats/recalculate/:stat");
+        mapGet("/admin/matches/cleanup");
 	}
 
 	private Config setupAuth() {
