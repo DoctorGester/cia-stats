@@ -220,6 +220,8 @@ public class StorageApplication {
         post("/quests/update", (request, response) -> {
             PlayerList players = requestObject(request, PlayerList.class);
 
+            log.info("Quests/Update {}", players.getPlayers());
+
             Map<Long, List<PassQuest>> quests = players.getPlayers().stream().collect(
                     Collectors.toMap(id -> id, id -> questService.updatePlayerQuests(id))
             );
