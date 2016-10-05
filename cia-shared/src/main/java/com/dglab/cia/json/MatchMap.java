@@ -6,5 +6,6 @@ package com.dglab.cia.json;
 public enum MatchMap {
 	RANKED_4,
 	RANKED_6,
-	UNRANKED
+	UNRANKED,
+	RANKED_2
 }
