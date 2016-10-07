@@ -5,8 +5,9 @@ import com.dglab.cia.json.util.ObjectMapperFactory;
 import com.dglab.cia.json.RankedPlayer;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 import de.neuland.jade4j.JadeConfiguration;
 import de.neuland.jade4j.template.TemplateLoader;
 import org.apache.commons.io.FileUtils;
@@ -48,6 +49,8 @@ public class ViewApplication {
 
 	private JadeTemplateEngine jadeTemplateEngine = createTemplateEngine();
 	private ObjectMapper mapper = ObjectMapperFactory.createObjectMapper();
+    private OkHttpClient client = new OkHttpClient();
+    private GithubHelper helper = new GithubHelper();
 
 	public ViewApplication() {
 		port(80);
@@ -55,6 +58,16 @@ public class ViewApplication {
 
 		mapGet("/ranks/top/:mode", "ranks/top/byMode", new TypeReference<List<RankedPlayer>>(){});
         mapGet("/", "home", new TypeReference<AllStats>(){});
+
+        get("/heroes", ((request, response) -> {
+            HashMap<Object, Object> model = new HashMap<>();
+            model.put("stringUtils", StringUtils.class);
+            model.put("heroes", helper.getHeroesBase64());
+            model.put("abilities", helper.getAbilitiesBase64());
+            model.put("localization", helper.getLocalizationBase64());
+
+            return new ModelAndView(model, "heroes");
+        }), jadeTemplateEngine);
 
         // What a hack
         get("/public/*", ((request, response) -> {
@@ -160,9 +173,13 @@ public class ViewApplication {
 		get(uri, ((request, response) -> {
 			String queryString = (request.queryString() != null ? "?" + request.queryString() : "");
 			Map<String, String> headers = request.headers().stream().collect(Collectors.toMap(h -> h, request::headers));
-			Unirest.get(PROXY_TARGET + request.uri() + queryString)
-					.headers(headers)
-					.asBinary();
+
+            Request.Builder builder = new Request.Builder().get().url(PROXY_TARGET + request.uri() + queryString);
+            headers.forEach(builder::addHeader);
+
+            Request built = builder.build();
+
+            client.newCall(built).execute();
 
 			return "";
 		}));
@@ -176,21 +193,24 @@ public class ViewApplication {
 		get(uri, ((request, response) -> {
 			String queryString = (request.queryString() != null ? "?" + request.queryString() : "");
 			Map<String, String> headers = request.headers().stream().collect(Collectors.toMap(h -> h, request::headers));
-			HttpResponse<InputStream> answer = Unirest
-					.get(PROXY_TARGET + request.uri() + queryString)
-					.headers(headers)
-					.asBinary();
 
-			if (answer == null) {
+            Request.Builder builder = new Request.Builder().get().url(PROXY_TARGET + request.uri() + queryString);
+            headers.forEach(builder::addHeader);
+
+            Request built = builder.build();
+
+            Response answer = client.newCall(built).execute();
+
+            if (answer == null) {
 				return null;
 			}
 
-			response.status(answer.getStatus());
-			answer.getHeaders().forEach((header, values) -> {
+			response.status(answer.code());
+			answer.headers().toMultimap().forEach((header, values) -> {
 				response.header(header, StringUtils.join(values, ";"));
 			});
 
-			Object result = mapper.readValue(IOUtils.toByteArray(answer.getBody()), type);
+			Object result = mapper.readValue(IOUtils.toByteArray(answer.body().byteStream()), type);
 
 			HashMap<Object, Object> model = new HashMap<>();
 			model.put("model", result);

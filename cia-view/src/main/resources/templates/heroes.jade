@@ -1,0 +1,154 @@
+extends /base.jade
+
+block append head
+    script(type="text/javascript", src="/public/scripts/JSONP.js")
+    script(type="text/javascript", src="/public/scripts/keyvalues.js")
+    script(type="text/javascript", src="/public/scripts/transparency.min.js")
+
+block content
+    style.
+        #data {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: row;
+            flex-basis: 50%;
+            margin-bottom: 60px;
+        }
+
+        .hero .image {
+            max-width: 128px;
+            border-radius: 3px;
+        }
+
+        .hero .abilities, .hero .subs {
+            margin-left: 10px;
+        }
+
+        .hero .ability img, .hero .sub img {
+            border-radius: 3px;
+            max-width: 64px;
+        }
+
+        .hero .hero-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .hero .hero-left .hero-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero .hero-right {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+        }
+
+    #data
+        .hero
+            .hero-left
+                img.image
+                .name
+            .hero-right
+                .abilities
+                    .ability
+                        img.image
+                .subs
+                    .sub
+                        img.image
+                .descriptions
+                    .description
+                        span(data-bind="abilityDescription")
+    script.
+        function loadKV(target, kv) {
+            target.load(atob(kv));
+        }
+
+        var heroes = new KeyValues();
+        var abilities = new KeyValues();
+        var strings = new KeyValues();
+
+        loadKV(heroes, "#{model.heroes}");
+        loadKV(abilities, "#{model.abilities}");
+        //loadKV(strings, "#{model.localization}");
+
+        var model = [];
+
+        heroes.value.forEach(function (hero) {
+            var heroModel = {};
+            heroModel.abilities = [];
+            heroModel.subs = [];
+            heroModel.descriptions = [];
+
+            for (var i = 1; i < 10; i++) {
+                var key = hero.findKey("Ability" + i);
+
+                heroModel.name = hero.findKey("override_hero").value.substr("npc_dota_hero_".length);
+
+                if (key) {
+                    var abilityName = key.value;
+                    var ability = abilities.findKey(abilityName);
+
+                    if (abilityName.startsWith("placeholder")) {
+                        continue;
+                    }
+
+                    if (ability) {
+                        var abilityModel = {};
+                        abilityModel.name = abilityName;
+                        abilityModel.image = ability.findKey("AbilityTextureName").value;
+
+                        heroModel.descriptions.push({ abilityDescription: abilityName });
+
+                        if (abilityName.endsWith("_sub")) {
+                            heroModel.subs.push(abilityModel);
+                        } else {
+                            heroModel.abilities.push(abilityModel);
+                        }
+                    } else {
+                        console.log(abilityName + " not found");
+                    }
+                }
+            }
+
+            console.log(heroModel.abilities);
+
+            if ((hero.findKey("Disabled") || {}).value === "true") {
+                return;
+            }
+
+            if (hero.findKey("Order")) {
+                model.push(heroModel);
+            }
+        });
+
+        var directives = {
+            image: {
+                src: function () {
+                    return "http://cdn.dota2.com/apps/dota2/images/heroes/" + this.name + "_vert.jpg";
+                }
+            },
+            abilities: {
+                image: {
+                    src: function () {
+                        return "http://cdn.dota2.com/apps/dota2/images/abilities/" + this.image + "_hp1.png";
+                    }
+                }
+            },
+            subs: {
+                image: {
+                    src: function () {
+                        return "http://cdn.dota2.com/apps/dota2/images/abilities/" + this.image + "_hp1.png";
+                    }
+                }
+            }
+        };
+        console.log(model);
+        Transparency.render(document.getElementById("data"), model, directives);
