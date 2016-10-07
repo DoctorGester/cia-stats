@@ -5,20 +5,13 @@ import com.dglab.cia.persistence.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
-import org.hibernate.SessionFactory;
-import org.jolokia.jvmagent.JolokiaServer;
-import org.jolokia.jvmagent.JolokiaServerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.impl.SimpleLogger;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import spark.Request;
 
-import javax.management.*;
-import javax.persistence.EntityManagerFactory;
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -226,6 +219,8 @@ public class StorageApplication {
 
         post("/quests/update", (request, response) -> {
             PlayerList players = requestObject(request, PlayerList.class);
+
+            log.info("Quests/Update {}", players.getPlayers());
 
             Map<Long, List<PassQuest>> quests = players.getPlayers().stream().collect(
                     Collectors.toMap(id -> id, id -> questService.updatePlayerQuests(id))

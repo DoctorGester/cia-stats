@@ -32,7 +32,7 @@ public class ExpiringObject<T> {
     public synchronized T get() {
         Instant now = Instant.now();
 
-        if (object == null || unit.between(now, this.lastUpdated) > time) {
+        if (object == null || unit.between(this.lastUpdated, now) > time) {
             update();
         }
 
