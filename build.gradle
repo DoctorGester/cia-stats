@@ -159,7 +159,9 @@ project(':cia-view') {
         compile group: 'org.pac4j', name: 'spark-pac4j', version: '1.1.0'
         compile group: 'org.pac4j', name: 'pac4j-oauth', version: '1.8.3'
         compile group: 'org.pac4j', name: 'pac4j-http', version: '1.8.3'
-        compile group: 'org.kohsuke', name: 'github-api', version: '1.77'
+        compile (group: 'org.kohsuke', name: 'github-api', version: '1.77') {
+            exclude group: 'org.jenkins-ci', module: 'annotation-indexer'
+        }
         compile group: 'com.squareup.okhttp', name: 'okhttp', version: '2.7.5'
         compile group: 'com.squareup.okhttp', name: 'okhttp-urlconnection', version: '2.7.5'
 

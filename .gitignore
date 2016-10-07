@@ -8,7 +8,7 @@
 *.war
 *.ear
 
-private.key
+*.key
 
 /.idea
 
