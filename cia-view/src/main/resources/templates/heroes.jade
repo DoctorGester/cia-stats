@@ -25,13 +25,18 @@ block content
             border-radius: 3px;
         }
 
-        .hero .abilities, .hero .subs {
-            margin-left: 10px;
+        .hero .ability img {
+            border-radius: 3px;
+            width: 64px;
+            height: 64px;
         }
 
-        .hero .ability img, .hero .sub img {
-            border-radius: 3px;
-            max-width: 64px;
+        .hero .ability span {
+            align-self: center;
+        }
+
+        .hero .hero-right .description {
+            margin-left: 10px;
         }
 
         .hero .hero-left {
@@ -45,10 +50,24 @@ block content
             flex-direction: column;
         }
 
-        .hero .hero-right {
+        .hero .hero-right .abilities {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .hero .hero-right .abilities .ability {
             display: flex;
             flex-direction: row;
-            justify-content: center;
+            margin: 4px;
+        }
+
+        .hero .hero-right .abilities .hidden .ability .sub-image  {
+            visibility: hidden;
+        }
+
+        .hero .hero-right .abilities .ability .image {
+            margin-right: 4px;
         }
 
     #data
@@ -60,12 +79,11 @@ block content
                 .abilities
                     .ability
                         img.image
-                .subs
-                    .sub
-                        img.image
-                .descriptions
-                    .description
-                        span(data-bind="abilityDescription")
+                        img.sub-image(data-bind="subImage")
+                        span.description(data-bind="description")
+                        span /
+                        span(data-bind="subDescription")
+
     script.
         function loadKV(target, kv) {
             target.load(atob(kv));
@@ -83,9 +101,8 @@ block content
 
         heroes.value.forEach(function (hero) {
             var heroModel = {};
+
             heroModel.abilities = [];
-            heroModel.subs = [];
-            heroModel.descriptions = [];
 
             for (var i = 1; i < 10; i++) {
                 var key = hero.findKey("Ability" + i);
@@ -94,22 +111,42 @@ block content
 
                 if (key) {
                     var abilityName = key.value;
+                    var originalName = abilityName;
                     var ability = abilities.findKey(abilityName);
+                    var isSub = false;
 
                     if (abilityName.startsWith("placeholder")) {
                         continue;
                     }
 
+                    if (abilityName.endsWith("_sub")) {
+                        isSub = true;
+                        abilityName = abilityName.substr(0, abilityName.length - "_sub".length);
+                    }
+
                     if (ability) {
                         var abilityModel = {};
                         abilityModel.name = abilityName;
-                        abilityModel.image = ability.findKey("AbilityTextureName").value;
 
-                        heroModel.descriptions.push({ abilityDescription: abilityName });
+                        var found = false;
 
-                        if (abilityName.endsWith("_sub")) {
-                            heroModel.subs.push(abilityModel);
+                        heroModel.abilities.forEach(function (value) {
+                            if (value.name == abilityName) {
+                                found = true;
+                                abilityModel = value;
+                                return false;
+                            }
+                        });
+
+                        if (!isSub) {
+                            abilityModel.image = ability.findKey("AbilityTextureName").value;
+                            abilityModel.description = abilityName;
                         } else {
+                            abilityModel.subImage = ability.findKey("AbilityTextureName").value;
+                            abilityModel.subDescription = originalName;
+                        }
+
+                        if (!found) {
                             heroModel.abilities.push(abilityModel);
                         }
                     } else {
@@ -117,8 +154,6 @@ block content
                     }
                 }
             }
-
-            console.log(heroModel.abilities);
 
             if ((hero.findKey("Disabled") || {}).value === "true") {
                 return;
@@ -140,15 +175,22 @@ block content
                     src: function () {
                         return "http://cdn.dota2.com/apps/dota2/images/abilities/" + this.image + "_hp1.png";
                     }
-                }
-            },
-            subs: {
-                image: {
+                },
+                subImage: {
                     src: function () {
-                        return "http://cdn.dota2.com/apps/dota2/images/abilities/" + this.image + "_hp1.png";
+                        if (!this.subImage) {
+                            return null;
+                        }
+
+                        return "http://cdn.dota2.com/apps/dota2/images/abilities/" + this.subImage + "_hp1.png";
+                    },
+                    style: function () {
+                        if (!this.subImage) {
+                            return "visibility: hidden;";
+                        }
                     }
                 }
             }
         };
-        console.log(model);
+
         Transparency.render(document.getElementById("data"), model, directives);
