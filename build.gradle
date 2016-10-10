@@ -12,6 +12,7 @@ buildscript {
 subprojects {
     apply plugin: 'java'
     apply plugin: 'application'
+    apply plugin: 'idea'
     group 'dg-lab'
     version '1.0-SNAPSHOT'
 
@@ -127,6 +128,8 @@ project(':cia-storage') {
         compile group: 'org.hibernate.javax.persistence', name: 'hibernate-jpa-2.1-api'
 
         compile 'org.springframework.data:spring-data-jpa:1.10.+'
+        compile "com.querydsl:querydsl-apt:4.1.4:jpa"
+        compile "com.querydsl:querydsl-jpa:4.1.4"
 
         compile group: 'org.springframework', name: 'spring-context', version: "$springVersion"
         compile group: 'org.springframework', name: 'spring-tx', version: "$springVersion"
@@ -135,6 +138,12 @@ project(':cia-storage') {
         compile group: 'com.lukaspradel', name: 'steam-web-api', version: '1.2'
 
         compile shared
+    }
+
+    idea {
+        module {
+            sourceDirs += file("generated/")
+        }
     }
 
     task kill() << {

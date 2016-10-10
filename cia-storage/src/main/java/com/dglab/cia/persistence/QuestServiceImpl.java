@@ -8,6 +8,8 @@ import com.dglab.cia.json.HeroWinRateAndGames;
 import com.dglab.cia.json.PassQuest;
 import com.dglab.cia.json.QuestType;
 import com.dglab.cia.util.ExpiringObject;
+import com.querydsl.core.group.GroupBy;
+import com.querydsl.jpa.impl.JPAQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -28,12 +31,18 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.dglab.cia.database.QQuest.quest;
+
+
 /**
  * @author doc
  */
 @Service
 public class QuestServiceImpl implements QuestService {
     private static final Logger log = LoggerFactory.getLogger(QuestServiceImpl.class);
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Autowired
     private PassService passService;
@@ -160,6 +169,22 @@ public class QuestServiceImpl implements QuestService {
     public void resetRerolls() {
         log.info("Resetting rerolls");
         rerollsRepository.truncate();
+    }
+
+    @Override
+    @Transactional
+    public void forceUpdateCompletedQuests() {
+        for (QuestType questType : QuestType.values()) {
+            Map<Long, List<Quest>> result = new JPAQuery<Quest>(entityManager)
+                    .from(quest)
+                    .where(quest.progress.goe(questType.getGoal()).and(quest.questType.eq(questType)))
+                    .transform(GroupBy.groupBy(quest.steamId64).as(GroupBy.list(quest)));
+
+            result.forEach((id, quests) -> {
+                quests.forEach(questsRepository::delete);
+                passService.awardExperience(id, 300 * quests.size());
+            });
+        }
     }
 
     private synchronized Map<Hero, Double> getHeroWeights() {
