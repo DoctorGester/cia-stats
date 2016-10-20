@@ -20,11 +20,14 @@ block content
             margin: 10px;
             border-radius: 3px;
             cursor: pointer;
+            object-fit: scale-down;
         }
 
-        .hero .image {
-            max-width: 128px;
-            border-radius: 3px;
+        @media (max-width: 1024px) {
+            #heroList > img {
+                max-width: 96px;
+                margin: 4px;
+            }
         }
 
         #heroDetails .ability img {
