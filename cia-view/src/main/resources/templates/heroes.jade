@@ -5,6 +5,7 @@ block append head
     script(type="text/javascript", src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-sanitize.js")
     script(type="text/javascript", src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-route.js")
     link(href="https://fonts.googleapis.com/css?family=Raleway", rel="stylesheet")
+    link(href="https://fonts.googleapis.com/css?family=Open+Sans&amp;subset=cyrillic", rel="stylesheet")
 
 block content
     style.
@@ -37,7 +38,8 @@ block content
         }
 
         #heroDetails .hero-right .description {
-            margin-left: 10px;
+            margin-left: 16px;
+            font-family: "Open Sans", sans-serif;
         }
 
         #heroDetails .hero-right .abilities {
@@ -59,7 +61,6 @@ block content
             display: flex;
             flex-direction: row;
             margin: 4px;
-            padding: 12px;
         }
 
         #heroDetails .hero-right .abilities .ability .image-block {
@@ -116,7 +117,7 @@ block content
             margin-bottom: 40px;
             font-size: 32px;
             text-transform: uppercase;
-            font-family: "Raleway", sans-serif;
+            font-family: "Raleway", "Open Sans", sans-serif;
             letter-spacing: 2px;
         }
 
@@ -124,7 +125,6 @@ block content
             display: flex;
             justify-content: center;
             margin-top: 40px;
-            margin-bottom: 40px;
         }
 
         #heroDetails .hero-bottom a {
@@ -134,9 +134,20 @@ block content
             text-transform: uppercase;
         }
 
+        .language-selector {
+            display: flex;
+            margin-top: 60px;
+            float: right;
+        }
+
+        .language-selector > a {
+            margin: 10px;
+            cursor: pointer;
+        }
+
     #app(ng-app="app")
         #main(ng-controller="HeroesCtrl")
-            div.ez-box(ng-show="!selectedHero")
+            div(ng-show="!selectedHero")
                 h2.content-head.is-center heroes
             #heroList(ng-show="!selectedHero")
                 img(ng-repeat="hero in heroes" ng-src="http://cdn.dota2.com/apps/dota2/images/heroes/{{hero.name}}_hphover.png" ng-click="selectHero(hero)")
@@ -159,6 +170,9 @@ block content
                                 span.description(ng-bind-html="getAbilityDescription(ability, true)")
                 .hero-bottom
                     a(href="#" ng-click="selectHero()") Back
+            div.language-selector
+                a(ng-click="selectEnglish()") ENG
+                a(ng-click="selectRussian()") RU
     script.
         function parseKV(string, targetObject) {
             var index = 0;
@@ -206,7 +220,7 @@ block content
 
         function kvToObject(base64) {
             var obj = {};
-            parseKV(atob(base64), obj);
+            parseKV(decodeURIComponent(escape(atob(base64))), obj);
             return obj;
         }
 
@@ -227,8 +241,21 @@ block content
                 hero.name = hero.override_hero.substr('npc_dota_hero_'.length);
             });
 
-            $scope.tokens = kvToObject("#{model.localization}").addon.Tokens;
+            var tokens = kvToObject("#{model.localization}").addon.Tokens;
+            var tokensRU = kvToObject("#{model.localizationRU}").addon.Tokens;
+
             $scope.heroes = heroes;
+
+            $scope.selectEnglish = function() {
+                $scope.tokens = tokens;
+            };
+
+            $scope.selectRussian = function () {
+                $scope.tokens = tokensRU;
+                console.log($scope.tokens);
+            };
+
+            $scope.selectEnglish();
 
             var allAbilities = kvToObject("#{model.abilities}").DOTAAbilities;
 

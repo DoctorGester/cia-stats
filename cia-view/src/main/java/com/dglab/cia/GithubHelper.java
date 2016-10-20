@@ -54,4 +54,8 @@ public class GithubHelper {
     public String getLocalizationBase64() {
         return requestFile("game/panorama/localization/addon_english.txt");
     }
+
+    public String getLocalizationRussianBase64() {
+        return requestFile("game/panorama/localization/addon_russian.txt");
+    }
 }

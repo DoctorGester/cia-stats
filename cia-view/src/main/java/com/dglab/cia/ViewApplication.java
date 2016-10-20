@@ -65,6 +65,7 @@ public class ViewApplication {
             model.put("heroes", helper.getHeroesBase64());
             model.put("abilities", helper.getAbilitiesBase64());
             model.put("localization", helper.getLocalizationBase64());
+            model.put("localizationRU", helper.getLocalizationRussianBase64());
 
             return new ModelAndView(model, "heroes");
         }), jadeTemplateEngine);
