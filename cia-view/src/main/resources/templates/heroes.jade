@@ -18,6 +18,7 @@ block content
         #heroList > img {
             margin: 10px;
             border-radius: 3px;
+            cursor: pointer;
         }
 
         .hero .image {
@@ -45,18 +46,52 @@ block content
             justify-content: center;
         }
 
-        #heroDetails .hero-right .abilities .ability {
+        #heroDetails .hero-right .abilities .ability-block {
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
             margin: 4px;
             border: 1px solid #eee;
             padding: 12px;
             border-radius: 3px;
         }
 
-        #heroDetails .hero-right .abilities .ability .image {
+        #heroDetails .hero-right .abilities .ability {
+            display: flex;
+            flex-direction: row;
+            margin: 4px;
+            padding: 12px;
+        }
+
+        #heroDetails .hero-right .abilities .ability .image-block {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            width: 64px;
+            height: 64px;
             margin-right: 4px;
             align-self: center;
+        }
+
+        #heroDetails .hero-right .abilities .ability .image-block .image {
+            position: relative;
+        }
+
+        #heroDetails .hero-right .abilities .ability .image-block .cooldown-text {
+            position: absolute;
+            color: white;
+            background-color: #2d2d29;
+            text-align: center;
+            border-radius: 4px;
+            left: 100%;
+            top: 100%;
+            transform: translate(-80%, -80%);
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        #heroDetails .hero-right .abilities .sub {
+            background-color: antiquewhite;
+            border-radius: 3px;
         }
 
         #heroDetails {
@@ -85,22 +120,45 @@ block content
             letter-spacing: 2px;
         }
 
+        #heroDetails .hero-bottom {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+
+        #heroDetails .hero-bottom a {
+            font-size: 32px;
+            font-family: "Raleway", sans-serif;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
     #app(ng-app="app")
         #main(ng-controller="HeroesCtrl")
+            div.ez-box(ng-show="!selectedHero")
+                h2.content-head.is-center heroes
             #heroList(ng-show="!selectedHero")
                 img(ng-repeat="hero in heroes" ng-src="http://cdn.dota2.com/apps/dota2/images/heroes/{{hero.name}}_hphover.png" ng-click="selectHero(hero)")
             #heroDetails(ng-show="selectedHero")
                 .hero-top
-                    img(ng-src="http://cdn.dota2.com/apps/dota2/images/heroes/{{selectedHero.name}}_full.png" ng-click="selectHero()")
+                    img(ng-src="http://cdn.dota2.com/apps/dota2/images/heroes/{{selectedHero.name}}_full.png")
                     .name {{tokens['HeroName_npc_dota_hero_' + selectedHero.name]}}
                 .hero-right
                     .abilities
-                        .ability(ng-repeat="ability in abilities")
-                            img.image(ng-src="http://cdn.dota2.com/apps/dota2/images/abilities/{{ability.image}}_hp1.png")
-                            img.sub-image(ng-if="ability.subImage" ng-src="http://cdn.dota2.com/apps/dota2/images/abilities/{{ability.subImage}}_hp1.png")
-                            span.description(ng-bind-html="tokens['AbilityTooltip_' + ability.name]")
-                            span(ng-if="ability.subImage") /
-                            span(ng-if="ability.subImage" ng-bind-html="tokens['AbilityTooltip_' + ability.subName]")
+                        .ability-block(ng-repeat="ability in abilities")
+                            .ability
+                                .image-block
+                                    img.image(ng-src="{{getAbilityImage(ability)}}")
+                                    span.cooldown-text(ng-if="ability.cooldown") {{ability.cooldown}}
+                                span.description(ng-bind-html="getAbilityDescription(ability)")
+                            .ability.sub(ng-if="ability.subName")
+                                .image-block
+                                    img.image(ng-src="{{getAbilityImage(ability, true)}}")
+                                    span.cooldown-text(ng-if="ability.subCooldown") {{ability.subCooldown}}
+                                span.description(ng-bind-html="getAbilityDescription(ability, true)")
+                .hero-bottom
+                    a(href="#" ng-click="selectHero()") Back
     script.
         function parseKV(string, targetObject) {
             var index = 0;
@@ -174,12 +232,34 @@ block content
 
             var allAbilities = kvToObject("#{model.abilities}").DOTAAbilities;
 
+            $scope.getAbilityImage = function(ability, sub) {
+                var template = "http://cdn.dota2.com/apps/dota2/images/abilities/%s_hp1.png";
+
+                if (ability.customIcon) {
+                    template = "https://github.com/DoctorGester/crumbling-island-arena/blob/master/content/panorama/images/custom_game/%s?raw=true";
+                }
+
+                if (sub) {
+                    return template.replace(/%s/, ability.subImage);
+                }
+
+                return template.replace(/%s/, ability.image);
+            };
+
+            $scope.getAbilityDescription = function(ability, sub) {
+                var token = $scope.tokens['AbilityTooltip_' + (sub ? ability.subName : ability.name)];
+
+                return token.replace(/\\"/g, "\"").replace(/\\\\\\\\/g, "");
+            };
+
             $scope.selectHero = function(hero) {
                 $scope.selectedHero = hero;
 
                 if (!hero) {
                     return;
                 }
+
+                var customIcons = hero.CustomIcons || {};
 
                 var abilities = [];
 
@@ -216,12 +296,19 @@ block content
                             }
                         });
 
+                        var customIcon = customIcons[originalName];
+                        var abilityImage = customIcon || ability.AbilityTextureName;
+
+                        abilityModel.customIcon = customIcon;
+
                         if (!isSub) {
-                            abilityModel.image = ability.AbilityTextureName;
+                            abilityModel.image = abilityImage;
                             abilityModel.name = abilityName;
+                            abilityModel.cooldown = parseFloat(ability.AbilityCooldown);
                         } else {
-                            abilityModel.subImage = ability.AbilityTextureName;
+                            abilityModel.subImage = abilityImage;
                             abilityModel.subName = originalName;
+                            abilityModel.subCooldown = parseFloat(ability.AbilityCooldown);
                         }
 
                         if (!found) {
