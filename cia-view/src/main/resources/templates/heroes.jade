@@ -146,7 +146,7 @@ block content
         }
 
     #app(ng-app="app")
-        #main(ng-controller="HeroesCtrl")
+        #main(ng-controller="HeroesCtrl" ng-cloak)
             div(ng-show="!selectedHero")
                 h2.content-head.is-center heroes
             #heroList(ng-show="!selectedHero")
