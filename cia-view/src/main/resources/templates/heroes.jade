@@ -221,6 +221,13 @@ block content
             return index;
         }
 
+        function getLang() {
+            if (navigator.languages != undefined)
+                return navigator.languages[0] || "";
+            else
+                return navigator.language || "";
+        }
+
         function kvToObject(base64) {
             var obj = {};
             parseKV(decodeURIComponent(escape(atob(base64))), obj);
@@ -258,7 +265,11 @@ block content
                 console.log($scope.tokens);
             };
 
-            $scope.selectEnglish();
+            if (getLang().indexOf("ru") !== -1) {
+                $scope.selectRussian();
+            } else {
+                $scope.selectEnglish();
+            }
 
             var allAbilities = kvToObject("#{model.abilities}").DOTAAbilities;
 
