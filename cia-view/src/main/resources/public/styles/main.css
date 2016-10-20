@@ -9,6 +9,7 @@ body {
     color: #7f8c8d;
     font-size: 13px;
     background-color: white;
+    font-family: "Open Sans", sans-serif;
 }
 
 h1,
@@ -50,6 +51,7 @@ label {
     color: white;
     font-weight: 400;
     font-size: 120%;
+    font-family: "Raleway", "Open Sans", sans-serif;
 }
 
 .home-menu .pure-menu-selected a {
@@ -81,8 +83,9 @@ label {
 .content-head {
     font-weight: 400;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
     margin: 2em 0 1em;
+    font-family: "Raleway", "Open Sans", sans-serif;
+    font-size: 36px;
 }
 
 /* This is a modifier class used when the content-head is inside a ribbon */
