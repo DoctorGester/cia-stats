@@ -54,7 +54,7 @@ public class ViewApplication {
     private GithubHelper helper = new GithubHelper();
 
 	public ViewApplication() {
-		port(80);
+		port(443);
 		threadPool(4);
 
         try {
