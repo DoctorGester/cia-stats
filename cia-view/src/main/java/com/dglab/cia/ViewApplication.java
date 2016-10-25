@@ -28,6 +28,7 @@ import spark.template.jade.JadeTemplateEngine;
 import spark.utils.GzipUtils;
 import spark.utils.IOUtils;
 
+import javax.servlet.ServletOutputStream;
 import java.io.*;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -104,6 +105,17 @@ public class ViewApplication {
 
             return "";
         }));
+
+        get("/.well-known/*", (request, response) -> {
+            try (InputStream stream = FileUtils.openInputStream(new File(".well-known/" + request.splat()[0]))) {
+                ServletOutputStream out = response.raw().getOutputStream();
+                org.apache.commons.io.IOUtils.copy(stream, out);
+                out.flush();
+                out.close();
+            }
+
+            return "";
+        });
 
 		exception(Exception.class, (exception, request, response) -> {
 			exception.printStackTrace();
