@@ -145,11 +145,6 @@ a
     text-decoration: none;
 }
 
-a:visited
-{
-    color: #265778;
-}
-
 .content-margin
 {
     margin-top: 10em;
