@@ -1,0 +1,11 @@
+extends /base.jade
+
+block append head
+    block title
+        title Error
+
+block content
+    div.ez-box
+        h2.content-head.is-center #{status} #{error}
+
+    div.ez-box.is-center #{message}
