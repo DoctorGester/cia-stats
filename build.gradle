@@ -7,6 +7,10 @@ buildscript {
     repositories {
         mavenCentral()
     }
+
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.1.RELEASE")
+    }
 }
 
 subprojects {
@@ -158,6 +162,8 @@ project(':cia-storage') {
 }
 
 project(':cia-view') {
+    apply plugin: 'spring-boot'
+    
     dependencies {
         testCompile group: 'junit', name: 'junit', version: '4.11'
 
