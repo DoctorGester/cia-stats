@@ -163,7 +163,7 @@ project(':cia-storage') {
 
 project(':cia-view') {
     apply plugin: 'spring-boot'
-    
+
     dependencies {
         testCompile group: 'junit', name: 'junit', version: '4.11'
 
@@ -189,7 +189,7 @@ project(':cia-view') {
         killProcess(80)
     }
 
-    task publish(dependsOn: bigJar) << {
+    task publish(dependsOn: build) << {
         runProcess(80)
     }
 
