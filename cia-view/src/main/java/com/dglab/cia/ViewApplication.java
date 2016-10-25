@@ -57,7 +57,11 @@ public class ViewApplication {
 		port(80);
 		threadPool(4);
 
-        secure("keystore.jks", "", null, null);
+        try {
+            secure("keystore.jks", FileUtils.readFileToString(new File("private.key")), null, null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         mapGet("/ranks/top/:mode", "ranks/top/byMode", new TypeReference<List<RankedPlayer>>(){});
         mapGet("/", "home", new TypeReference<AllStats>(){});
