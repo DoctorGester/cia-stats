@@ -242,10 +242,13 @@ public class MatchServiceImpl implements MatchService {
             winRateKey.setRankRange(RankRange.ALL);
 
             boolean isWinner = Objects.equals(round.getWinner(), playerTeams.get(playerRoundInfo.getSteamId64()));
-            RankAndStars rankAndStars = matchRanks.get(playerRoundInfo.getSteamId64());
 
-            if (rankAndStars != null && rankAndStars.getRank() == 1) {
-                winRateKey.setRankRange(RankRange.RANK_ONE);
+            if (matchRanks != null) {
+                RankAndStars rankAndStars = matchRanks.get(playerRoundInfo.getSteamId64());
+
+                if (rankAndStars != null && rankAndStars.getRank() == 1) {
+                    winRateKey.setRankRange(RankRange.RANK_ONE);
+                }
             }
 
             statsService.incrementHeroStat(winRateKey, isWinner);
