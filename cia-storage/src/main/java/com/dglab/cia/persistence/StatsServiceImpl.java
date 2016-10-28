@@ -67,14 +67,14 @@ public class StatsServiceImpl implements StatsService {
                 .fetch();
 
         return result.stream().map(tuple -> {
-            Integer games = tuple.get(heroWinRate.games);
-            Integer wins = tuple.get(heroWinRate.wins);
+            Integer games = tuple.get(heroWinRate.games.sum());
+            Integer wins = tuple.get(heroWinRate.wins.sum());
 
             if (games == null || wins == null) {
                 return null;
             }
 
-            return new HeroWinRateAndGames(tuple.get(heroWinRate.pk.heroName), (double) games / wins, wins);
+            return new HeroWinRateAndGames(tuple.get(heroWinRate.pk.heroName), (double) wins / games, wins);
         }).collect(Collectors.toList());
     }
 
