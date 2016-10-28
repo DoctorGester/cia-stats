@@ -233,25 +233,27 @@ public class MatchServiceImpl implements MatchService {
 			roundData.setProjectilesFired(playerRoundInfo.getProjectilesFired());
 			roundData.setConnectionState(playerRoundInfo.getConnectionState());
 
-            HeroWinRateKey winRateKey = new HeroWinRateKey();
-            winRateKey.setDate(match.getDateTime().atZone(ZoneId.systemDefault()).toLocalDate());
-            winRateKey.setHeroName(playerRoundInfo.getHero());
-            winRateKey.setMap(match.getMap());
-            winRateKey.setMode(match.getMode());
-            winRateKey.setPlayers(match.getPlayers());
-            winRateKey.setRankRange(RankRange.ALL);
+            if (playerRoundInfo.getHero() != null) {
+                HeroWinRateKey winRateKey = new HeroWinRateKey();
+                winRateKey.setDate(match.getDateTime().atZone(ZoneId.systemDefault()).toLocalDate());
+                winRateKey.setHeroName(playerRoundInfo.getHero());
+                winRateKey.setMap(match.getMap());
+                winRateKey.setMode(match.getMode());
+                winRateKey.setPlayers(match.getPlayers());
+                winRateKey.setRankRange(RankRange.ALL);
 
-            boolean isWinner = Objects.equals(round.getWinner(), playerTeams.get(playerRoundInfo.getSteamId64()));
+                boolean isWinner = Objects.equals(round.getWinner(), playerTeams.get(playerRoundInfo.getSteamId64()));
 
-            if (matchRanks != null) {
-                RankAndStars rankAndStars = matchRanks.get(playerRoundInfo.getSteamId64());
+                if (matchRanks != null) {
+                    RankAndStars rankAndStars = matchRanks.get(playerRoundInfo.getSteamId64());
 
-                if (rankAndStars != null && rankAndStars.getRank() == 1) {
-                    winRateKey.setRankRange(RankRange.RANK_ONE);
+                    if (rankAndStars != null && rankAndStars.getRank() == 1) {
+                        winRateKey.setRankRange(RankRange.RANK_ONE);
+                    }
                 }
-            }
 
-            statsService.incrementHeroStat(winRateKey, isWinner);
+                statsService.incrementHeroStat(winRateKey, isWinner);
+            }
 
 			playerRoundData.add(roundData);
 		}
