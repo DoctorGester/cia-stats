@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,12 @@ public class MatchServiceImpl implements MatchService {
 
 	@Autowired
 	private MatchDao matchDao;
+
+    @Autowired
+    private StatsService statsService;
+
+    @Autowired
+    private RankService rankService;
 
 	@Autowired
 	private PlayerNameService playerNameService;
@@ -201,9 +208,15 @@ public class MatchServiceImpl implements MatchService {
 			round.setWinner(roundInfo.getWinner());
 		}
 
-		Collection<PlayerRoundData> playerRoundData = new HashSet<>();
+        Map<Long, Byte> playerTeams = match.getMatchData().stream().collect(
+                Collectors.toMap(data -> data.getPk().getSteamId64(), PlayerMatchData::getTeam)
+        );
 
-		for (PlayerRoundInfo playerRoundInfo : roundInfo.getPlayers()) {
+        Collection<PlayerRoundData> playerRoundData = new HashSet<>();
+
+        Map<Long, RankAndStars> matchRanks = rankService.getMatchRanks(match.getMatchId());
+
+        for (PlayerRoundInfo playerRoundInfo : roundInfo.getPlayers()) {
 			PlayerRoundData roundData = new PlayerRoundData();
 
 			PlayerRoundData.Pk playerKey = new PlayerRoundData.Pk();
@@ -219,6 +232,23 @@ public class MatchServiceImpl implements MatchService {
 			roundData.setDamageDealt(playerRoundInfo.getDamageDealt());
 			roundData.setProjectilesFired(playerRoundInfo.getProjectilesFired());
 			roundData.setConnectionState(playerRoundInfo.getConnectionState());
+
+            HeroWinRateKey winRateKey = new HeroWinRateKey();
+            winRateKey.setDate(match.getDateTime().atZone(ZoneId.systemDefault()).toLocalDate());
+            winRateKey.setHeroName(playerRoundInfo.getHero());
+            winRateKey.setMap(match.getMap());
+            winRateKey.setMode(match.getMode());
+            winRateKey.setPlayers(match.getPlayers());
+            winRateKey.setRankRange(RankRange.ALL);
+
+            boolean isWinner = Objects.equals(round.getWinner(), playerTeams.get(playerRoundInfo.getSteamId64()));
+            RankAndStars rankAndStars = matchRanks.get(playerRoundInfo.getSteamId64());
+
+            if (rankAndStars != null && rankAndStars.getRank() == 1) {
+                winRateKey.setRankRange(RankRange.RANK_ONE);
+            }
+
+            statsService.incrementHeroStat(winRateKey, isWinner);
 
 			playerRoundData.add(roundData);
 		}

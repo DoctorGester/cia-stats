@@ -269,22 +269,6 @@ public class StorageApplication {
 			return "";
 		});
 
-        get("/admin/stats/recalculate/:stat", (request, response) -> {
-            String stat = request.params("stat");
-
-            switch (stat) {
-                case "allWinRates":
-                    statsService.runAllWinRatesRecalculation();
-                    break;
-
-                case "rankOneWinRates":
-                    statsService.runRankOneWinRatesRecalculation();
-                    break;
-            }
-
-            return "";
-        });
-
         get("/admin/matches/cleanup", (request, response) -> {
             matchService.deleteOldMatches();
 

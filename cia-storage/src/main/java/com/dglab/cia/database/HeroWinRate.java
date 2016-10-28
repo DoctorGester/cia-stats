@@ -12,7 +12,7 @@ import javax.persistence.Table;
 @Table(name = "hero_win_rates")
 public class HeroWinRate {
     private HeroWinRateKey pk;
-    private float winRate;
+    private int wins;
     private int games;
 
     @EmbeddedId
@@ -20,9 +20,9 @@ public class HeroWinRate {
         return pk;
     }
 
-    @Column(name = "winRate", nullable = false)
-    public float getWinRate() {
-        return winRate;
+    @Column(name = "wins", nullable = false)
+    public int getWins() {
+        return wins;
     }
 
     @Column(name = "games", nullable = false)
@@ -34,8 +34,8 @@ public class HeroWinRate {
         this.games = games;
     }
 
-    public void setWinRate(float winRate) {
-        this.winRate = winRate;
+    public void setWins(int wins) {
+        this.wins = wins;
     }
 
     public void setPk(HeroWinRateKey pk) {

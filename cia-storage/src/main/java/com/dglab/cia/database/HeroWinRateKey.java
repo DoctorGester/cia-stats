@@ -8,17 +8,28 @@ import javax.persistence.Embeddable;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import java.io.Serializable;
+import java.time.LocalDate;
 
 /**
  * @author doc
  */
 @Embeddable
 public class HeroWinRateKey implements Serializable {
+    private LocalDate date;
     private String heroName;
     private String mode;
     private byte players;
     private MatchMap map;
     private RankRange rankRange;
+
+    @Column(name = "date", nullable = false, updatable = false)
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
 
     @Column(name = "playerAmount", nullable = false, updatable = false)
     public byte getPlayers() {
@@ -75,6 +86,7 @@ public class HeroWinRateKey implements Serializable {
         HeroWinRateKey that = (HeroWinRateKey) o;
 
         if (players != that.players) return false;
+        if (date != null ? !date.equals(that.date) : that.date != null) return false;
         if (heroName != null ? !heroName.equals(that.heroName) : that.heroName != null) return false;
         if (mode != null ? !mode.equals(that.mode) : that.mode != null) return false;
         if (map != that.map) return false;
@@ -83,7 +95,8 @@ public class HeroWinRateKey implements Serializable {
 
     @Override
     public int hashCode() {
-        int result = heroName != null ? heroName.hashCode() : 0;
+        int result = date != null ? date.hashCode() : 0;
+        result = 31 * result + (heroName != null ? heroName.hashCode() : 0);
         result = 31 * result + (mode != null ? mode.hashCode() : 0);
         result = 31 * result + (int) players;
         result = 31 * result + (map != null ? map.hashCode() : 0);
