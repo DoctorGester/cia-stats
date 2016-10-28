@@ -38,7 +38,7 @@ public class StatsServiceImpl implements StatsService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void incrementHeroStat(HeroWinRateKey key, boolean won) {
-        HeroWinRate heroWinRate = winRateRepository.getOne(key);
+        HeroWinRate heroWinRate = winRateRepository.findOne(key);
 
         if (heroWinRate == null) {
             heroWinRate = new HeroWinRate();
