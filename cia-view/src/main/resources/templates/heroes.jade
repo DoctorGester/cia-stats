@@ -4,6 +4,9 @@ block append head
     script(type="text/javascript", src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js")
     script(type="text/javascript", src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-sanitize.js")
     script(type="text/javascript", src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-route.js")
+    script(type="text/javascript", src="https://code.highcharts.com/highcharts.js")
+    script(type="text/javascript", src="/scripts/highcharts-ng.min.js")
+    base(href="/")
     block title
         title Crumbling Island Arena | Heroes
 
@@ -16,17 +19,18 @@ block content
             justify-content: center;
         }
 
-        #heroList > img {
-            margin: 10px;
-            border-radius: 3px;
-            cursor: pointer;
+        #heroList > a {
+            margin: 8px 8px 0 8px;
             object-fit: scale-down;
+        }
+
+        #heroList > a img {
+            border-radius: 3px;
         }
 
         @media (max-width: 1024px) {
             #heroList > img {
                 max-width: 96px;
-                margin: 4px;
             }
         }
 
@@ -124,23 +128,32 @@ block content
             letter-spacing: 2px;
         }
 
-        #heroDetails .hero-bottom {
+        #heroDetails .hero-bar {
             display: flex;
-            justify-content: center;
-            margin-top: 40px;
+            justify-content: space-between;
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
 
-        #heroDetails .hero-bottom a {
-            font-size: 32px;
+        #heroDetails .hero-bar a {
+            font-size: 28px;
             font-family: "Raleway", sans-serif;
             letter-spacing: 2px;
             text-transform: uppercase;
         }
 
+        #heroDetails .hero-bar > a {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        #heroDetails .hero-stats {
+            margin-top: 40px;
+        }
+
         .language-selector {
             display: flex;
-            margin-top: 60px;
-            float: right;
         }
 
         .language-selector > a {
@@ -150,32 +163,7 @@ block content
 
     #app(ng-app="app")
         #main(ng-controller="HeroesCtrl" ng-cloak)
-            div(ng-show="!selectedHero")
-                h2.content-head.is-center heroes
-            #heroList(ng-show="!selectedHero")
-                img(ng-repeat="hero in heroes" ng-src="http://cdn.dota2.com/apps/dota2/images/heroes/{{hero.name}}_hphover.png" ng-click="selectHero(hero)")
-            #heroDetails(ng-show="selectedHero")
-                .hero-top
-                    img(ng-src="http://cdn.dota2.com/apps/dota2/images/heroes/{{selectedHero.name}}_full.png")
-                    .name {{tokens['HeroName_npc_dota_hero_' + selectedHero.name]}}
-                .hero-right
-                    .abilities
-                        .ability-block(ng-repeat="ability in abilities")
-                            .ability
-                                .image-block
-                                    img.image(ng-src="{{getAbilityImage(ability)}}")
-                                    span.cooldown-text(ng-if="ability.cooldown") {{ability.cooldown}}
-                                span.description(ng-bind-html="getAbilityDescription(ability)")
-                            .ability.sub(ng-if="ability.subName")
-                                .image-block
-                                    img.image(ng-src="{{getAbilityImage(ability, true)}}")
-                                    span.cooldown-text(ng-if="ability.subCooldown") {{ability.subCooldown}}
-                                span.description(ng-bind-html="getAbilityDescription(ability, true)")
-                .hero-bottom
-                    a(href="#" ng-click="selectHero()") Back
-            div.language-selector
-                a(ng-click="selectEnglish()") ENG
-                a(ng-click="selectRussian()") RU
+            ng-view
     script.
         function parseKV(string, targetObject) {
             var index = 0;
@@ -236,9 +224,24 @@ block content
 
         var model = [];
 
-        var app = angular.module('app', [ "ngSanitize", "ngRoute" ]);
+        var app = angular.module('app', [ "ngSanitize", "ngRoute", "highcharts-ng" ]);
 
-        app.controller('HeroesCtrl', function ($scope) {
+        app.config(function($routeProvider, $locationProvider) {
+            console.log("config");
+            $routeProvider.when("/heroes/:hero", {
+                templateUrl: "/templates/hero.html",
+                controller: "HeroesCtrl"
+            });
+
+            $routeProvider.when("/heroes", {
+                templateUrl: "/templates/heroList.html",
+                controller: "HeroesCtrl"
+            });
+
+            $locationProvider.html5Mode(true);
+        });
+
+        app.controller('HeroesCtrl', function ($scope, $http, $filter, $routeParams) {
             var heroes = kvToObject("#{model.heroes}").DOTAHeroes;
             heroes = Object.keys(heroes).filter(function(key) {
                 var hero = heroes[key];
@@ -262,7 +265,6 @@ block content
 
             $scope.selectRussian = function () {
                 $scope.tokens = tokensRU;
-                console.log($scope.tokens);
             };
 
             if (getLang().indexOf("ru") !== -1) {
@@ -293,12 +295,61 @@ block content
                 return token.replace(/\\"/g, "\"").replace(/\\\\\\\\/g, "");
             };
 
+            $scope.winrateConfig = {
+                loading: true,
+                options: {
+                    chart: {
+                        type: "line"
+                    },
+                    tooltip: {
+                        formatter: function () {
+                            return this.y.toFixed(1) + ' % across ' + this.point.games + ' games';
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    }
+                },
+                title: {
+                    text: "Winrate"
+                },
+                xAxis: {
+                    type: 'datetime',
+                    title: {
+                        text: 'Date'
+                    }
+                },
+                yAxis: {
+                    min: 25,
+                    max: 75
+                }
+            };
+
+            var loadHeroWinRates = function(hero) {
+                $scope.winrateConfig.loading = true;
+
+                $http.get("/stats/" + hero.name)
+                    .then(function(response) {
+                        var seriesResult = [];
+                        angular.forEach(response.data, function(value, key) {
+                            seriesResult.push({ x: new Date(key), y: value.winRate * 100, games: value.games })
+                        }, seriesResult);
+
+                        seriesResult = $filter('orderBy')(seriesResult, "'x'");
+
+                        $scope.winrateConfig.series = [{ data: seriesResult }];
+                        $scope.winrateConfig.loading = false;
+                    });
+            };
+
             $scope.selectHero = function(hero) {
                 $scope.selectedHero = hero;
 
                 if (!hero) {
                     return;
                 }
+
+                loadHeroWinRates(hero);
 
                 var customIcons = hero.CustomIcons || {};
 
@@ -363,5 +414,11 @@ block content
                 $scope.abilities = abilities;
             };
 
-            console.log($scope.heroes)
+            if ($routeParams.hero) {
+                heroes.forEach(function (hero) {
+                    if (hero.name === $routeParams.hero) {
+                        $scope.selectHero(hero);
+                    }
+                });
+            }
         });

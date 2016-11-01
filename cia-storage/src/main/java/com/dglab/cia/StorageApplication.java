@@ -136,6 +136,10 @@ public class StorageApplication {
             return stats;
         }, jsonUtil.json());
 
+        get("/stats/:hero", (request, response) -> {
+            return statsService.getHeroWinRatePerDay(request.params("hero"));
+        }, jsonUtil.json());
+
         post("/match/info/:id", (request, response) -> {
             long matchId = requestLong(request, "id");
             MatchInfo matchInfo = requestObject(request, MatchInfo.class);

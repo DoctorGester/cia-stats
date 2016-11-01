@@ -1,0 +1,32 @@
+<div id="heroDetails" ng-show="selectedHero">
+    <div class="hero-top"><img ng-src="http://cdn.dota2.com/apps/dota2/images/heroes/{{selectedHero.name}}_full.png"/>
+        <div class="name">{{tokens['HeroName_npc_dota_hero_' + selectedHero.name]}}</div>
+    </div>
+    <div class="hero-bar">
+        <div class="language-selector">
+            <a ng-click="selectEnglish()">ENG</a>
+            <a ng-click="selectRussian()">RU</a>
+        </div>
+        <a href="/heroes">Back</a>
+    </div>
+    <div class="hero-right">
+        <div class="abilities">
+            <div ng-repeat="ability in abilities" class="ability-block">
+                <div class="ability">
+                    <div class="image-block"><img ng-src="{{getAbilityImage(ability)}}" class="image"/><span ng-if="ability.cooldown" class="cooldown-text">{{ability.cooldown}}</span></div><span ng-bind-html="getAbilityDescription(ability)" class="description"></span>
+                </div>
+                <div ng-if="ability.subName" class="ability sub">
+                    <div class="image-block"><img ng-src="{{getAbilityImage(ability, true)}}" class="image"/><span ng-if="ability.subCooldown" class="cooldown-text">{{ability.subCooldown}}</span></div><span ng-bind-html="getAbilityDescription(ability, true)" class="description"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <highchart config="winrateConfig" class="hero-stats"></highchart>
+    <div class="hero-bar">
+        <div class="language-selector">
+            <a ng-click="selectEnglish()">ENG</a>
+            <a ng-click="selectRussian()">RU</a>
+        </div>
+        <a href="/heroes">Back</a>
+    </div>
+</div>

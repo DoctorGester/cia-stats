@@ -1,6 +1,7 @@
 package com.dglab.cia;
 
 import com.dglab.cia.json.AllStats;
+import com.dglab.cia.json.HeroWinRateAndGames;
 import com.dglab.cia.json.RankedPlayer;
 import com.dglab.cia.json.util.ObjectMapperFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -16,9 +17,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author doc
@@ -66,7 +70,7 @@ public class ViewApplication {
         return "home";
     }
 
-    @RequestMapping("/heroes")
+    @RequestMapping("/heroes/**")
     String heroes(Model model) {
         model.addAttribute("stringUtils", StringUtils.class);
         model.addAttribute("heroes", helper.getHeroesBase64());
@@ -83,6 +87,15 @@ public class ViewApplication {
         });
 
         return "ranks/top/byMode";
+    }
+
+    @RequestMapping("/stats/{hero}")
+    @ResponseBody
+    Object heroWinRates(Model model, @PathVariable("hero") String hero) {
+        setupModelFromURL(String.format("/stats/%s", hero), model, new TypeReference<Map<LocalDate, HeroWinRateAndGames>>() {
+        });
+
+        return model.asMap().get("model");
     }
 
     private void setupModelFromURL(String query, Model model, TypeReference<?> type) {
