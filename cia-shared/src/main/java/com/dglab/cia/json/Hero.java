@@ -38,5 +38,6 @@ public enum Hero {
     MEDUSA,
     OMNIKNIGHT,
     ANTIMAGE,
-    PHANTOM_LANCER;
+    PHANTOM_LANCER,
+    GYROCOPTER
 }
