@@ -63,7 +63,15 @@ function createWinRateGraph(graphId, graphName, data) {
         plotOptions: heroIconPlotOptions,
         series: [{
             showInLegend: false,
-            data: markers
+            data: markers,
+            cursor: 'pointer',
+            point: {
+                events: {
+                    click: function() {
+                        window.location.href = "/heroes/" + this.name;
+                    }
+                }
+            }
         }]
     });
 

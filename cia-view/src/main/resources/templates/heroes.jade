@@ -227,7 +227,6 @@ block content
         var app = angular.module('app', [ "ngSanitize", "ngRoute", "highcharts-ng" ]);
 
         app.config(function($routeProvider, $locationProvider) {
-            console.log("config");
             $routeProvider.when("/heroes/:hero", {
                 templateUrl: "/templates/hero.html",
                 controller: "HeroesCtrl"

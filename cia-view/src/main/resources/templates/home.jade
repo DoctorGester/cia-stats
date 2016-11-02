@@ -73,6 +73,14 @@ block content
             series: [{
                 showInLegend: false,
                 data: markers,
-                name: "Rounds played"
+                name: "Rounds played",
+                cursor: "pointer",
+                point: {
+                    events: {
+                        click: function () {
+                            window.location.href = "/heroes/" + this.name;
+                        }
+                    }
+                }
             }]
         });
