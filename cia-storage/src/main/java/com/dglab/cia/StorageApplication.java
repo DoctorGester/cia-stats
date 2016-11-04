@@ -193,6 +193,12 @@ public class StorageApplication {
 			MatchResult matchResult = requestObject(request, MatchResult.class);
 			matchResult.setMatchId(matchId);
 
+            if (matchResult.getWinnerTeam() == 0) {
+                log.warn("Incorrect match winner received. Aborting");
+                log.warn(request.raw().getParameter("data"));
+                return "";
+            }
+
 			if (matchService.putMatchResult(matchResult)) {
                 log.info("Winner set {}", matchId);
 
