@@ -1,6 +1,7 @@
 package com.dglab.cia;
 
 import com.dglab.cia.json.util.ObjectMapperFactory;
+import com.dglab.cia.util.JsonLogger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.io.FileUtils;
@@ -97,5 +98,10 @@ public class PersistenceConfig {
 	@Bean
 	public JsonUtil createJsonUtil() {
 		return new JsonUtil();
+	}
+
+	@Bean
+	public JsonLogger createJsonLogger() {
+		return new JsonLogger();
 	}
 }

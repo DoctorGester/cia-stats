@@ -2,12 +2,12 @@ package com.dglab.cia;
 
 import com.dglab.cia.json.*;
 import com.dglab.cia.persistence.*;
+import com.dglab.cia.util.JsonLogger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.map.PassiveExpiringMap;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.impl.SimpleLogger;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import spark.Request;
 
@@ -25,9 +25,6 @@ import static spark.Spark.*;
 public class StorageApplication {
     static {
         System.setProperty("org.jboss.logging.provider", "slf4j");
-        System.setProperty(SimpleLogger.SHOW_DATE_TIME_KEY, "true");
-        System.setProperty(SimpleLogger.SHOW_SHORT_LOG_NAME_KEY, "true");
-        System.setProperty(SimpleLogger.DATE_TIME_FORMAT_KEY, "[yyyy/MM/dd HH:mm:ss]");
     }
 
     private static Logger log = LoggerFactory.getLogger(StorageApplication.class);
@@ -41,6 +38,7 @@ public class StorageApplication {
     private PassService passService;
     private ObjectMapper mapper;
 	private JsonUtil jsonUtil;
+    private JsonLogger jsonLogger;
 
     private Map<HttpServletRequest, Long> requestTimeMap = Collections.synchronizedMap(
             new PassiveExpiringMap<>(new PassiveExpiringMap.ConstantTimeToLiveExpirationPolicy<>(1, TimeUnit.MINUTES))
@@ -64,6 +62,7 @@ public class StorageApplication {
         passService = context.getBean(PassService.class);
 		mapper = context.getBean(ObjectMapper.class);
 		jsonUtil = context.getBean(JsonUtil.class);
+        jsonLogger = context.getBean(JsonLogger.class);
 
         before((request, response) -> requestTimeMap.put(request.raw(), System.currentTimeMillis()));
 
@@ -83,6 +82,10 @@ public class StorageApplication {
 
                 times.add(resultTime);
             }
+        });
+
+        before((request, response) -> {
+            //request.requestMethod() + request.uri();
         });
 
 		get("/match/:id", (request, response) -> {
@@ -154,6 +157,8 @@ public class StorageApplication {
         }, jsonUtil.json());
 
 		post("/match/:id", (request, response) -> {
+            jsonLogger.log(request);
+
 			long matchId = requestLong(request, "id");
 			MatchInfo matchInfo = requestObject(request, MatchInfo.class);
 			matchInfo.setMatchId(matchId);
@@ -175,6 +180,8 @@ public class StorageApplication {
 		}, jsonUtil.json());
 
 		post("/match/:id/:round", (request, response) -> {
+            jsonLogger.log(request);
+
 			long matchId = requestLong(request, "id");
 			short round = requestLong(request, "round").shortValue();
 
@@ -188,6 +195,8 @@ public class StorageApplication {
 		});
 
 		post("/winner/:id", (request, response) -> {
+            jsonLogger.log(request);
+
 			long matchId = requestLong(request, "id");
 
 			MatchResult matchResult = requestObject(request, MatchResult.class);
@@ -213,6 +222,8 @@ public class StorageApplication {
 		}, jsonUtil.json());
 
         post("/quests/report/:id", (request, response) -> {
+            jsonLogger.log(request);
+
             long matchId = requestLong(request, "id");
             QuestProgressReport progress = requestObject(request, QuestProgressReport.class);
 
@@ -228,15 +239,15 @@ public class StorageApplication {
         }, jsonUtil.json());
 
         post("/quests/update", (request, response) -> {
+            jsonLogger.log(request);
+
             PlayerList players = requestObject(request, PlayerList.class);
 
             log.info("Quests/Update {}", players.getPlayers());
 
-            Map<Long, List<PassQuest>> quests = players.getPlayers().stream().collect(
+            return players.getPlayers().stream().collect(
                     Collectors.toMap(id -> id, id -> questService.updatePlayerQuests(id))
             );
-
-            return quests;
         }, jsonUtil.json());
 
         post("/quests/reroll/:id", (request, response) -> {

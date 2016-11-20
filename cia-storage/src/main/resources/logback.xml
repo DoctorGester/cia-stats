@@ -1,0 +1,23 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%d] [%thread] %-5level %logger{0} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="JSON" class="ch.qos.logback.core.FileAppender">
+        <file>json.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>[%d] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.dglab.cia.util.JsonLogger">
+        <appender-ref ref="JSON" />
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
