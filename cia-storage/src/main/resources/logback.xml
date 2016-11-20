@@ -5,7 +5,7 @@
         </encoder>
     </appender>
 
-    <appender name="JSON" class="ch.qos.logback.core.FileAppender" additivity="false">
+    <appender name="JSON" class="ch.qos.logback.core.FileAppender">
         <file>json.log</file>
         <append>true</append>
         <encoder>
@@ -13,7 +13,7 @@
         </encoder>
     </appender>
 
-    <logger name="com.dglab.cia.util.JsonLogger">
+    <logger name="com.dglab.cia.util.JsonLogger" additivity="false">
         <appender-ref ref="JSON" />
     </logger>
 
