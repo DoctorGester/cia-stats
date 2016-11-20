@@ -5,7 +5,7 @@
         </encoder>
     </appender>
 
-    <appender name="JSON" class="ch.qos.logback.core.FileAppender">
+    <appender name="JSON" class="ch.qos.logback.core.FileAppender" additivity="false">
         <file>json.log</file>
         <append>true</append>
         <encoder>
