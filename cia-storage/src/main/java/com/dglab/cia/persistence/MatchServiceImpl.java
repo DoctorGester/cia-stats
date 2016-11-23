@@ -283,11 +283,4 @@ public class MatchServiceImpl implements MatchService {
 
 		return false;
 	}
-
-    @Scheduled(cron = "0 0 0 * * *")
-    @Async
-    @Transactional
-    public void deleteOldMatches() {
-        matchDao.deleteOldMatches();
-    }
 }

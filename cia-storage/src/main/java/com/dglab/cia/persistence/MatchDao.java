@@ -66,13 +66,6 @@ public class MatchDao {
         return entityManager.createQuery(query).setMaxResults(amount).getResultList();
     }
 
-    public void deleteOldMatches() {
-        entityManager.createNativeQuery("delete from player_round_data R using matches M where M.matchid = R.matchid and M.datetime <= current_date - cast('10 day' as INTERVAL)").executeUpdate();
-        entityManager.createNativeQuery("delete from rounds R using matches M where M.matchid = R.matchid and M.datetime <= current_date - cast('10 day' as INTERVAL)").executeUpdate();
-        entityManager.createNativeQuery("delete from player_match_data R using matches M where M.matchid = R.matchid and M.datetime <= current_date - cast('10 day' as INTERVAL)").executeUpdate();
-        entityManager.createNativeQuery("delete from matches M where M.datetime <= current_date - cast('10 day' as INTERVAL)").executeUpdate();
-    }
-
 	public List<Match> getPlayerMatchesInADay(long steamId64) {
 		Instant lastDay = Instant.now().minus(1, ChronoUnit.DAYS);
 

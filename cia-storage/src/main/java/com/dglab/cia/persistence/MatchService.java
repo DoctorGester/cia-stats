@@ -16,5 +16,4 @@ public interface MatchService {
 	void putMatch(MatchInfo matchInfo);
 	void putRound(RoundInfo roundInfo);
 	boolean putMatchResult(MatchResult result);
-    void deleteOldMatches();
 }

@@ -290,12 +290,6 @@ public class StorageApplication {
 			return "";
 		});
 
-        get("/admin/matches/cleanup", (request, response) -> {
-            matchService.deleteOldMatches();
-
-            return "";
-        });
-
 		exception(Exception.class, (exception, request, response) -> {
 			log.error("Error processing request: {} at {}", exception, exception.getStackTrace()[0]);
             response.status(500);
