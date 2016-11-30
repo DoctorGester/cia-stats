@@ -1,0 +1,180 @@
+extends base.jade
+block append head
+    block title
+        title Crumbling Island Arena 2.0
+
+block content
+    style.
+        #header {
+            text-transform: uppercase;
+            margin: 2em 0 1em;
+            font-family: "Open Sans", sans-serif;
+            font-size: 48px;
+            font-weight: normal;
+        }
+
+        #change-list {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #other-changes {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            margin: 10px 10px 40px;
+            align-items: center;
+        }
+
+        #other-changes span {
+            font-size: 17px;
+            line-height: 1.9em;
+        }
+
+        #footer {
+            align-self: center;
+            font-size: 24px;
+            margin: 40px;
+        }
+
+        .hero-changes {
+            display: flex;
+            flex-direction: row;
+            padding: 12px;
+            border: 1px solid #eee;
+            border-radius: 3px;
+            margin: 10px;
+        }
+
+        .hero-icon {
+            align-self: center;
+            height: auto;
+            border-radius: 2px;
+        }
+
+        .change-lines {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            margin-left: 30px;
+            justify-content: center;
+        }
+
+        .change-lines span {
+            font-size: 18px;
+        }
+    div
+        h2#header.is-center Crumbling Island Arena 2.0
+
+    div#change-list
+        div#other-changes
+            span All ranged heroes now have 20 health points
+            span All melee heroes now have 24 health points
+            span Rune now has 5 health points
+            span Every hero now has a basic attack, activated by pressing left mouse button
+            span When executing basic attacks more than 3 times in quick concession their cooldown starts to grow
+            span Adjusted all damage and healing numbers for all abilities
+            span Made walking near edges way easier
+            span Spells which do not travel through holes in the ground now check for holes more leniently
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/brewmaster_hphover.png")
+            div.change-lines
+                span Basic attack: Melee. Damage is double if a hero has at least 2 Beer stacks on him
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/crystal_maiden_hphover.png")
+            div.change-lines
+                span Basic attack: Ranged. Hitting enemies with other abilities charges the attack. At 3 charges the attack is trasnformed into a Freezing projectile
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/drow_ranger_hphover.png")
+            div.change-lines
+                span Basic attack: Ranged. Slowing projectile
+                span new Q: short ranged dash which fires arrows in a circle. Can be recast in a short period
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/earthshaker_hphover.png")
+            div.change-lines
+                span Basic attack: Melee. Using abilities makes the next attack deal double damage
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/ember_spirit_hphover.png")
+            div.change-lines
+                span Basic attack: Melee. Deals double damage to Burning enemies
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/invoker_hphover.png")
+            div.change-lines
+                span Basic attack: Ranged
+                span W: now disarms the affected enemy and doubles all incoming ability damage, but prevents taking attack damage
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/juggernaut_hphover.png")
+            div.change-lines
+                span Basic attack: Mixed. Grows with gathered swords
+                span new Q: spins dealing damage around himself
+                span W: now heals over time, instead of healing once
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/tinker_hphover.png")
+            div.change-lines
+                span Basic attack: Ranged. fire a laser dealing 1 damage. Travels through portals
+                span Moved W to the Q slot
+                span Split portals to separate ability slots
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/phantom_assassin_hphover.png")
+            div.change-lines
+                span Basic attack: Ranged. Throws a quick boomerang which returns shortly
+                span new Q: fire a slowing and damaging dagger
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/sven_hphover.png")
+            div.change-lines
+                span Basic attack: Melee. Damage and knocback is doubled when Enraged
+                span new Q: fire a projectile which stuns and knocks back enemies in AoE on impact
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/tiny_hphover.png")
+            div.change-lines
+                span Basic attack: Melee
+                span R: can also empower the next basic attack, dealing more damage and knocking back farther
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/sand_king_hphover.png")
+            div.change-lines
+                span Basic attack: Melee. Applies a debuff which can be triggered by hitting the enemy with other abilities, dealing damage in the AoE
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/sniper_hphover.png")
+            div.change-lines
+                span Basic attack: Ranged. Global
+                span new Q: fire a shrapnel dealing damage over time in a target area and slowing enemies hit
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/vengefulspirit_hphover.png")
+            div.change-lines
+                span Basic attack: Ranged
+                span W: now deals damage and amplifies incoming attack damage to the enemies debuffed
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/legion_commander_hphover.png")
+            div.change-lines
+                span Basic attack: Melee. Deals double damage when the hero movespeed is buffed
+                span Q: is now a directional dash. Deals damage upon landing
+                span W: can now be applied to allies. Shield for 2 damage
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/queenofpain_hphover.png")
+            div.change-lines
+                span Basic attack: Ranged. Deals double damage to slowed targets
+                span Q: now deals damage over time
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/tusk_hphover.png")
+            div.change-lines
+                span Basic attack: Melee. Deals double damage and knocks back farther every 5 seconds
+                span Q: now pushes the caster back when cast
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/storm_spirit_hphover.png")
+            div.change-lines
+                span Basic attack: Ranged. Charged every time an ability is used. Charged attacks deal double damage and apply slow in the AoE
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/slark_hphover.png")
+            div.change-lines
+                span Basic attack: Melee. Steals health and applies a debuff to himself, returning stolen health on expiration
+                span new Q: throws his weapon, slowing an enemy on impact
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/gyrocopter_hphover.png")
+            div.change-lines
+                span Basic attack: Ranged. Applies a stacking slow. At 3 stacks deals an additional point of damage
+                span new Q: launch 3 knocking back projectiles in a cone
+        div.hero-changes
+            img.hero-icon(src="http://cdn.dota2.com/apps/dota2/images/heroes/skeleton_king_hphover.png")
+            div.change-lines
+                span Basic attack: Melee. Restores health for each hero hit
+        span#footer Missing heroes will be finished and added to the game in the following weeks

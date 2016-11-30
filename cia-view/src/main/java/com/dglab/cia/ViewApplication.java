@@ -81,6 +81,11 @@ public class ViewApplication {
         return "heroes";
     }
 
+    @RequestMapping("/reborn")
+    String reborn(Model model) {
+        return "reborn";
+    }
+
     @RequestMapping("/ranks/top/{mode}")
     String ranks(Model model, @PathVariable("mode") String mode) {
         setupModelFromURL(String.format("/ranks/top/%s", mode), model, new TypeReference<List<RankedPlayer>>() {
