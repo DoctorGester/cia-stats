@@ -72,6 +72,7 @@ subprojects {
     ext.runProcess = { int port ->
         def builder = new ProcessBuilder(
                 'java',
+                '-XX:+HeapDumpOnOutOfMemoryError',
                 '-jar',
                 'build/libs/' + project.name + '-' + project.version + '.jar'
         )
