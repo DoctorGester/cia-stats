@@ -27,19 +27,20 @@ label {
     height: auto;
 }
 
-.is-center
-{
+.is-center {
     text-align: center;
 }
 
 .home-menu {
     padding: 0.5em;
     text-align: center;
-    box-shadow: 0 1px 1px rgba(0,0,0, 0.10);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.10);
 }
+
 .home-menu {
     background: #2d3e50;
 }
+
 .pure-menu.pure-menu-fixed {
     /* Fixed menus normally have a border at the bottom. */
     border-bottom: none;
@@ -61,6 +62,7 @@ label {
 .home-menu a {
     color: #6FBEF3;
 }
+
 .home-menu li a:hover,
 .home-menu li a:focus {
     background: none;
@@ -97,9 +99,10 @@ label {
 .content-subhead {
     color: #1f8dd6;
 }
-    .content-subhead i {
-        margin-right: 7px;
-    }
+
+.content-subhead i {
+    margin-right: 7px;
+}
 
 /* This is the class used for the dark-background areas. */
 .ribbon {
@@ -118,6 +121,7 @@ label {
     body {
         font-size: 16px;
     }
+
     /* We want to give the content area some more padding */
     .content {
         padding: 1em;
@@ -129,9 +133,9 @@ label {
         text-align: left;
     }
 
-	.home-menu ul {
-		float: right;
-	}
+    .home-menu ul {
+        float: right;
+    }
 
     /* We remove the border-separator assigned to .l-box-lrg */
     .l-box-lrg {
@@ -139,47 +143,40 @@ label {
     }
 }
 
-a
-{
+a {
     color: #3b8bba;
     text-decoration: none;
 }
 
-.content-margin
-{
+.content-margin {
     margin-top: 10em;
 }
 
-.page-content
-{
+.page-content {
     width: 70%;
     margin-left: auto;
     margin-right: auto;
 }
 
-.ranked-name
-{
+.ranked-name {
     margin-left: 3.5em;
     line-height: 48px;
     font-weight: bold;
     font-size: 18px;
 }
 
-.ranked-name-container
-{
+.ranked-name-container {
     height: 48px;
 }
 
-.ranked-avatar
-{
-	width: 48px;
-   	height: 48px;
+.ranked-avatar {
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     margin-left: 3.5em;
 }
 
-.rank-image-container
-{
+.rank-image-container {
     width: 48px;
     height: 48px;
     position: relative;
@@ -189,32 +186,27 @@ a
     margin-right: 3.5em;
 }
 
-.elite-rank-container
-{
-	background-color: palegoldenrod;
+.elite-rank-container {
+    background-color: palegoldenrod;
 }
 
-.rank-image
-{
+.rank-image {
     width: 100%;
     height: 100%;
 }
 
-.rank-row
-{
+.rank-row {
     margin: 10px 0 10px 0;
     background-color: rgba(0, 148, 255, 0.15);
     border-radius: 3px;
     padding: 10px 0 10px 0;
 }
 
-.rank-row:nth-child(even)
-{
+.rank-row:nth-child(even) {
     background-color: rgba(0, 127, 127, 0.15);
 }
 
-.rank-number
-{
+.rank-number {
     position: absolute;
     right: 0;
     width: 100%;
@@ -226,18 +218,15 @@ a
     font-size: 24px;
 }
 
-.normal-number
-{
+.normal-number {
     text-shadow: 0 0 4px deepskyblue;
 }
 
-.elite-number
-{
+.elite-number {
     text-shadow: 0 0 4px black;
 }
 
-.stats-graph
-{
+.stats-graph {
     width: 100%;
     height: 400px;
     margin-top: 2em;
@@ -245,40 +234,69 @@ a
 }
 
 @media (max-width: 1024px) {
-    .page-content
-    {
+    .page-content {
         width: 80%;
     }
 
-    .rank-image-container
-    {
+    .rank-image-container {
         width: 32px;
         height: 32px;
         margin-right: 1em;
     }
 
-    .ranked-avatar
-    {
-    	display: none;
+    .ranked-avatar {
+        display: none;
     }
 
-    .ranked-name-container
-    {
+    .ranked-name-container {
         height: 32px;
     }
 
-    .ranked-name
-    {
+    .ranked-name {
         margin-left: 1em;
         line-height: 32px;
         font-weight: bold;
         font-size: 12px;
     }
 
-    .rank-number
-    {
+    .rank-number {
         line-height: 32px;
         top: 6px;
         font-size: 16px;
     }
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    top: 120%;
+    left: 50%;
+    margin-left: -60px;
+}
+
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent black transparent;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
 }

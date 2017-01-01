@@ -49,6 +49,14 @@ block content
             font-family: "Open Sans", sans-serif;
         }
 
+        #heroDetails .hero-right .attack-ability {
+            margin-left: 16px;
+            font-family: "Open Sans", sans-serif;
+            text-transform: uppercase;
+            font-size: 18px;
+            color: steelblue;
+        }
+
         #heroDetails .hero-right .abilities {
             display: flex;
             flex-direction: column;
@@ -93,6 +101,19 @@ block content
             left: 100%;
             top: 100%;
             transform: translate(-80%, -80%);
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        #heroDetails .hero-right .abilities .ability .image-block .damage-text {
+            position: absolute;
+            color: white;
+            background-color: #da2715;
+            text-align: center;
+            border-radius: 4px;
+            right: 100%;
+            top: 100%;
+            transform: translate(80%, -80%);
             padding-left: 5px;
             padding-right: 5px;
         }
@@ -274,6 +295,16 @@ block content
 
             var allAbilities = kvToObject("#{model.abilities}").DOTAAbilities;
 
+            $scope.isAttackAbility = function(ability) {
+                return ability.name.endsWith("_a");
+            };
+
+            $scope.not = function (func) {
+                return function (item) {
+                    return !func(item);
+                }
+            };
+
             $scope.getAbilityImage = function(ability, sub) {
                 var template = "http://cdn.dota2.com/apps/dota2/images/abilities/%s_hp1.png";
 
@@ -396,10 +427,12 @@ block content
                             abilityModel.image = abilityImage;
                             abilityModel.name = abilityName;
                             abilityModel.cooldown = parseFloat(ability.AbilityCooldown);
+                            abilityModel.damage = ability.Damage ? parseFloat(ability.Damage) : undefined;
                         } else {
                             abilityModel.subImage = abilityImage;
                             abilityModel.subName = originalName;
                             abilityModel.subCooldown = parseFloat(ability.AbilityCooldown);
+                            abilityModel.subDamage = ability.Damage ? parseFloat(ability.Damage) : undefined;
                         }
 
                         if (!found) {
