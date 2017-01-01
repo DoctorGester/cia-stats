@@ -4,7 +4,7 @@ import com.dglab.cia.json.*;
 import com.dglab.cia.persistence.*;
 import com.dglab.cia.util.JsonLogger;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.collections4.map.PassiveExpiringMap;
+import net.jodah.expiringmap.ExpiringMap;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,8 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import spark.Request;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -40,10 +41,7 @@ public class StorageApplication {
 	private JsonUtil jsonUtil;
     private JsonLogger jsonLogger;
 
-    private Map<HttpServletRequest, Long> requestTimeMap = Collections.synchronizedMap(
-            new PassiveExpiringMap<>(new PassiveExpiringMap.ConstantTimeToLiveExpirationPolicy<>(1, TimeUnit.MINUTES))
-    );
-
+    private Map<HttpServletRequest, Long> requestTimeMap = ExpiringMap.builder().expiration(1, TimeUnit.MINUTES).build();
     private Map<String, Queue<Long>> urlRequestTimes = new ConcurrentHashMap<>();
 
 	public StorageApplication() {
