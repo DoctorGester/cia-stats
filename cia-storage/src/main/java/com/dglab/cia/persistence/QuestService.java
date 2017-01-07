@@ -13,4 +13,5 @@ public interface QuestService {
     PassQuest updateQuestProgress(long questId, short progress);
     void resetRerolls();
     void forceUpdateCompletedQuests();
+    void forceCompleteImpossibleQuests();
 }

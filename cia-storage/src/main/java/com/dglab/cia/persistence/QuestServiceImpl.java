@@ -9,6 +9,7 @@ import com.dglab.cia.json.PassQuest;
 import com.dglab.cia.json.QuestType;
 import com.dglab.cia.util.ExpiringObject;
 import com.querydsl.core.group.GroupBy;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -187,6 +188,28 @@ public class QuestServiceImpl implements QuestService {
         }
     }
 
+    private void findQuestsAndComplete(QuestType questType, BooleanExpression expr) {
+        Map<Long, List<Quest>> result = new JPAQuery<Quest>(entityManager)
+                .from(quest)
+                .where(quest.questType.eq(questType).and(expr))
+                .transform(GroupBy.groupBy(quest.steamId64).as(GroupBy.list(quest)));
+
+        result.forEach((id, quests) -> {
+            quests.forEach(questsRepository::delete);
+            passService.awardExperience(id, questType.getReward() * quests.size());
+        });
+    }
+
+    @Override
+    @Transactional
+    public void forceCompleteImpossibleQuests() {
+        List<Hero> heroes = new ArrayList<>(Arrays.asList(Hero.values()));
+        heroes.removeAll(getHeroWeights().keySet());
+
+        findQuestsAndComplete(QuestType.PLAY_ROUNDS_AS, quest.hero.in(heroes));
+        findQuestsAndComplete(QuestType.PLAY_ROUNDS_AS_OR, quest.hero.in(heroes).or(quest.secondaryHero.in(heroes)));
+    }
+
     private synchronized Map<Hero, Double> getHeroWeights() {
         List<HeroWinRateAndGames> heroWinRates = cachedWinRates.get();
 
@@ -195,11 +218,13 @@ public class QuestServiceImpl implements QuestService {
                 HeroWinRateAndGames::getGames
         ));
 
-        double avg = heroGames.values().stream().mapToLong(l -> l).average().orElse(1);
+        if (heroGames.size() < 2) {
+            double avg = heroGames.values().stream().mapToLong(l -> l).average().orElse(1);
 
-        for (Hero hero : Hero.values()) {
-            if (!heroGames.containsKey(hero)) {
-                heroGames.put(hero, (long) avg);
+            for (Hero hero : Hero.values()) {
+                if (!heroGames.containsKey(hero)) {
+                    heroGames.put(hero, (long) avg);
+                }
             }
         }
 
@@ -211,7 +236,7 @@ public class QuestServiceImpl implements QuestService {
     private <E> E weightedRandomValue(Stream<Map.Entry<E, Double>> weights, Random random) {
         return weights
                 .map(e -> new AbstractMap.SimpleEntry<>(e.getKey(), -Math.log(random.nextDouble()) / e.getValue()))
-                .min((e0,e1)-> e0.getValue().compareTo(e1.getValue()))
+                .min(Comparator.comparing(AbstractMap.SimpleEntry::getValue))
                 .orElseThrow(IllegalArgumentException::new).getKey();
     }
 
