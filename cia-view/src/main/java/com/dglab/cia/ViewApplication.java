@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -19,7 +20,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -41,17 +45,6 @@ public class ViewApplication {
 		/*threadPool(4);*/
 
         /*
-        get("/.well-known/*", (request, response) -> {
-            try (InputStream stream = FileUtils.openInputStream(new File(".well-known/" + request.splat()[0]))) {
-                ServletOutputStream out = response.raw().getOutputStream();
-                org.apache.commons.io.IOUtils.copy(stream, out);
-                out.flush();
-                out.close();
-            }
-
-            return "";
-        });
-
 		exception(Exception.class, (exception, request, response) -> {
 			exception.printStackTrace();
 		});
@@ -60,6 +53,16 @@ public class ViewApplication {
 		mapGet("/admin/ranks/set/:id/:mode/:rank");
 		mapGet("/admin/elo/set/:id/:mode/:elo");
         mapGet("/admin/stats/recalculate/:stat");*/
+    }
+
+    @RequestMapping("/.well-known/{path}")
+    void wellKnown(@PathVariable("path") String path, HttpServletResponse response) {
+        try (InputStream stream = FileUtils.openInputStream(new File(".well-known/" + path))) {
+            org.apache.commons.io.IOUtils.copy(stream, response.getOutputStream());
+            response.flushBuffer();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @RequestMapping("/")
