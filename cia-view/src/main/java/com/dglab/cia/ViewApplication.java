@@ -55,9 +55,9 @@ public class ViewApplication {
         mapGet("/admin/stats/recalculate/:stat");*/
     }
 
-    @RequestMapping("/.well-known/{path}")
+    @RequestMapping("/.well-known/acme-challenge/{path}")
     void wellKnown(@PathVariable("path") String path, HttpServletResponse response) {
-        try (InputStream stream = FileUtils.openInputStream(new File(".well-known/" + path))) {
+        try (InputStream stream = FileUtils.openInputStream(new File(".well-known/acme-challenge/", path))) {
             org.apache.commons.io.IOUtils.copy(stream, response.getOutputStream());
             response.flushBuffer();
         } catch (IOException e) {
