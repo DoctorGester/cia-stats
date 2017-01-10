@@ -39,5 +39,6 @@ public enum Hero {
     OMNIKNIGHT,
     ANTIMAGE,
     PHANTOM_LANCER,
-    GYROCOPTER
+    GYROCOPTER,
+    WINDRUNNER
 }
