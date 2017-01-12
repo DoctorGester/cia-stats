@@ -1,7 +1,7 @@
 package com.dglab.cia;
 
 import com.dglab.cia.json.AllStats;
-import com.dglab.cia.json.HeroWinRateAndGames;
+import com.dglab.cia.json.HeroStats;
 import com.dglab.cia.json.RankedPlayer;
 import com.dglab.cia.json.util.ObjectMapperFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -99,8 +99,8 @@ public class ViewApplication {
 
     @RequestMapping("/stats/{hero}")
     @ResponseBody
-    Object heroWinRates(Model model, @PathVariable("hero") String hero) {
-        setupModelFromURL(String.format("/stats/%s", hero), model, new TypeReference<Map<LocalDate, HeroWinRateAndGames>>() {
+    Object heroStats(Model model, @PathVariable("hero") String hero) {
+        setupModelFromURL(String.format("/stats/%s", hero), model, new TypeReference<HeroStats>() {
         });
 
         return model.asMap().get("model");

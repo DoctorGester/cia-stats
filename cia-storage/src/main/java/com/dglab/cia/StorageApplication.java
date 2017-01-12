@@ -12,6 +12,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import spark.Request;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -138,7 +139,17 @@ public class StorageApplication {
         }, jsonUtil.json());
 
         get("/stats/:hero", (request, response) -> {
-            return statsService.getHeroWinRatePerDay(request.params("hero"));
+            String hero = request.params("hero");
+
+            Map<LocalDate, HeroWinRateAndGames> winRatePerDay = statsService.getHeroWinRatePerDay(hero);
+            Map<Long, HeroWinRateAndGames> playerHeroWinRate = statsService.getPlayerHeroWinRate(hero);
+
+            HeroStats heroStats = new HeroStats();
+
+            heroStats.setHeroWinRatePerDate(winRatePerDay);
+            heroStats.setHeroWinRatePerPlayer(playerHeroWinRate);
+
+            return heroStats;
         }, jsonUtil.json());
 
         post("/match/info/:id", (request, response) -> {

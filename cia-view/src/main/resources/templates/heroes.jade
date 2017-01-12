@@ -361,7 +361,9 @@ block content
                 $http.get("/stats/" + hero.name)
                     .then(function(response) {
                         var seriesResult = [];
-                        angular.forEach(response.data, function(value, key) {
+                        var perDay = response.data.heroWinRatePerDate;
+
+                        angular.forEach(perDay, function(value, key) {
                             seriesResult.push({ x: new Date(key), y: value.winRate * 100, games: value.games })
                         }, seriesResult);
 

@@ -252,7 +252,7 @@ public class MatchServiceImpl implements MatchService {
                     }
                 }
 
-                statsService.incrementHeroStat(winRateKey, isWinner);
+                statsService.incrementHeroStat(playerRoundInfo.getSteamId64(), winRateKey, isWinner);
             }
 
 			playerRoundData.add(roundData);
