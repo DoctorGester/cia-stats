@@ -76,6 +76,7 @@ public class StatsServiceImpl implements StatsService {
         playerHeroWinRate.setWinrate(playerHeroWinRate.getWins() / playerHeroWinRate.getGames());
 
         winRateRepository.save(heroWinRate);
+        playerHeroWinRateRepository.save(playerHeroWinRate);
     }
 
     private BooleanExpression defaultMatchFilters(int days) {
