@@ -73,7 +73,7 @@ public class StatsServiceImpl implements StatsService {
             playerHeroWinRate.setWins(playerHeroWinRate.getWins() + 1);
         }
 
-        playerHeroWinRate.setWinrate(playerHeroWinRate.getWins() / playerHeroWinRate.getGames());
+        playerHeroWinRate.setWinrate((double) playerHeroWinRate.getWins() / playerHeroWinRate.getGames());
 
         winRateRepository.save(heroWinRate);
         playerHeroWinRateRepository.save(playerHeroWinRate);
