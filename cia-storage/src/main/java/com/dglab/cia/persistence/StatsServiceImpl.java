@@ -5,6 +5,7 @@ import com.dglab.cia.database.HeroWinRateKey;
 import com.dglab.cia.database.PlayerHeroWinRate;
 import com.dglab.cia.database.PlayerHeroWinRateKey;
 import com.dglab.cia.json.HeroWinRateAndGames;
+import com.dglab.cia.json.PlayerHeroWinRateAndGames;
 import com.dglab.cia.json.RankRange;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 
 import static com.dglab.cia.database.QHeroWinRate.*;
 import static com.dglab.cia.database.QPlayerHeroWinRate.*;
+import static com.dglab.cia.database.QPlayerName.*;
 
 /**
  * @author doc
@@ -41,6 +43,9 @@ public class StatsServiceImpl implements StatsService {
 
     @Autowired
     private PlayerHeroWinRateRepository playerHeroWinRateRepository;
+
+    @Autowired
+    private PlayerNameRepository playerNameRepository;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
@@ -128,12 +133,12 @@ public class StatsServiceImpl implements StatsService {
                 return null;
             }
 
-            return new HeroWinRateAndGames(hero, (double) wins / games, wins);
+            return new HeroWinRateAndGames(hero, (double) wins / games, games);
         }));
     }
 
     @Override
-    public Map<Long, HeroWinRateAndGames> getPlayerHeroWinRate(String hero) {
+    public List<PlayerHeroWinRateAndGames> getPlayerHeroWinRate(String hero) {
         if (hero == null) {
             return null;
         }
@@ -145,27 +150,45 @@ public class StatsServiceImpl implements StatsService {
         BooleanExpression relevantMatch = oneVersusOne.or(twoVersusTwo).or(threeVersusThree);
 
         List<Tuple> result = new JPAQuery<PlayerHeroWinRate>(entityManager)
-                .select(playerHeroWinRate.games.sum(), playerHeroWinRate.wins.sum(), playerHeroWinRate.winrate.avg(), playerHeroWinRate.pk.steamId64)
+                .select(
+                        playerHeroWinRate.games.sum(),
+                        playerHeroWinRate.wins.sum(),
+                        playerHeroWinRate.winrate.avg(),
+                        playerHeroWinRate.pk.steamId64,
+                        playerName.name,
+                        playerName.avatarUrl
+                )
                 .from(playerHeroWinRate)
+                .innerJoin(playerHeroWinRate.name, playerName)
                 .where(playerHeroWinRate.pk.heroName.eq("npc_dota_hero_" + hero)
                         .and(relevantMatch)
-                        .and(playerHeroWinRate.games.gt(20))
+                        .and(playerHeroWinRate.games.gt(10))
+                        .and(playerName.steamId64.eq(playerHeroWinRate.pk.steamId64))
                 )
-                .orderBy(playerHeroWinRate.winrate.avg().desc())
-                .groupBy(playerHeroWinRate.pk.steamId64)
-                .limit(5)
+                .orderBy(playerHeroWinRate.games.sum().desc(), playerHeroWinRate.winrate.avg().desc())
+                .groupBy(playerHeroWinRate.pk.steamId64, playerName.steamId64)
+                .distinct()
+                .limit(3)
                 .fetch();
 
-        return result.stream().collect(Collectors.toMap(t -> t.get(playerHeroWinRate.pk.steamId64), t -> {
+        return result.stream().map(t -> {
+            Long steamId64 = t.get(playerHeroWinRate.pk.steamId64);
             Integer games = t.get(playerHeroWinRate.games.sum());
             Integer wins = t.get(playerHeroWinRate.wins.sum());
 
-            if (games == null || wins == null) {
+            if (games == null || wins == null || steamId64 == null) {
                 return null;
             }
 
-            return new HeroWinRateAndGames(hero, (double) wins / games, wins);
-        }));
+            HeroWinRateAndGames winRateAndGames = new HeroWinRateAndGames(hero, (double) wins / games, games);
+
+            return new PlayerHeroWinRateAndGames(
+                    steamId64,
+                    t.get(playerName.name),
+                    t.get(playerName.avatarUrl),
+                    winRateAndGames
+            );
+        }).collect(Collectors.toList());
     }
 
     @Override

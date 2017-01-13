@@ -48,7 +48,7 @@ public class PersistenceConfig {
         dataSource.addDataSourceProperty("password", password);
         dataSource.addDataSourceProperty("databaseName", "ciadb");
         dataSource.addDataSourceProperty("portNumber", "5432");
-        dataSource.addDataSourceProperty("serverName", "127.0.0.1");
+        dataSource.addDataSourceProperty("serverName", "cia-is.moe");
 
 		return dataSource;
 	}

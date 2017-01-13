@@ -2,6 +2,16 @@
     <div class="hero-top"><img ng-src="http://cdn.dota2.com/apps/dota2/images/heroes/{{selectedHero.name}}_full.png"/>
         <div class="name">{{tokens['HeroName_npc_dota_hero_' + selectedHero.name]}}</div>
     </div>
+    <div class="hero-top-players">
+        <div ng-repeat="player in winratePerPlayer">
+            <div class="player-column">
+                <img class="ranked-avatar" ng-src="{{player.avatarUrl}}"/>
+                <a class="ranked-name no-line-height" ng-href="http://steamcommunity.com/profiles/{{player.steamId64}}">{{player.name}}</a>
+                <div><b>{{player.winRateAndGames.games}}</b> rounds</div>
+                <div><b>{{player.winRate}}%</b> wins</div>
+            </div>
+        </div>
+    </div>
     <div class="hero-bar">
         <div class="language-selector">
             <a ng-click="selectEnglish()">ENG</a>

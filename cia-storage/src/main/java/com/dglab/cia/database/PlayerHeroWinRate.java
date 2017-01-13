@@ -1,9 +1,9 @@
 package com.dglab.cia.database;
 
-import javax.persistence.Column;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
+import javax.persistence.*;
 
 /**
  * @author doc
@@ -15,6 +15,7 @@ public class PlayerHeroWinRate {
     private int wins;
     private int games;
     private double winrate;
+    private PlayerName name;
 
     @EmbeddedId
     public PlayerHeroWinRateKey getPk() {
@@ -34,6 +35,22 @@ public class PlayerHeroWinRate {
     @Column(name = "winrate", nullable = false)
     public double getWinrate() {
         return winrate;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @NotFound(action = NotFoundAction.IGNORE)
+    @JoinColumn(
+            name = "steamId64",
+            insertable = false,
+            updatable = false,
+            foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT)
+    )
+    public PlayerName getName() {
+        return name;
+    }
+
+    public void setName(PlayerName name) {
+        this.name = name;
     }
 
     public void setGames(int games) {

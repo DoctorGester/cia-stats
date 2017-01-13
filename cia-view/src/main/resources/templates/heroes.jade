@@ -34,6 +34,26 @@ block content
             }
         }
 
+        #heroDetails .hero-top-players {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+        }
+
+        #heroDetails .hero-top-players .player-column {
+            display: flex;
+            flex-direction: column;
+            margin: 30px;
+        }
+
+        #heroDetails .hero-top-players .player-column > * {
+            margin: 6px auto 6px auto;
+        }
+
+        #heroDetails .hero-top-players .player-column > .no-line-height {
+            line-height: normal;
+        }
+
         #heroDetails .ability img {
             border-radius: 3px;
             width: 64px;
@@ -371,6 +391,13 @@ block content
 
                         $scope.winrateConfig.series = [{ data: seriesResult }];
                         $scope.winrateConfig.loading = false;
+                        $scope.winratePerPlayer = response.data.heroWinRatePerPlayer
+
+                        angular.forEach($scope.winratePerPlayer, function(value) {
+                            value.winRate = parseFloat(Math.round(value.winRateAndGames.winRate * 100)).toFixed(1);
+                        });
+
+                        console.log($scope.winratePerPlayer);
                     });
             };
 

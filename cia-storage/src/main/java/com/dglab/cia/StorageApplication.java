@@ -13,6 +13,7 @@ import spark.Request;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -142,7 +143,7 @@ public class StorageApplication {
             String hero = request.params("hero");
 
             Map<LocalDate, HeroWinRateAndGames> winRatePerDay = statsService.getHeroWinRatePerDay(hero);
-            Map<Long, HeroWinRateAndGames> playerHeroWinRate = statsService.getPlayerHeroWinRate(hero);
+            List<PlayerHeroWinRateAndGames> playerHeroWinRate = statsService.getPlayerHeroWinRate(hero);
 
             HeroStats heroStats = new HeroStats();
 

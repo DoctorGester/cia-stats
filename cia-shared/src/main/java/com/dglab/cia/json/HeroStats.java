@@ -1,6 +1,7 @@
 package com.dglab.cia.json;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -8,7 +9,7 @@ import java.util.Map;
  */
 public class HeroStats {
     private Map<LocalDate, HeroWinRateAndGames> heroWinRatePerDate;
-    private Map<Long, HeroWinRateAndGames> heroWinRatePerPlayer;
+    private List<PlayerHeroWinRateAndGames> heroWinRatePerPlayer;
 
     public Map<LocalDate, HeroWinRateAndGames> getHeroWinRatePerDate() {
         return heroWinRatePerDate;
@@ -18,11 +19,11 @@ public class HeroStats {
         this.heroWinRatePerDate = heroWinRatePerDate;
     }
 
-    public Map<Long, HeroWinRateAndGames> getHeroWinRatePerPlayer() {
+    public List<PlayerHeroWinRateAndGames> getHeroWinRatePerPlayer() {
         return heroWinRatePerPlayer;
     }
 
-    public void setHeroWinRatePerPlayer(Map<Long, HeroWinRateAndGames> heroWinRatePerPlayer) {
+    public void setHeroWinRatePerPlayer(List<PlayerHeroWinRateAndGames> heroWinRatePerPlayer) {
         this.heroWinRatePerPlayer = heroWinRatePerPlayer;
     }
 }
