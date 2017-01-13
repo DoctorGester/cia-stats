@@ -42,25 +42,20 @@ public class CoordinatorServiceImpl implements CoordinatorService {
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public MatchResults processMatch(MatchInfo matchInfo) {
-        try {
-            MatchResults matchResults = new MatchResults();
+        MatchResults matchResults = new MatchResults();
 
-            log.info("Saving match {}", matchInfo.getMatchId());
-            matchService.putMatch(matchInfo);
+        log.info("Saving match {}", matchInfo.getMatchId());
+        matchService.putMatch(matchInfo);
 
-            log.info("Processing ranks for match {}", matchInfo.getMatchId());
-            RankUpdateDetails details = rankService.processMatchResults(matchInfo);
+        log.info("Processing ranks for match {}", matchInfo.getMatchId());
+        RankUpdateDetails details = rankService.processMatchResults(matchInfo);
 
-            log.info("Updating quest results for match {}", matchInfo.getMatchId());
-            Map<Long, PlayerQuestResult> questResults = passService.processMatchUpdate(matchInfo);
+        log.info("Updating quest results for match {}", matchInfo.getMatchId());
+        Map<Long, PlayerQuestResult> questResults = passService.processMatchUpdate(matchInfo);
 
-            matchResults.setRankDetails(details);
-            matchResults.setQuestResults(questResults);
+        matchResults.setRankDetails(details);
+        matchResults.setQuestResults(questResults);
 
-            return matchResults;
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
+        return matchResults;
     }
 }
