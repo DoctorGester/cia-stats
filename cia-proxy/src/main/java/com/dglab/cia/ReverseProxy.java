@@ -35,7 +35,7 @@ public class ReverseProxy {
     private static final Logger log = LoggerFactory.getLogger(ReverseProxy.class);
 
 	public static final String PROXY_TARGET = "http://127.0.0.1:5141";
-	private static final String IP_POOL = "https://raw.githubusercontent.com/SteamDatabase/GameTracking/master/dota/game/dota/pak01_dir/scripts/regions.txt";
+	private static final String IP_POOL = "https://raw.githubusercontent.com/SteamDatabase/GameTracking-Dota2/master/game/dota/pak01_dir/scripts/regions.txt";
 
 	private ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
 	private Collection<IpRange> whiteList = new HashSet<>();
