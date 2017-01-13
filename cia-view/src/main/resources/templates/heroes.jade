@@ -38,6 +38,8 @@ block content
             display: flex;
             flex-direction: row;
             justify-content: center;
+            border: 1px solid #eee;
+            border-radius: 4px;
         }
 
         #heroDetails .hero-top-players .player-column {
@@ -396,8 +398,6 @@ block content
                         angular.forEach($scope.winratePerPlayer, function(value) {
                             value.winRate = parseFloat(Math.round(value.winRateAndGames.winRate * 100)).toFixed(1);
                         });
-
-                        console.log($scope.winratePerPlayer);
                     });
             };
 
