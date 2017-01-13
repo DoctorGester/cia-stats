@@ -52,17 +52,6 @@ public class RankDao {
 	}
 
 	public PlayerRank findPlayerRank(long steamId64, byte season, RankedMode mode) {
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<PlayerMatchData> query = builder.createQuery(PlayerMatchData.class);
-
-		Root<PlayerMatchData> matchDataRoot = query.from(PlayerMatchData.class);
-		query.select(matchDataRoot);
-		query.where(builder.equal(matchDataRoot.get("pk").get("steamId64"), steamId64));
-
-		if (entityManager.createQuery(query).getResultList().isEmpty()) {
-			return null;
-		}
-
 		RankPrimaryKey pk = new RankPrimaryKey();
 		pk.setSteamId64(steamId64);
 		pk.setSeason(season);

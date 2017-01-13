@@ -15,10 +15,10 @@ public interface RankService {
 	byte getCurrentSeason();
 	Map<RankedMode, RankAndStars> getPlayerRanks(long steamId64);
 	Map<Byte, Map<RankedMode, RankAndStars>> getPlayerRankHistory(long steamId64);
-	RankedMode getMatchRankedMode(Match match);
-	Map<Long, RankAndStars> getMatchRanks(long matchId);
-	Map<Long, RankedAchievements> getRankedAchievements(MatchInfo matchInfo);
-	RankUpdateDetails processMatchResults(long matchId);
+	RankedMode getMatchRankedMode(String mode, int players, MatchMap map);
+	Map<Long, RankAndStars> getMatchRanks(MatchInfo matchInfo);
+	Map<Long, RankedAchievements> getRankedAchievements(PlayerList matchInfo);
+	RankUpdateDetails processMatchResults(MatchInfo matchInfo);
 	Map<RankedMode, List<RankedPlayer>> getTopPlayers();
     RankedInfo getRankedInfo();
 	List<RankedPlayer> getTopPlayers(RankedMode mode);

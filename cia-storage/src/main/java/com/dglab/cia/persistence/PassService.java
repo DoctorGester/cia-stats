@@ -1,6 +1,7 @@
 package com.dglab.cia.persistence;
 
 import com.dglab.cia.database.PassOwner;
+import com.dglab.cia.json.MatchInfo;
 import com.dglab.cia.json.PassPlayer;
 import com.dglab.cia.json.PlayerQuestResult;
 import com.dglab.cia.json.QuestProgressReport;
@@ -18,5 +19,5 @@ public interface PassService {
     PassOwner getOrCreate(long steamId64);
     List<PassPlayer> getTopPlayers();
     void awardExperience(long steamId64, int experience);
-    Map<Long, PlayerQuestResult> processMatchUpdate(long matchId, QuestProgressReport progress);
+    Map<Long, PlayerQuestResult> processMatchUpdate(MatchInfo matchInfo);
 }

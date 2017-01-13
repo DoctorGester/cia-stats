@@ -5,8 +5,6 @@ import com.dglab.cia.json.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +13,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -42,21 +41,20 @@ public class MatchServiceImpl implements MatchService {
 
 	@Override
     @Transactional(readOnly = true)
-	public Map<Long, Long> getMatchesPlayed(MatchInfo info) {
-        return info.getPlayers()
+	public Map<Long, Long> getMatchesPlayed(PlayerList players) {
+        return players.getPlayers()
                 .stream()
                 .collect(Collectors.toMap(
-                        PlayerInfo::getSteamId64,
-                        player -> matchDao.getMatchCount(player.getSteamId64())
+						Function.identity(),
+                        player -> matchDao.getMatchCount(player)
                 ));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Map<Long, Integer> getPassExperience(MatchInfo info) {
-        return info.getPlayers()
+    public Map<Long, Integer> getPassExperience(PlayerList players) {
+        return players.getPlayers()
                 .stream()
-                .map(PlayerInfo::getSteamId64)
                 .map(passService::get)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toMap(
@@ -67,7 +65,7 @@ public class MatchServiceImpl implements MatchService {
 
     @Override
     @Transactional(readOnly = true)
-	public MatchDetails getMatchDetails(long matchId) {
+	public MatchInfo getMatchDetails(long matchId) {
 		Match match = matchDao.getMatch(matchId);
 
 		if (match == null) {
@@ -117,14 +115,16 @@ public class MatchServiceImpl implements MatchService {
                 playerRoundInfoCollection.add(playerRoundInfo);
             }
 
-            RoundInfo roundInfo = new RoundInfo(playerRoundInfoCollection);
+            RoundInfo roundInfo = new RoundInfo(playerRoundInfoCollection, round.getNumber());
 			roundInfo.setWinner(round.getWinner());
             roundInfo.setRoundNumber(round.getPk().getNumber());
 
             roundInfoCollection.add(roundInfo);
         }
 
-		return new MatchDetails(info, roundInfoCollection);
+        info.setRounds(roundInfoCollection);
+
+		return info;
 	}
 
     @Override
@@ -141,11 +141,11 @@ public class MatchServiceImpl implements MatchService {
 	public void putMatch(MatchInfo matchInfo) {
 		Collection<PlayerMatchData> playerMatchData = new HashSet<>();
 
-		Match match = matchDao.getMatch(matchInfo.getMatchId());
-
-		if (match == null) {
-			match = new Match();
+		if (matchDao.getMatch(matchInfo.getMatchId()) != null) {
+			throw new IllegalArgumentException();
 		}
+
+        Match match = new Match();
 
 		match.setMatchId(matchInfo.getMatchId());
 		match.setPlayers(matchInfo.getPlayerNumber());
@@ -153,6 +153,8 @@ public class MatchServiceImpl implements MatchService {
 		match.setVersion(matchInfo.getVersion());
 		match.setMap(matchInfo.getMap());
 		match.setDateTime(Instant.now(Clock.systemUTC()));
+        match.setGameLength(matchInfo.getGameLength());
+        match.setWinnerTeam(matchInfo.getWinnerTeam());
 
 		for (PlayerInfo info : matchInfo.getPlayers()) {
 			PlayerMatchData matchData = match
@@ -183,18 +185,19 @@ public class MatchServiceImpl implements MatchService {
 
 		match.setMatchData(playerMatchData);
 
+        Map<Long, RankAndStars> matchRanks = rankService.getMatchRanks(matchInfo);
+
+		match.setRoundData(
+		        matchInfo.getRounds().stream().map(
+		                info -> createRound(match, info, matchRanks)
+                ).collect(Collectors.toList())
+        );
+
         matchDao.putMatch(match);
 	}
 
-	@Override
     @Transactional(propagation = Propagation.REQUIRED)
-	public void putRound(RoundInfo roundInfo) {
-		Match match = matchDao.getMatch(roundInfo.getMatchId());
-
-		if (match == null) {
-			throw new IllegalArgumentException();
-		}
-
+	private Round createRound(Match match, RoundInfo roundInfo, Map<Long, RankAndStars> matchRanks) {
 		Round round = new Round();
 
 		Round.Pk roundKey = new Round.Pk();
@@ -213,8 +216,6 @@ public class MatchServiceImpl implements MatchService {
         );
 
         Collection<PlayerRoundData> playerRoundData = new HashSet<>();
-
-        Map<Long, RankAndStars> matchRanks = rankService.getMatchRanks(match.getMatchId());
 
         for (PlayerRoundInfo playerRoundInfo : roundInfo.getPlayers()) {
 			PlayerRoundData roundData = new PlayerRoundData();
@@ -260,27 +261,6 @@ public class MatchServiceImpl implements MatchService {
 
 		round.setPlayerRoundData(playerRoundData);
 
-		matchDao.putRound(round);
-	}
-
-	@Override
-    @Transactional(propagation = Propagation.REQUIRED)
-	public boolean putMatchResult(MatchResult result) {
-		Match match = matchDao.getMatch(result.getMatchId());
-
-		if (match == null) {
-			throw new IllegalArgumentException();
-		}
-
-		if (match.getWinnerTeam() == 0) {
-            match.setGameLength(result.getGameLength());
-			match.setWinnerTeam(result.getWinnerTeam());
-
-			matchDao.save(match);
-
-			return true;
-		}
-
-		return false;
+        return round;
 	}
 }

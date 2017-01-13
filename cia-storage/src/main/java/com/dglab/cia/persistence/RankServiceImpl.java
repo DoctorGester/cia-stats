@@ -109,12 +109,7 @@ public class RankServiceImpl implements RankService {
 
 		for (PlayerRank rank : ranks) {
 			byte season = rank.getPk().getSeason();
-			Map<RankedMode, RankAndStars> seasonRanks = result.get(season);
-
-			if (seasonRanks == null) {
-				seasonRanks = new HashMap<>();
-				result.put(season, seasonRanks);
-			}
+			Map<RankedMode, RankAndStars> seasonRanks = result.computeIfAbsent(season, k -> new HashMap<>());
 
 			seasonRanks.put(rank.getPk().getMode(), new RankAndStars(rank.getRank(), rank.getStars()));
 		}
@@ -123,11 +118,8 @@ public class RankServiceImpl implements RankService {
 	}
 
 	@Override
-	public RankedMode getMatchRankedMode(Match match) {
-		String mode = match.getMode();
-		byte players = match.getPlayers();
-
-		if (match.getMap() == MatchMap.UNRANKED) {
+	public RankedMode getMatchRankedMode(String mode, int players, MatchMap map) {
+		if (map == MatchMap.UNRANKED) {
 			return null;
 		}
 
@@ -148,12 +140,10 @@ public class RankServiceImpl implements RankService {
 
     @Override
 	@Transactional(readOnly = true)
-    public Map<Long, RankedAchievements> getRankedAchievements(MatchInfo matchInfo) {
+    public Map<Long, RankedAchievements> getRankedAchievements(PlayerList players) {
         Map<Long, RankedAchievements> result = new HashMap<>();
 
-        for (PlayerInfo player : matchInfo.getPlayers()) {
-            long steamId64 = player.getSteamId64();
-
+		for (Long steamId64 : players.getPlayers()) {
             Collection<Integer> seasons = rankDao.findPlayerRankOneSeasons(steamId64);
 
             RankedAchievements rankedAchievements = new RankedAchievements();
@@ -162,9 +152,7 @@ public class RankServiceImpl implements RankService {
                     .values()
                     .stream()
                     .flatMap(Collection::stream)
-                    .filter(r -> r.getPk().getSteamId64() == steamId64)
-                    .findAny()
-                    .isPresent()
+                    .anyMatch(r -> r.getPk().getSteamId64() == steamId64)
             );
 
             result.put(steamId64, rankedAchievements);
@@ -175,14 +163,8 @@ public class RankServiceImpl implements RankService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-	public Map<Long, RankAndStars> getMatchRanks(long matchId) {
-		Match match = matchDao.getMatch(matchId);
-
-		if (match == null) {
-			return null;
-		}
-
-		RankedMode matchRankedMode = getMatchRankedMode(match);
+	public Map<Long, RankAndStars> getMatchRanks(MatchInfo match) {
+		RankedMode matchRankedMode = getMatchRankedMode(match.getMode(), match.getPlayers().size(), match.getMap());
 		byte season = getCurrentSeason();
 
 		if (matchRankedMode == null) {
@@ -191,8 +173,8 @@ public class RankServiceImpl implements RankService {
 
 		Map<Long, RankAndStars> result = new HashMap<>();
 
-		for (PlayerMatchData player : match.getMatchData()) {
-			long steamId64 = player.getPk().getSteamId64();
+		for (PlayerInfo player : match.getPlayers()) {
+			long steamId64 = player.getSteamId64();
 			PlayerRank rank = rankDao.findPlayerRank(steamId64, season, matchRankedMode);
 
             result.put(steamId64, convertRank(rank));
@@ -207,8 +189,8 @@ public class RankServiceImpl implements RankService {
 		return (byte) between;
 	}
 
-    private int getPlayerElo(PlayerMatchData player, byte season, RankedMode mode) {
-        PlayerRank playerRank = rankDao.findPlayerRank(player.getPk().getSteamId64(), season, mode);
+    private int getPlayerElo(PlayerInfo player, byte season, RankedMode mode) {
+        PlayerRank playerRank = rankDao.findPlayerRank(player.getSteamId64(), season, mode);
         EliteElo elo = playerRank.getElo();
 
         if (playerRank.getRank() == 1 && elo != null) {
@@ -220,14 +202,8 @@ public class RankServiceImpl implements RankService {
 
 	@Override
     @Transactional(propagation = Propagation.REQUIRED)
-	public RankUpdateDetails processMatchResults(long matchId) {
-		Match match = matchDao.getMatch(matchId);
-
-		if (match == null) {
-			return null;
-		}
-
-		RankedMode matchRankedMode = getMatchRankedMode(match);
+	public RankUpdateDetails processMatchResults(MatchInfo match) {
+		RankedMode matchRankedMode = getMatchRankedMode(match.getMode(), match.getPlayers().size(), match.getMap());
 		byte season = getCurrentSeason();
 
 		if (matchRankedMode == null) {
@@ -236,13 +212,13 @@ public class RankServiceImpl implements RankService {
 
         int rounds = match.getRounds().size();
 
-        if (rounds <= 2) {
-            log.info("Match not scored because only {} rounds were played. Match ID {}", rounds, matchId);
+        if (rounds <= 1) {
+            log.info("Match not scored because only {} rounds were played. Match ID {}", rounds, match.getMatchId());
 			return null;
         }
 
 		if (checkRankedAbuse(match)) {
-			log.info("Ranked abuse detected! Match ID {}", matchId);
+			log.info("Ranked abuse detected! Match ID {}", match.getMatchId());
 			return null;
 		}
 
@@ -251,9 +227,9 @@ public class RankServiceImpl implements RankService {
 
 		List<PlayerRank> toUpdate = new ArrayList<>();
 
-        Map<Byte, Double> teamAverageElo = match.getMatchData().stream()
+        Map<Byte, Double> teamAverageElo = match.getPlayers().stream()
                 .collect(
-                        Collectors.groupingBy(PlayerMatchData::getTeam)
+                        Collectors.groupingBy(PlayerInfo::getTeam)
                 ).entrySet().stream()
                 .collect(
                         Collectors.toMap(
@@ -264,12 +240,12 @@ public class RankServiceImpl implements RankService {
                         )
                 );
 
-        for (PlayerMatchData player : match.getMatchData()) {
-			List<PlayerRoundData> playerData = match
+        for (PlayerInfo player : match.getPlayers()) {
+			List<PlayerRoundInfo> playerData = match
 					.getRounds()
 					.stream()
-					.flatMap(round -> round.getPlayerRoundData().stream())
-					.filter(data -> data.getPk().getSteamId64() == player.getPk().getSteamId64())
+					.flatMap(round -> round.getPlayers().stream())
+					.filter(data -> data.getSteamId64() == player.getSteamId64())
 					.collect(Collectors.toList());
 
 			long notPlayed = playerData
@@ -281,7 +257,7 @@ public class RankServiceImpl implements RankService {
 					.stream()
 					.anyMatch(data -> data.getConnectionState() == ConnectionState.ABANDONED.ordinal());
 
-			long steamId64 = player.getPk().getSteamId64();
+			long steamId64 = player.getSteamId64();
 			PlayerRank playerRank = rankDao.findPlayerRank(steamId64, season, matchRankedMode);
 			EliteElo elo = playerRank.getElo();
 
@@ -294,7 +270,7 @@ public class RankServiceImpl implements RankService {
 
             if (playerRank.getRank() == 1) {
                 Optional<Byte> enemyTeam
-                        = teamAverageElo.keySet().stream().filter(team -> player.getTeam() != team).findFirst();
+                        = teamAverageElo.keySet().stream().filter(team -> !Objects.equals(player.getTeam(), team)).findFirst();
 
                 if (enemyTeam.isPresent()) {
                     double playerAverageElo = teamAverageElo.get(player.getTeam());
@@ -337,7 +313,7 @@ public class RankServiceImpl implements RankService {
 
 		rankDao.save(toUpdate);
 
-        log.info("Updated ranks for match {}", matchId);
+        log.info("Updated ranks for match {}", match.getMatchId());
 
         // Adding starting ELO values to all players who just reached rank 1
         updated.entrySet().stream()
@@ -352,22 +328,22 @@ public class RankServiceImpl implements RankService {
 		return details;
 	}
 
-	private boolean checkRankedAbuse(Match match) {
-		PlayerMatchData firstPlayer = match.getMatchData().iterator().next();
-		List<Match> lastMatches = matchDao.getPlayerMatchesInADay(firstPlayer.getPk().getSteamId64());
+	private boolean checkRankedAbuse(MatchInfo match) {
+		PlayerInfo firstPlayer = match.getPlayers().iterator().next();
+		List<Match> lastMatches = matchDao.getPlayerMatchesInADay(firstPlayer.getSteamId64());
 
 		int sameSetAmount = 0;
 
 		Set<Long> initialSet = match
-				.getMatchData()
+				.getPlayers()
 				.stream()
-				.map(data -> data.getPk().getSteamId64())
+				.map(PlayerInfo::getSteamId64)
 				.collect(Collectors.toSet());
 
 		for (Match lastMatch : lastMatches) {
 			if (lastMatch.getMatchId() != match.getMatchId()) {
 
-				if (getMatchRankedMode(lastMatch) != null) {
+				if (getMatchRankedMode(lastMatch.getMode(), lastMatch.getPlayers(), lastMatch.getMap()) != null) {
 					Set<Long> playerSet = lastMatch
 							.getMatchData()
 							.stream()

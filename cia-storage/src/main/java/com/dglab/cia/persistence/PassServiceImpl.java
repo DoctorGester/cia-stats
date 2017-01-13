@@ -1,10 +1,8 @@
 package com.dglab.cia.persistence;
 
-import com.dglab.cia.database.Match;
 import com.dglab.cia.database.PassOwner;
 import com.dglab.cia.json.*;
 import com.dglab.cia.util.ExpiringObject;
-import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,27 +97,22 @@ public class PassServiceImpl implements PassService {
 
     @Override
     @Transactional
-    public Map<Long, PlayerQuestResult> processMatchUpdate(long matchId, QuestProgressReport progress) {
-        if (progress.getGameLength() < 90) {
-            log.info("Insufficient game length to process rewards ({})", progress.getGameLength());
+    public Map<Long, PlayerQuestResult> processMatchUpdate(MatchInfo match) {
+        QuestProgressReport progress = match.getQuestProgress();
+
+        if (progress == null) {
+            log.info("No quest results to process for match {}", match.getMatchId());
             return null;
         }
 
-        Match match = matchDao.getMatch(matchId);
-
-        if (match == null) {
-            log.info("Could not find a match with id {}", matchId);
-            return null;
-        }
-
-        if (BooleanUtils.isTrue(match.getQuestsUpdated())) {
-            log.info("Quests already updated for match {}", matchId);
+        if (match.getGameLength() < 90) {
+            log.info("Insufficient game length to process rewards ({})", match.getGameLength());
             return null;
         }
 
         Map<Long, PlayerQuestResult> result = new HashMap<>();
 
-        int award = (int) Math.ceil(Math.min(progress.getGameLength() * EXPERIENCE_PER_SECOND, 100));
+        int award = (int) Math.ceil(Math.min(match.getGameLength() * EXPERIENCE_PER_SECOND, 100));
         for (Long passPlayer : progress.getPassPlayers()) {
             PassOwner passOwner = getOrCreate(passPlayer);
 
@@ -158,10 +151,8 @@ public class PassServiceImpl implements PassService {
         }
 
         if (progress.getPassPlayers().size() > 0) {
-            log.info("Awarded {} experience for match {}", award, matchId);
+            log.info("Awarded {} experience for match {}", award, match.getMatchId());
         }
-
-        match.setQuestsUpdated(true);
 
         return result;
     }

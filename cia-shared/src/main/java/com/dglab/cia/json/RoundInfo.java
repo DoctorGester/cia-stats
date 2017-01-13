@@ -10,22 +10,17 @@ import java.util.HashSet;
  * @author doc
  */
 public class  RoundInfo {
-	private Long matchId;
 	private short roundNumber;
 	private Byte winner;
 	private Collection<PlayerRoundInfo> players = new HashSet<>();
 
 	@JsonCreator()
-	public RoundInfo(@JsonProperty(value = "players", required = true) Collection<PlayerRoundInfo> players) {
+	public RoundInfo(
+			@JsonProperty(value = "players", required = true) Collection<PlayerRoundInfo> players,
+			@JsonProperty(value = "roundNumber", required = true) short roundNumber
+	) {
 		this.players = players;
-	}
-
-	public Long getMatchId() {
-		return matchId;
-	}
-
-	public void setMatchId(Long matchId) {
-		this.matchId = matchId;
+		this.roundNumber = roundNumber;
 	}
 
 	public short getRoundNumber() {

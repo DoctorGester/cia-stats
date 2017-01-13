@@ -9,7 +9,6 @@ import java.util.Map;
 public class QuestProgressReport {
     private Map<Long, Integer> questProgress;
     private List<Long> passPlayers;
-    private int gameLength;
 
     public Map<Long, Integer> getQuestProgress() {
         return questProgress;
@@ -17,9 +16,5 @@ public class QuestProgressReport {
 
     public List<Long> getPassPlayers() {
         return passPlayers;
-    }
-
-    public int getGameLength() {
-        return gameLength;
     }
 }

@@ -15,21 +15,30 @@ public class MatchInfo {
 	private String mode;
 	private String version;
 	private Collection<PlayerInfo> players = new HashSet<>();
+    private Collection<RoundInfo> rounds;
 	private Instant dateTime;
 	private MatchMap map;
     private byte winnerTeam;
 	private Integer gameLength;
+	private QuestProgressReport questProgress;
 
 	@JsonCreator()
 	public MatchInfo(
 			@JsonProperty(value = "mode", required = true) String mode,
 			@JsonProperty(value = "version", required = true) String version,
 			@JsonProperty(value = "players", required = true) Collection<PlayerInfo> players,
-			@JsonProperty(value = "map", required = true) MatchMap map) {
+            @JsonProperty(value = "rounds", required = true) Collection<RoundInfo> rounds,
+			@JsonProperty(value = "map", required = true) MatchMap map,
+			@JsonProperty(value = "winnerTeam", required = true) byte winnerTeam,
+			@JsonProperty(value = "gameLength", required = true) int gameLength
+	) {
 		this.mode = mode;
 		this.version = version;
 		this.players = players;
+		this.rounds = rounds;
 		this.map = map;
+		this.winnerTeam = winnerTeam;
+		this.gameLength = gameLength;
 	}
 
 	public MatchInfo() {
@@ -97,5 +106,25 @@ public class MatchInfo {
 
     public void setGameLength(Integer gameLength) {
         this.gameLength = gameLength;
+    }
+
+    public Collection<RoundInfo> getRounds() {
+        return rounds;
+    }
+
+    public void setRounds(Collection<RoundInfo> rounds) {
+        this.rounds = rounds;
+    }
+
+    public void setPlayers(Collection<PlayerInfo> players) {
+        this.players = players;
+    }
+
+    public QuestProgressReport getQuestProgress() {
+        return questProgress;
+    }
+
+    public void setQuestProgress(QuestProgressReport progress) {
+        this.questProgress = progress;
     }
 }

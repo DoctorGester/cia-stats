@@ -9,11 +9,9 @@ import java.util.Map;
  * @author doc
  */
 public interface MatchService {
-	MatchDetails getMatchDetails(long matchId);
+	MatchInfo getMatchDetails(long matchId);
     List<MatchHeader> getRecentPlayerMatches(long steamId64);
-	Map<Long, Long> getMatchesPlayed(MatchInfo info);
-	Map<Long, Integer> getPassExperience(MatchInfo info);
+	Map<Long, Long> getMatchesPlayed(PlayerList info);
+	Map<Long, Integer> getPassExperience(PlayerList info);
 	void putMatch(MatchInfo matchInfo);
-	void putRound(RoundInfo roundInfo);
-	boolean putMatchResult(MatchResult result);
 }

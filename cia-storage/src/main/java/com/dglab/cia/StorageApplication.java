@@ -153,13 +153,11 @@ public class StorageApplication {
             return heroStats;
         }, jsonUtil.json());
 
-        post("/match/info/:id", (request, response) -> {
-            long matchId = requestLong(request, "id");
-            MatchInfo matchInfo = requestObject(request, MatchInfo.class);
-            matchInfo.setMatchId(matchId);
+        post("/match/achievements", (request, response) -> {
+            PlayerList players = requestObject(request, PlayerList.class);
 
             long startTime = System.currentTimeMillis();
-            Achievements achievements = coordinatorService.getAchievements(matchInfo);
+            Achievements achievements = coordinatorService.getAchievements(players);
 
             log.info("Match/Info request took {} ms", System.currentTimeMillis() - startTime);
 
@@ -175,78 +173,15 @@ public class StorageApplication {
 
             long startTime = System.currentTimeMillis();
 
-            if (matchInfo.getPlayers().stream().mapToInt(PlayerInfo::getTeam).sum() == 0) {
-                log.info("Initial match registration {}", matchId);
-            } else {
-                log.info("Match started {}", matchId);
-            }
+            log.info("Match received {}", matchId);
 
-			matchService.putMatch(matchInfo);
+            MatchResults matchResults = coordinatorService.processMatch(matchInfo);
 
             long elapsedTime = System.currentTimeMillis() - startTime;
-            log.info("Match registration request took {} ms", elapsedTime);
+            log.info("Match process request took {} ms", elapsedTime);
 
-			return "";
+			return matchResults;
 		}, jsonUtil.json());
-
-		post("/match/:id/:round", (request, response) -> {
-            jsonLogger.log(request);
-
-			long matchId = requestLong(request, "id");
-			short round = requestLong(request, "round").shortValue();
-
-			RoundInfo roundInfo = requestObject(request, RoundInfo.class);
-			roundInfo.setMatchId(matchId);
-			roundInfo.setRoundNumber(round);
-
-			matchService.putRound(roundInfo);
-
-			return "";
-		});
-
-		post("/winner/:id", (request, response) -> {
-            jsonLogger.log(request);
-
-			long matchId = requestLong(request, "id");
-
-			MatchResult matchResult = requestObject(request, MatchResult.class);
-			matchResult.setMatchId(matchId);
-
-            if (matchResult.getWinnerTeam() == 0) {
-                log.warn("Incorrect match winner received. Aborting");
-                log.warn(request.raw().getParameter("data"));
-                return "";
-            }
-
-			if (matchService.putMatchResult(matchResult)) {
-                log.info("Winner set {}", matchId);
-
-                MatchResults matchResults = new MatchResults();
-                RankUpdateDetails details = rankService.processMatchResults(matchId);
-                matchResults.setRankDetails(details);
-
-                return matchResults;
-            }
-
-			return "";
-		}, jsonUtil.json());
-
-        post("/quests/report/:id", (request, response) -> {
-            jsonLogger.log(request);
-
-            long matchId = requestLong(request, "id");
-            QuestProgressReport progress = requestObject(request, QuestProgressReport.class);
-
-            if (progress != null) {
-                Map<Long, PlayerQuestResult> result = passService.processMatchUpdate(matchId, progress);
-
-                if (result != null) {
-                    return result;
-                }
-            }
-
-            return "";
-        }, jsonUtil.json());
 
         post("/quests/update", (request, response) -> {
             jsonLogger.log(request);
