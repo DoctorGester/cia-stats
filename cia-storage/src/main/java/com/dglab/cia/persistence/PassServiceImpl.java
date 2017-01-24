@@ -116,13 +116,22 @@ public class PassServiceImpl implements PassService {
         for (Long passPlayer : progress.getPassPlayers()) {
             PassOwner passOwner = getOrCreate(passPlayer);
 
-            PlayerQuestResult questResult = new PlayerQuestResult();
-            questResult.setExperience(passOwner.getExperience());
-            questResult.setEarnedExperience(award);
+            int sum = match.getRounds()
+                    .stream()
+                    .flatMap(r -> r.getPlayers().stream())
+                    .filter(p -> p.getSteamId64() == passPlayer)
+                    .mapToInt(PlayerRoundInfo::getDamageDealt)
+                    .sum();
 
-            result.put(passOwner.getSteamId64(), questResult);
+            if (sum >= 20) {
+                PlayerQuestResult questResult = new PlayerQuestResult();
+                questResult.setExperience(passOwner.getExperience());
+                questResult.setEarnedExperience(award);
 
-            awardExperience(passPlayer, award);
+                result.put(passOwner.getSteamId64(), questResult);
+
+                awardExperience(passPlayer, award);
+            }
         }
 
         for (Map.Entry<Long, Integer> entry : progress.getQuestProgress().entrySet()) {

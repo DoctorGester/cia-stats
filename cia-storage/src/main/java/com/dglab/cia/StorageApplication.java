@@ -73,19 +73,10 @@ public class StorageApplication {
                 long resultTime = System.currentTimeMillis() - time;
 
                 String url = request.requestMethod() + request.uri().replaceAll("/\\d+", "/#");
-                Queue<Long> times = urlRequestTimes.get(url);
-
-                if (times == null) {
-                    times = new CircularFifoQueue<>(1024);
-                    urlRequestTimes.put(url, times);
-                }
+                Queue<Long> times = urlRequestTimes.computeIfAbsent(url, k -> new CircularFifoQueue<>(1024));
 
                 times.add(resultTime);
             }
-        });
-
-        before((request, response) -> {
-            //request.requestMethod() + request.uri();
         });
 
 		get("/match/:id", (request, response) -> {
