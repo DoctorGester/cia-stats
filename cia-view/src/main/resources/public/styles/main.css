@@ -269,6 +269,7 @@ a {
 .tooltip {
     position: relative;
     display: inline-block;
+    z-index: 1;
 }
 
 .tooltip .tooltiptext {
@@ -299,4 +300,78 @@ a {
 
 .tooltip:hover .tooltiptext {
     visibility: visible;
+}
+
+.c-tabs-nav {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#tabs
+{
+    margin-top: 60px;
+}
+
+.c-tabs-nav__link {
+    flex: 1;
+    margin-right: 4px;
+    padding: 12px;
+    color: #fff;
+    background-color: slategray;
+    text-align: center;
+    transition: color 0.15s;
+    cursor: pointer;
+}
+
+.c-tabs-nav__link:last-child {
+    margin-right: 0;
+}
+
+.c-tabs-nav__link:hover {
+    color: #6FBEF3;
+}
+
+.c-tabs-nav__link.is-active {
+    color: #6FBEF3;
+    background-color: #2d3e50;
+}
+
+.c-tabs-nav__link i,
+.c-tabs-nav__link span {
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+}
+
+.c-tabs-nav__link i {
+    font-size: 18px;
+}
+
+.c-tabs-nav__link span {
+    display: none;
+    font-size: 18px;
+}
+
+@media all and (min-width: 720px) {
+    .c-tabs-nav__link i {
+        margin-bottom: 12px;
+        font-size: 22px;
+    }
+    .c-tabs-nav__link span {
+        display: block;
+    }
+}
+
+.c-tab {
+    display: none;
+}
+
+.c-tab.is-active {
+    display: block;
+}
+
+.c-tab__content {
+    padding: 1.5rem;
 }

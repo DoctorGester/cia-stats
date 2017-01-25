@@ -17,4 +17,5 @@ public interface StatsService {
     List<PlayerHeroWinRateAndGames> getPlayerHeroWinRate(String hero);
     List<HeroWinRateAndGames> getGeneralWinRates();
     List<HeroWinRateAndGames> getRankOneWinRates();
+    List<HeroWinRateAndGames> getDuelWinRates();
 }

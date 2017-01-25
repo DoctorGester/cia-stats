@@ -9,9 +9,24 @@ block content
     div.ez-box
         h2.content-head.is-center Crumbling island arena stats
     div.ez-wr
-        div#winRates.stats-graph
-        div#rankOneWinRates.stats-graph
-        div#games.stats-graph
+        #tabs.c-tabs
+            .c-tabs-nav
+                a.c-tabs-nav__link.is-active All 2v2/3v3
+                a.c-tabs-nav__link Ranked 1v1
+                a.c-tabs-nav__link Rank 1 2v2/3v3
+                a.c-tabs-nav__link Rounds played
+            .c-tab.is-active
+                .c-tab__content
+                    div#winRates.stats-graph
+            .c-tab
+                .c-tab__content
+                    div#duelWinRates.stats-graph
+            .c-tab
+                .c-tab__content
+                    div#rankOneWinRates.stats-graph
+            .c-tab
+                .c-tab__content
+                    div#games.stats-graph
 
     - var s = "";
     - var f = true;
@@ -21,6 +36,10 @@ block content
     - f = true
     - for(data : model.rankOneWinrates) { s = s + (f ? " " : ", ") + "['" + data.hero + "', " + data.winRate + ", " + data.games + "]"; f = false; };
     - var rankOneSeriesString = s
+    - s = ""
+    - f = true
+    - for(data : model.duelWinrates) { s = s + (f ? " " : ", ") + "['" + data.hero + "', " + data.winRate + ", " + data.games + "]"; f = false; };
+    - var duelSeriesString = s
 
     script.
         var data = [#{generalSeriesString}];
@@ -42,8 +61,11 @@ block content
             }
         };
 
-        createWinRateGraph("winRates", "General winrates", data);
-        createWinRateGraph("rankOneWinRates", "Rank 1 winrates", [#{rankOneSeriesString}]);
+        var charts = [];
+
+        charts.push(createWinRateGraph("winRates", data));
+        charts.push(createWinRateGraph("duelWinRates", [#{duelSeriesString}]));
+        charts.push(createWinRateGraph("rankOneWinRates", [#{rankOneSeriesString}]));
 
         var markers = getMarkersFromData(data, 2);
         console.log(data);
@@ -54,7 +76,7 @@ block content
            };
         });
 
-        Highcharts.chart('games', {
+        charts.push(Highcharts.chart('games', {
             xAxis: {
                 labels: {
                     enabled: false
@@ -67,7 +89,7 @@ block content
                 enabled: false
             },
             title: {
-                text: "Rounds played"
+                text: ""
             },
             plotOptions: heroIconPlotOptions,
             series: [{
@@ -83,4 +105,11 @@ block content
                     }
                 }
             }]
-        });
+        }));
+
+        tabs({
+            el: '#tabs',
+            tabNavigationLinks: '.c-tabs-nav__link',
+            tabContentContainers: '.c-tab',
+            charts: charts
+        }).init();

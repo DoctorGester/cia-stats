@@ -8,6 +8,7 @@ import java.util.List;
 public class AllStats {
     private List<HeroWinRateAndGames> generalWinrates;
     private List<HeroWinRateAndGames> rankOneWinrates;
+    private List<HeroWinRateAndGames> duelWinrates;
 
     public List<HeroWinRateAndGames> getRankOneWinrates() {
         return rankOneWinrates;
@@ -23,5 +24,13 @@ public class AllStats {
 
     public void setGeneralWinrates(List<HeroWinRateAndGames> generalWinrates) {
         this.generalWinrates = generalWinrates;
+    }
+
+    public List<HeroWinRateAndGames> getDuelWinrates() {
+        return duelWinrates;
+    }
+
+    public void setDuelWinrates(List<HeroWinRateAndGames> duelWinrates) {
+        this.duelWinrates = duelWinrates;
     }
 }

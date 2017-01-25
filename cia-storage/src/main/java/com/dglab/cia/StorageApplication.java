@@ -126,6 +126,7 @@ public class StorageApplication {
             AllStats stats = new AllStats();
             stats.setGeneralWinrates(statsService.getGeneralWinRates());
             stats.setRankOneWinrates(statsService.getRankOneWinRates());
+            stats.setDuelWinrates(statsService.getDuelWinRates());
 
             return stats;
         }, jsonUtil.json());

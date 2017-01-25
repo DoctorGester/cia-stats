@@ -5,6 +5,7 @@ import com.dglab.cia.database.HeroWinRateKey;
 import com.dglab.cia.database.PlayerHeroWinRate;
 import com.dglab.cia.database.PlayerHeroWinRateKey;
 import com.dglab.cia.json.HeroWinRateAndGames;
+import com.dglab.cia.json.MatchMap;
 import com.dglab.cia.json.PlayerHeroWinRateAndGames;
 import com.dglab.cia.json.RankRange;
 import com.querydsl.core.Tuple;
@@ -92,11 +93,22 @@ public class StatsServiceImpl implements StatsService {
         return dateAfter.and(twoVersusTwo.or(threeVersusThree));
     }
 
-    private List<HeroWinRateAndGames> getHeroWinRates(RankRange rankRange) {
+    private BooleanExpression duelMatchFilters(int days) {
+        BooleanExpression oneVersusOne =
+                heroWinRate.pk.mode.eq("ffa")
+                .and(heroWinRate.pk.players.eq((byte) 2))
+                .and(heroWinRate.pk.map.eq(MatchMap.RANKED_2));
+
+        BooleanExpression dateAfter = heroWinRate.pk.date.after(LocalDate.now(Clock.systemUTC()).minusDays(days));
+
+        return dateAfter.and(oneVersusOne);
+    }
+
+    private List<HeroWinRateAndGames> getHeroWinRates(RankRange rankRange, BooleanExpression filter) {
         List<Tuple> result = new JPAQuery<HeroWinRate>(entityManager)
                 .select(heroWinRate.games.sum(), heroWinRate.wins.sum(), heroWinRate.pk.heroName)
                 .from(heroWinRate)
-                .where(defaultMatchFilters(7).and(heroWinRate.pk.rankRange.eq(rankRange)))
+                .where(filter.and(heroWinRate.pk.rankRange.eq(rankRange)))
                 .groupBy(heroWinRate.pk.heroName)
                 .fetch();
 
@@ -193,11 +205,16 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
 	public List<HeroWinRateAndGames> getGeneralWinRates() {
-		return getHeroWinRates(RankRange.ALL);
+		return getHeroWinRates(RankRange.ALL, defaultMatchFilters(7));
 	}
 
     @Override
     public List<HeroWinRateAndGames> getRankOneWinRates() {
-        return getHeroWinRates(RankRange.RANK_ONE);
+        return getHeroWinRates(RankRange.RANK_ONE, defaultMatchFilters(7));
+    }
+
+    @Override
+    public List<HeroWinRateAndGames> getDuelWinRates() {
+        return getHeroWinRates(RankRange.ALL, duelMatchFilters(7));
     }
 }
