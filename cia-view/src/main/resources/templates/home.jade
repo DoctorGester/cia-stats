@@ -68,7 +68,7 @@ block content
         charts.push(createWinRateGraph("rankOneWinRates", [#{rankOneSeriesString}]));
 
         var markers = getMarkersFromData(data, 2);
-        console.log(data);
+
         markers = _.map(markers, function(point) {
            return {
                y: point[2],

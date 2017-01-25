@@ -35,7 +35,7 @@ function createWinRateGraph(graphId, data) {
                 enabled: true,
                 useHTML: true,
                 formatter: heroIconFormatter,
-                y: 26
+                y: 40
             }
         }
     };
@@ -54,7 +54,8 @@ function createWinRateGraph(graphId, data) {
         },
         yAxis: {
             min: 0,
-            max: 100
+            max: 100,
+            tickInterval: 10
         },
         tooltip: {
             formatter: function() {
