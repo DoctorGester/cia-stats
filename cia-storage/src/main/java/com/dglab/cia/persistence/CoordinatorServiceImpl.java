@@ -1,6 +1,7 @@
 package com.dglab.cia.persistence;
 
 import com.dglab.cia.json.*;
+import com.dglab.cia.util.MatchAlreadyExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +42,7 @@ public class CoordinatorServiceImpl implements CoordinatorService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public MatchResults processMatch(MatchInfo matchInfo) {
+    public MatchResults processMatch(MatchInfo matchInfo) throws MatchAlreadyExistsException {
         MatchResults matchResults = new MatchResults();
 
         log.info("Saving match {}", matchInfo.getMatchId());

@@ -3,6 +3,7 @@ package com.dglab.cia;
 import com.dglab.cia.json.*;
 import com.dglab.cia.persistence.*;
 import com.dglab.cia.util.JsonLogger;
+import com.dglab.cia.util.MatchAlreadyExistsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.jodah.expiringmap.ExpiringMap;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
@@ -167,7 +168,14 @@ public class StorageApplication {
 
             log.info("Match received {}", matchId);
 
-            MatchResults matchResults = coordinatorService.processMatch(matchInfo);
+            MatchResults matchResults;
+
+            try {
+                matchResults = coordinatorService.processMatch(matchInfo);
+            } catch (MatchAlreadyExistsException e) {
+                log.info("Tried to report an existing match {}", e.getMatchId());
+                return "";
+            }
 
             long elapsedTime = System.currentTimeMillis() - startTime;
             log.info("Match process request took {} ms", elapsedTime);

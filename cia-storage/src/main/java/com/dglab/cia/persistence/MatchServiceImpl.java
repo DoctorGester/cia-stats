@@ -2,6 +2,7 @@ package com.dglab.cia.persistence;
 
 import com.dglab.cia.database.*;
 import com.dglab.cia.json.*;
+import com.dglab.cia.util.MatchAlreadyExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,11 +139,11 @@ public class MatchServiceImpl implements MatchService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-	public void putMatch(MatchInfo matchInfo) {
+	public void putMatch(MatchInfo matchInfo) throws MatchAlreadyExistsException {
 		Collection<PlayerMatchData> playerMatchData = new HashSet<>();
 
 		if (matchDao.getMatch(matchInfo.getMatchId()) != null) {
-			throw new IllegalArgumentException();
+			throw new MatchAlreadyExistsException(matchInfo.getMatchId());
 		}
 
         Match match = new Match();

@@ -9,4 +9,8 @@ public class MatchAlreadyExistsException extends Exception {
     public MatchAlreadyExistsException(long matchId) {
         this.matchId = matchId;
     }
+
+    public long getMatchId() {
+        return matchId;
+    }
 }
