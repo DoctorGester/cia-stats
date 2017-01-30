@@ -147,7 +147,7 @@ public class PassServiceImpl implements PassService {
             PassOwner passOwner = getOrCreate(passPlayer);
             short damage = damagePerPlayer.getOrDefault(passPlayer, (short) 0);
 
-            if (damage < statistics.getPercentile(30)) {
+            if (damage < statistics.getPercentile(25) && match.getPlayers().size() > 2) {
                 Offence offence = playerOffences.computeIfAbsent(passPlayer, (p) -> new Offence());
 
                 log.info(
