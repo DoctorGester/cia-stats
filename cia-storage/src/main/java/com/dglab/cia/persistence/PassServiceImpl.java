@@ -147,7 +147,7 @@ public class PassServiceImpl implements PassService {
             PassOwner passOwner = getOrCreate(passPlayer);
             short damage = damagePerPlayer.getOrDefault(passPlayer, (short) 0);
 
-            if (damage < statistics.getPercentile(25) && match.getPlayers().size() > 2) {
+            if (damage < statistics.getPercentile(20) && match.getPlayers().size() > 2) {
                 Offence offence = playerOffences.computeIfAbsent(passPlayer, (p) -> new Offence());
 
                 log.info(
@@ -156,6 +156,8 @@ public class PassServiceImpl implements PassService {
                         damage,
                         offence.repeats
                 );
+
+                log.info("Damage per player: {}", damagePerPlayer);
 
                 if (Duration.between(LocalDateTime.now(), offence.lastReportedDate).abs().toHours() > 24) {
                     log.info("Last offence more than 24 hours ago, resetting");
