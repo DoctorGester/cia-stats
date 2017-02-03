@@ -2,9 +2,9 @@ package com.dglab.cia;
 
 import com.dglab.cia.data.*;
 import com.dglab.cia.json.util.KvUtil;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
@@ -70,7 +70,7 @@ public class DataFetcherService {
         LinkedHashMap<String, HeroAbility> abilitiesByName = new LinkedHashMap<>();
 
         for (final String ability : kvHero.getAbilities()) {
-            if (ability.startsWith("placeholder")) {
+            if (StringUtils.isEmpty(ability) || ability.startsWith("placeholder")) {
                 continue;
             }
 
