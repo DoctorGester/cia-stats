@@ -241,7 +241,7 @@ block content
                 });
         });
 
-        app.controller("HeroDetailsCtrl", function ($scope, $http, $routeParams) {
+        app.controller("HeroDetailsCtrl", function ($scope, $http, $filter, $routeParams) {
             $scope.heroName = $routeParams.hero;
 
             $http.get("/api/heroes/details/" + $scope.heroName, { async: true })
@@ -271,8 +271,12 @@ block content
                 return template.replace(/%s/, ability.texture);
             };
 
-            $scope.getAbilityDescription = function (ability, sub) {
+            $scope.getAbilityDescription = function (ability) {
                 var token = $scope.tokens['AbilityTooltip_' + ability.name];
+
+                if (!token) {
+                    return "";
+                }
 
                 return token.replace(/\\"/g, "\"").replace(/\\\\\\\\/g, "");
             };
@@ -312,7 +316,7 @@ block content
                 $http.get("/stats/" + hero, { async: true })
                     .success(function (response) {
                         var seriesResult = [];
-                        var perDay = response.data.heroWinRatePerDate;
+                        var perDay = response.heroWinRatePerDate;
 
                         angular.forEach(perDay, function (value, key) {
                             seriesResult.push({x: new Date(key), y: value.winRate * 100, games: value.games})
@@ -322,7 +326,7 @@ block content
 
                         $scope.winrateConfig.series = [{data: seriesResult}];
                         $scope.winrateConfig.loading = false;
-                        $scope.winratePerPlayer = response.data.heroWinRatePerPlayer
+                        $scope.winratePerPlayer = response.heroWinRatePerPlayer;
 
                         angular.forEach($scope.winratePerPlayer, function (value) {
                             value.winRate = parseFloat(Math.round(value.winRateAndGames.winRate * 100)).toFixed(1);
