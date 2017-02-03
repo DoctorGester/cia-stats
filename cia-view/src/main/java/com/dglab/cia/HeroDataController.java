@@ -24,9 +24,4 @@ public class HeroDataController {
     public Hero getHero(@PathVariable("hero") String hero) {
         return dataFetcher.getHero(hero);
     }
-
-    @GetMapping("/localization")
-    private Object getLocalization() {
-        return dataFetcher.getLocalization();
-    }
 }

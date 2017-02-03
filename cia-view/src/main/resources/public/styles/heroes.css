@@ -1,0 +1,191 @@
+#heroList {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+#heroList > a {
+    margin: 8px 8px 0 8px;
+    object-fit: scale-down;
+}
+
+#heroList > a img {
+    border-radius: 3px;
+}
+
+@media (max-width: 1024px) {
+    #heroList > img {
+        max-width: 96px;
+    }
+}
+
+#heroDetails .hero-top-players {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+
+#heroDetails .hero-top-players .player-column {
+    display: flex;
+    flex-direction: column;
+    margin: 30px;
+}
+
+#heroDetails .hero-top-players .player-column > * {
+    margin: 6px auto 6px auto;
+}
+
+#heroDetails .hero-top-players .player-column > .no-line-height {
+    line-height: normal;
+}
+
+#heroDetails .ability img {
+    border-radius: 3px;
+    width: 64px;
+    height: 64px;
+}
+
+#heroDetails .ability span {
+    align-self: center;
+}
+
+#heroDetails .hero-right .description {
+    margin-left: 16px;
+    font-family: "Open Sans", sans-serif;
+}
+
+#heroDetails .hero-right .attack-ability {
+    margin-left: 16px;
+    font-family: "Open Sans", sans-serif;
+    text-transform: uppercase;
+    font-size: 18px;
+    color: steelblue;
+}
+
+#heroDetails .hero-right .abilities {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#heroDetails .hero-right .abilities .ability-block {
+    display: flex;
+    flex-direction: column;
+    margin: 4px;
+    border: 1px solid #eee;
+    padding: 12px;
+    border-radius: 3px;
+}
+
+#heroDetails .hero-right .abilities .ability {
+    display: flex;
+    flex-direction: row;
+    margin: 4px;
+}
+
+#heroDetails .hero-right .abilities .ability .image-block {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    width: 64px;
+    height: 64px;
+    margin-right: 4px;
+    align-self: center;
+}
+
+#heroDetails .hero-right .abilities .ability .image-block .image {
+    position: relative;
+}
+
+#heroDetails .hero-right .abilities .ability .image-block .cooldown-text {
+    position: absolute;
+    color: white;
+    background-color: #2d2d29;
+    text-align: center;
+    border-radius: 4px;
+    left: 100%;
+    top: 100%;
+    transform: translate(-80%, -80%);
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+#heroDetails .hero-right .abilities .ability .image-block .damage-text {
+    position: absolute;
+    color: white;
+    background-color: #da2715;
+    text-align: center;
+    border-radius: 4px;
+    right: 100%;
+    top: 100%;
+    transform: translate(80%, -80%);
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+#heroDetails .hero-right .abilities .sub {
+    background-color: antiquewhite;
+    border-radius: 3px;
+}
+
+#heroDetails {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.4em;
+}
+
+#heroDetails .hero-top {
+    align-content: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#heroDetails .hero-top img {
+    border-radius: 4px;
+}
+
+#heroDetails .hero-top .name {
+    margin-top: 24px;
+    margin-bottom: 40px;
+    font-size: 32px;
+    text-transform: uppercase;
+    font-family: "Raleway", "Open Sans", sans-serif;
+    letter-spacing: 2px;
+}
+
+#heroDetails .hero-bar {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+#heroDetails .hero-bar a {
+    font-size: 28px;
+    font-family: "Raleway", sans-serif;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+#heroDetails .hero-bar > a {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+#heroDetails .hero-stats {
+    margin-top: 40px;
+}
+
+.language-selector {
+    display: flex;
+}
+
+.language-selector > a {
+    margin: 10px;
+    cursor: pointer;
+}

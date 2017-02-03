@@ -86,10 +86,9 @@ public class KvUtil {
 
                 if (value != null) {
                     Class<?> type = field.getType();
+                    field.setAccessible(true);
 
                     if (value instanceof String) {
-                        field.setAccessible(true);
-
                         String valueString = value.toString();
 
                         if (type == String.class) {
@@ -107,7 +106,11 @@ public class KvUtil {
                         }
                     } else {
                         if (Map.class.isAssignableFrom(type)) {
+                            Map<String, Object> target = (Map<String, Object>) field.get(object);
 
+                            for (Map.Entry<String, Object> entry : ((Map<String, Object>) value).entrySet()) {
+                                target.put(entry.getKey(), entry.getValue());
+                            }
                         } else {
                             Constructor<?> constructor = type.getConstructor();
                             Object sub = constructor.newInstance();

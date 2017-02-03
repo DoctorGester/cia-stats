@@ -1,5 +1,8 @@
 package com.dglab.cia.data;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by shoujo on 2/2/2017.
  */
@@ -8,7 +11,12 @@ public class HeroAbility {
     private Integer damage;
     private Double cooldown;
     private String texture;
+    private Map<String, String> description = new HashMap<>();
     private HeroAbility sub;
+
+    public void putDescription(String language, String desc) {
+        description.put(language, desc);
+    }
 
     public String getTexture() {
         return texture;
@@ -48,5 +56,9 @@ public class HeroAbility {
 
     public void setSub(HeroAbility sub) {
         this.sub = sub;
+    }
+
+    public Map<String, String> getDescription() {
+        return description;
     }
 }

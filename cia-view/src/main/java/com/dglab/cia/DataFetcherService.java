@@ -1,14 +1,12 @@
 package com.dglab.cia;
 
-import com.dglab.cia.data.Hero;
-import com.dglab.cia.data.HeroAbility;
-import com.dglab.cia.data.KeyValueAbility;
-import com.dglab.cia.data.KeyValueHero;
+import com.dglab.cia.data.*;
 import com.dglab.cia.json.util.KvUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -22,30 +20,29 @@ public class DataFetcherService {
     private GithubHelper helper = new GithubHelper();
     private static final Pattern HERO_INCLUDE_PATTERN = Pattern.compile("#base[\\s\t]+\".*\\\\(.*)\\.txt\"");
 
+    private static Map<String, String> languageFiles = new HashMap<>();
+
+    static {
+        languageFiles.put("en-US", "game/panorama/localization/addon_english.txt");
+        languageFiles.put("ru-RU", "game/panorama/localization/addon_russian.txt");
+    }
+
     private RemoteAsyncExpiringObject<List<String>> heroList = new RemoteAsyncExpiringObject<>(
             helper,
             "game/scripts/npc/npc_heroes_custom.txt",
             this::parseHeroList
     );
 
-    private RemoteAsyncExpiringObject<Object> localization = new RemoteAsyncExpiringObject<>(
-            helper,
-            "game/panorama/localization/addon_english.txt",
-            (data) -> KvUtil.parseKV(data).get("addon")
-    );
-
+    private Map<String, RemoteAsyncExpiringObject<KeyValueLocalization>> localization = new HashMap<>();
     private Map<String, RemoteAsyncExpiringObject<Hero>> heroMap = new HashMap<>();
     private Map<String, RemoteAsyncExpiringObject<KeyValueAbility>> abilityMap = new HashMap<>();
 
-    @PostConstruct
-    public void init() {
-        KeyValueHero keyValueHero = new RemoteAsyncExpiringObject<>(
+    private KeyValueLocalization getLocalizationForLanguage(String language) {
+        return localization.computeIfAbsent(language, l -> new RemoteAsyncExpiringObject<>(
                 helper,
-                "game/scripts/npc/heroes/zuus.txt",
-                (data) -> KvUtil.parseKV(data, KeyValueHero.class, true)
-        ).get();
-
-        System.out.println(keyValueHero);
+                languageFiles.get(language),
+                (data) -> KvUtil.parseKV(data, KeyValueLocalization.class, true)
+        )).get();
     }
 
     private List<String> parseHeroList(String data) {
@@ -56,9 +53,18 @@ public class DataFetcherService {
                 .collect(Collectors.toList());
     }
 
+    private void localize(BiConsumer<String, String> consumer, String token) {
+        for (String language : languageFiles.keySet()) {
+            KeyValueLocalization localization = getLocalizationForLanguage(language);
+
+            consumer.accept(language, localization.getString(token));
+        }
+    }
+
     private Hero parseHero(String hero, String data) {
         KeyValueHero kvHero = KvUtil.parseKV(data, KeyValueHero.class, true);
         Hero createdHero = new Hero();
+        localize(createdHero::putName, "HeroName_npc_dota_hero_" + hero);
 
         // Type is important
         LinkedHashMap<String, HeroAbility> abilitiesByName = new LinkedHashMap<>();
@@ -81,6 +87,8 @@ public class DataFetcherService {
             createdAbility.setTexture(kvAbility.getTexture());
             createdAbility.setCooldown(kvAbility.getCooldown());
             createdAbility.setDamage(kvAbility.getDamage());
+
+            localize(createdAbility::putDescription, "AbilityTooltip_" + ability);
 
             if (ability.endsWith("_sub")) {
                 HeroAbility parent = abilitiesByName.get(ability.substring(0, ability.length() - "_sub".length()));
@@ -107,9 +115,5 @@ public class DataFetcherService {
                     (data) -> parseHero(hero, data)
             )
         ).get();
-    }
-
-    public Object getLocalization() {
-        return localization.get();
     }
 }

@@ -1,6 +1,6 @@
 <div id="heroDetails">
     <div class="hero-top"><img ng-src="http://cdn.dota2.com/apps/dota2/images/heroes/{{heroName}}_full.png"/>
-        <div class="name">{{tokens['HeroName_npc_dota_hero_' + heroName]}}</div>
+        <div class="name">{{hero.name[language]}}</div>
     </div>
     <div class="hero-top-players">
         <div ng-repeat="player in winratePerPlayer">
@@ -14,8 +14,8 @@
     </div>
     <div class="hero-bar">
         <div class="language-selector">
-            <a ng-click="selectEnglish()">ENG</a>
-            <a ng-click="selectRussian()">RU</a>
+            <a ng-click="selectLanguage('en-US')">ENG</a>
+            <a ng-click="selectLanguage('ru-RU')">RU</a>
         </div>
         <a href="/heroes">Back</a>
     </div>
@@ -51,8 +51,8 @@
     <highchart config="winrateConfig" class="hero-stats"></highchart>
     <div class="hero-bar">
         <div class="language-selector">
-            <a ng-click="selectEnglish()">ENG</a>
-            <a ng-click="selectRussian()">RU</a>
+            <a ng-click="selectLanguage('en-US')">ENG</a>
+            <a ng-click="selectLanguage('ru-RU')">RU</a>
         </div>
         <a href="/heroes">Back</a>
     </div>
