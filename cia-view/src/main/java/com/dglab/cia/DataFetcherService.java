@@ -82,9 +82,11 @@ public class DataFetcherService {
                     )
             ).get();
 
+            String customIcon = kvHero.getCustomIcons().get(ability);
+
             HeroAbility createdAbility = new HeroAbility();
             createdAbility.setName(ability);
-            createdAbility.setTexture(kvAbility.getTexture());
+            createdAbility.setTexture(customIcon == null ? kvAbility.getTexture() + "_png.png" : "custom/" + customIcon);
             createdAbility.setCooldown(kvAbility.getCooldown());
             createdAbility.setDamage(kvAbility.getDamage());
 

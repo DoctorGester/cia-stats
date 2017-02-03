@@ -48,13 +48,7 @@ app.controller("HeroDetailsCtrl", function ($scope, $http, $filter, $routeParams
     };
 
     $scope.getAbilityImage = function (ability) {
-        var template = "http://cdn.dota2.com/apps/dota2/images/abilities/%s_hp1.png";
-
-        if (ability.customIcon) {
-            template = "https://github.com/DoctorGester/crumbling-island-arena/blob/master/content/panorama/images/custom_game/%s?raw=true";
-        }
-
-        return template.replace(/%s/, ability.texture);
+        return "/images/abilities/%s".replace(/%s/, ability.texture);
     };
 
     $scope.getAbilityDescription = function (ability) {
