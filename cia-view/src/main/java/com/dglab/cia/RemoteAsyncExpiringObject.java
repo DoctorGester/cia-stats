@@ -11,7 +11,7 @@ import java.util.concurrent.CompletableFuture;
  */
 public class RemoteAsyncExpiringObject<T> extends ExpiringObject<T> {
     public RemoteAsyncExpiringObject(GithubHelper helper, String path, FileProcessor<T> processor) {
-        super(() -> processor.process(helper.requestFile(path)), ChronoUnit.SECONDS, 10);
+        super(() -> processor.process(helper.requestFile(path)), ChronoUnit.HOURS, 1);
     }
 
     @Override
