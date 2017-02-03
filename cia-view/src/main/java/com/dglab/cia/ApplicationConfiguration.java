@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
 import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
  * Time: 19:11
  */
 @Configuration
+@ComponentScan("com.dglab.cia")
 public class ApplicationConfiguration {
     @Value("${server.http.port}")
     private int httpPort;

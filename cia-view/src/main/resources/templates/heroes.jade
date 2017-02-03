@@ -1,10 +1,10 @@
 extends base.jade
 
 block append head
-    script(type="text/javascript", src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js")
-    script(type="text/javascript", src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-sanitize.js")
-    script(type="text/javascript", src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-route.js")
-    script(type="text/javascript", src="https://code.highcharts.com/highcharts.js")
+    script(type="text/javascript", src="/scripts/angular.min.js")
+    script(type="text/javascript", src="/scripts/angular-sanitize.js")
+    script(type="text/javascript", src="/scripts/angular-route.js")
+    script(type="text/javascript", src="/scripts/highcharts.js")
     script(type="text/javascript", src="/scripts/highcharts-ng.min.js")
     base(href="/")
     block title
@@ -205,64 +205,15 @@ block content
         }
 
     #app(ng-app="app")
-        #main(ng-controller="HeroesCtrl" ng-cloak)
+        #main(ng-cloak)
             ng-view
     script.
-        function parseKV(string, targetObject) {
-            var index = 0;
-            var state = 0;
-            var buffer = "";
-            var lastKey = null;
-            var prevToken = null;
-
-            while (index < string.length) {
-                var token = string.charAt(index);
-
-                if (token == "}" && state != 1 && state != 3) {
-                    return index;
-                }
-
-                if (token == "\"" && prevToken != "\\") {
-                    if (state == 0) {
-                        state = 1;
-                    } else if (state == 1) {
-                        state = 2;
-                        lastKey = buffer;
-                        buffer = "";
-                    } else if (state == 2) {
-                        state = 3;
-                    } else if (state == 3) {
-                        targetObject[lastKey] = buffer;
-                        buffer = "";
-                        state = 0;
-                    }
-                } else if (token == "{" && state == 2) {
-                    var internal = {};
-                    index += parseKV(string.substring(index), internal);
-                    targetObject[lastKey] = internal;
-                    state = 0;
-                } else if (state == 1 || state == 3) {
-                    buffer = buffer + token;
-                }
-
-                prevToken = token;
-                index++;
-            }
-
-            return index;
-        }
 
         function getLang() {
             if (navigator.languages != undefined)
                 return navigator.languages[0] || "";
             else
                 return navigator.language || "";
-        }
-
-        function kvToObject(base64) {
-            var obj = {};
-            parseKV(decodeURIComponent(escape(atob(base64))), obj);
-            return obj;
         }
 
         var model = [];
@@ -272,52 +223,61 @@ block content
         app.config(function($routeProvider, $locationProvider) {
             $routeProvider.when("/heroes/:hero", {
                 templateUrl: "/templates/hero.html",
-                controller: "HeroesCtrl"
+                controller: "HeroDetailsCtrl"
             });
 
             $routeProvider.when("/heroes", {
                 templateUrl: "/templates/heroList.html",
-                controller: "HeroesCtrl"
+                controller: "HeroListCtrl"
             });
 
             $locationProvider.html5Mode(true);
         });
 
-        app.controller('HeroesCtrl', function ($scope, $http, $filter, $routeParams) {
-            var heroes = kvToObject("#{model.heroes}").DOTAHeroes;
-            heroes = Object.keys(heroes).filter(function(key) {
-                var hero = heroes[key];
-                return (!hero.Disabled || hero.Disabled == "false") && hero.Order;
-            }).map(function (key) {
-                return heroes[key];
-            });
+        app.controller("HeroListCtrl", function($scope, $http) {
+            $http.get("/api/heroes/list", { async: true })
+                .success(function (response) {
+                    $scope.heroes = response;
+                });
+        });
 
-            heroes.forEach(function(hero) {
-                hero.name = hero.override_hero.substr('npc_dota_hero_'.length);
-            });
+        app.controller("HeroDetailsCtrl", function ($scope, $http, $routeParams) {
+            $scope.heroName = $routeParams.hero;
 
-            var tokens = kvToObject("#{model.localization}").addon.Tokens;
-            var tokensRU = kvToObject("#{model.localizationRU}").addon.Tokens;
+            $http.get("/api/heroes/details/" + $scope.heroName, { async: true })
+                .success(function(response) {
+                    $scope.hero = response;
+                });
 
-            $scope.heroes = heroes;
+            var tokens = {};
 
-            $scope.selectEnglish = function() {
-                $scope.tokens = tokens;
+            $http.get("/api/heroes/localization", { async: true })
+                .success(function (response) {
+                    $scope.tokens = response.Tokens;
+                });
+
+            //kvToObject("#{model.localization}").addon.Tokens;
+            //var tokensRU = kvToObject("#{model.localizationRU}").addon.Tokens;
+
+            $scope.tokens = tokens;
+
+            $scope.getAbilityImage = function (ability) {
+                var template = "http://cdn.dota2.com/apps/dota2/images/abilities/%s_hp1.png";
+
+                if (ability.customIcon) {
+                    template = "https://github.com/DoctorGester/crumbling-island-arena/blob/master/content/panorama/images/custom_game/%s?raw=true";
+                }
+
+                return template.replace(/%s/, ability.texture);
             };
 
-            $scope.selectRussian = function () {
-                $scope.tokens = tokensRU;
+            $scope.getAbilityDescription = function (ability, sub) {
+                var token = $scope.tokens['AbilityTooltip_' + ability.name];
+
+                return token.replace(/\\"/g, "\"").replace(/\\\\\\\\/g, "");
             };
 
-            if (getLang().indexOf("ru") !== -1) {
-                $scope.selectRussian();
-            } else {
-                $scope.selectEnglish();
-            }
-
-            var allAbilities = kvToObject("#{model.abilities}").DOTAAbilities;
-
-            $scope.isAttackAbility = function(ability) {
+            $scope.isAttackAbility = function (ability) {
                 return ability.name.endsWith("_a");
             };
 
@@ -327,159 +287,48 @@ block content
                 }
             };
 
-            $scope.getAbilityImage = function(ability, sub) {
-                var template = "http://cdn.dota2.com/apps/dota2/images/abilities/%s_hp1.png";
-
-                if (ability.customIcon) {
-                    template = "https://github.com/DoctorGester/crumbling-island-arena/blob/master/content/panorama/images/custom_game/%s?raw=true";
-                }
-
-                if (sub) {
-                    return template.replace(/%s/, ability.subImage);
-                }
-
-                return template.replace(/%s/, ability.image);
-            };
-
-            $scope.getAbilityDescription = function(ability, sub) {
-                var token = $scope.tokens['AbilityTooltip_' + (sub ? ability.subName : ability.name)];
-
-                return token.replace(/\\"/g, "\"").replace(/\\\\\\\\/g, "");
-            };
-
             $scope.winrateConfig = {
                 loading: true,
                 options: {
-                    chart: {
-                        type: "line"
-                    },
+                    chart: { type: "line" },
                     tooltip: {
                         formatter: function () {
                             return this.y.toFixed(1) + ' % across ' + this.point.games + ' games';
                         }
                     },
-                    legend: {
-                        enabled: false
-                    }
+                    legend: { enabled: false }
                 },
-                title: {
-                    text: "Winrate"
-                },
+                title: { text: "Winrate" },
                 xAxis: {
                     type: 'datetime',
-                    title: {
-                        text: 'Date'
-                    }
+                    title: { text: 'Date' }
                 },
-                yAxis: {
-                    min: 25,
-                    max: 75
-                }
+                yAxis: { min: 25, max: 75 }
             };
 
-            var loadHeroWinRates = function(hero) {
+            var loadHeroWinRates = function (hero) {
                 $scope.winrateConfig.loading = true;
 
-                $http.get("/stats/" + hero.name)
-                    .then(function(response) {
+                $http.get("/stats/" + hero, { async: true })
+                    .success(function (response) {
                         var seriesResult = [];
                         var perDay = response.data.heroWinRatePerDate;
 
-                        angular.forEach(perDay, function(value, key) {
-                            seriesResult.push({ x: new Date(key), y: value.winRate * 100, games: value.games })
+                        angular.forEach(perDay, function (value, key) {
+                            seriesResult.push({x: new Date(key), y: value.winRate * 100, games: value.games})
                         }, seriesResult);
 
                         seriesResult = $filter('orderBy')(seriesResult, "'x'");
 
-                        $scope.winrateConfig.series = [{ data: seriesResult }];
+                        $scope.winrateConfig.series = [{data: seriesResult}];
                         $scope.winrateConfig.loading = false;
                         $scope.winratePerPlayer = response.data.heroWinRatePerPlayer
 
-                        angular.forEach($scope.winratePerPlayer, function(value) {
+                        angular.forEach($scope.winratePerPlayer, function (value) {
                             value.winRate = parseFloat(Math.round(value.winRateAndGames.winRate * 100)).toFixed(1);
                         });
                     });
             };
 
-            $scope.selectHero = function(hero) {
-                $scope.selectedHero = hero;
-
-                if (!hero) {
-                    return;
-                }
-
-                loadHeroWinRates(hero);
-
-                var customIcons = hero.CustomIcons || {};
-
-                var abilities = [];
-
-                for (var i = 1; i < 10; i++) {
-                    var abilityName = hero["Ability" + i];
-
-                    if (!abilityName) {
-                        continue;
-                    }
-
-                    var originalName = abilityName;
-                    var ability = allAbilities[abilityName];
-                    var isSub = false;
-
-                    if (abilityName.startsWith("placeholder")) {
-                        continue;
-                    }
-
-                    if (abilityName.endsWith("_sub")) {
-                        isSub = true;
-                        abilityName = abilityName.substr(0, abilityName.length - "_sub".length);
-                    }
-
-                    if (ability) {
-                        var abilityModel = {};
-
-                        var found = false;
-
-                        abilities.forEach(function (value) {
-                            if (value.name == abilityName) {
-                                found = true;
-                                abilityModel = value;
-                                return false;
-                            }
-                        });
-
-                        var customIcon = customIcons[originalName];
-                        var abilityImage = customIcon || ability.AbilityTextureName;
-
-                        abilityModel.customIcon = customIcon;
-
-                        if (!isSub) {
-                            abilityModel.image = abilityImage;
-                            abilityModel.name = abilityName;
-                            abilityModel.cooldown = parseFloat(ability.AbilityCooldown);
-                            abilityModel.damage = ability.Damage ? parseFloat(ability.Damage) : undefined;
-                        } else {
-                            abilityModel.subImage = abilityImage;
-                            abilityModel.subName = originalName;
-                            abilityModel.subCooldown = parseFloat(ability.AbilityCooldown);
-                            abilityModel.subDamage = ability.Damage ? parseFloat(ability.Damage) : undefined;
-                        }
-
-                        if (!found) {
-                            abilities.push(abilityModel);
-                        }
-                    } else {
-                        console.log(abilityName + " not found");
-                    }
-                }
-
-                $scope.abilities = abilities;
-            };
-
-            if ($routeParams.hero) {
-                heroes.forEach(function (hero) {
-                    if (hero.name === $routeParams.hero) {
-                        $scope.selectHero(hero);
-                    }
-                });
-            }
+            loadHeroWinRates($scope.heroName);
         });

@@ -6,8 +6,10 @@ import com.squareup.okhttp.OkUrlFactory;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.kohsuke.github.GHCommit;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
+import org.kohsuke.github.PagedIterator;
 import org.kohsuke.github.extras.OkHttpConnector;
 
 import java.io.File;
@@ -33,29 +35,13 @@ public class GithubHelper {
         }
     }
 
-    private String requestFile(String url) {
+    public String requestFile(String url) {
         try {
-            return Base64.encodeBase64String(IOUtils.toByteArray(repository.getFileContent(url).read()));
+            return new String(IOUtils.toByteArray(repository.getFileContent(url).read()), "UTF8");
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return "";
-    }
-
-    public String getHeroesBase64() {
-        return requestFile("game/scripts/npc/npc_heroes_custom.txt");
-    }
-
-    public String getAbilitiesBase64() {
-        return requestFile("game/scripts/npc/npc_abilities_custom.txt");
-    }
-
-    public String getLocalizationBase64() {
-        return requestFile("game/panorama/localization/addon_english.txt");
-    }
-
-    public String getLocalizationRussianBase64() {
-        return requestFile("game/panorama/localization/addon_russian.txt");
+        return null;
     }
 }

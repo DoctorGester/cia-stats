@@ -1,6 +1,6 @@
-<div id="heroDetails" ng-show="selectedHero">
-    <div class="hero-top"><img ng-src="http://cdn.dota2.com/apps/dota2/images/heroes/{{selectedHero.name}}_full.png"/>
-        <div class="name">{{tokens['HeroName_npc_dota_hero_' + selectedHero.name]}}</div>
+<div id="heroDetails">
+    <div class="hero-top"><img ng-src="http://cdn.dota2.com/apps/dota2/images/heroes/{{heroName}}_full.png"/>
+        <div class="name">{{tokens['HeroName_npc_dota_hero_' + heroName]}}</div>
     </div>
     <div class="hero-top-players">
         <div ng-repeat="player in winratePerPlayer">
@@ -20,8 +20,8 @@
         <a href="/heroes">Back</a>
     </div>
     <div class="hero-right">
-        <div class="abilities">
-            <div ng-repeat="ability in abilities | orderBy: not(isAttackAbility)" class="ability-block">
+        <div class="abilities" ng-show="hero">
+            <div ng-repeat="ability in hero.abilities | orderBy: not(isAttackAbility)" class="ability-block">
                 <div class="ability">
                     <div class="image-block"><img ng-src="{{getAbilityImage(ability)}}" class="image"/>
                         <span ng-if="ability.damage" class="damage-text tooltip">{{ability.damage}}
@@ -34,16 +34,16 @@
                     <span ng-if="isAttackAbility(ability)" class="attack-ability">Basic Attack</span>
                     <span ng-bind-html="getAbilityDescription(ability)" class="description"></span>
                 </div>
-                <div ng-if="ability.subName" class="ability sub">
-                    <div class="image-block"><img ng-src="{{getAbilityImage(ability, true)}}" class="image"/>
-                        <span ng-if="ability.subDamage" class="damage-text tooltip">{{ability.subDamage}}
+                <div ng-if="ability.sub" class="ability sub">
+                    <div class="image-block"><img ng-src="{{getAbilityImage(ability.sub)}}" class="image"/>
+                        <span ng-if="ability.sub.damage" class="damage-text tooltip">{{ability.sub.damage}}
                             <span class="tooltiptext">Damage</span>
                         </span>
-                        <span ng-if="ability.subCooldown" class="cooldown-text tooltip">{{ability.subCooldown}}
+                        <span ng-if="ability.sub.cooldown" class="cooldown-text tooltip">{{ability.sub.cooldown}}
                             <span class="tooltiptext">Cooldown</span>
                         </span>
                     </div>
-                    <span ng-bind-html="getAbilityDescription(ability, true)" class="description"></span>
+                    <span ng-bind-html="getAbilityDescription(ability.sub)" class="description"></span>
                 </div>
             </div>
         </div>

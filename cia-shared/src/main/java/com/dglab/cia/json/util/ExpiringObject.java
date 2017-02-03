@@ -1,7 +1,8 @@
-package com.dglab.cia.util;
+package com.dglab.cia.json.util;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -10,11 +11,11 @@ import java.util.function.Supplier;
  * Time: 0:50
  */
 public class ExpiringObject<T> {
-    private T object;
-    private Supplier<T> supplier;
+    protected T object;
+    protected Supplier<T> supplier;
     private final ChronoUnit unit;
     private final long time;
-    private Instant lastUpdated;
+    protected Instant lastUpdated;
 
     public ExpiringObject(Supplier<T> supplier, ChronoUnit unit, long time) {
         this.supplier = supplier;
@@ -24,7 +25,7 @@ public class ExpiringObject<T> {
         lastUpdated = Instant.now();
     }
 
-    private void update() {
+    protected void update() {
         object = supplier.get();
         lastUpdated = Instant.now();
     }

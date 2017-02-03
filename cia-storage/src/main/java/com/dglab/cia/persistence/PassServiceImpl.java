@@ -2,7 +2,7 @@ package com.dglab.cia.persistence;
 
 import com.dglab.cia.database.PassOwner;
 import com.dglab.cia.json.*;
-import com.dglab.cia.util.ExpiringObject;
+import com.dglab.cia.json.util.ExpiringObject;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

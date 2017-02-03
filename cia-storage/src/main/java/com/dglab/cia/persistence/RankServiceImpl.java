@@ -4,7 +4,7 @@ import com.dglab.cia.ConnectionState;
 import com.dglab.cia.json.RankedMode;
 import com.dglab.cia.database.*;
 import com.dglab.cia.json.*;
-import com.dglab.cia.util.ExpiringObject;
+import com.dglab.cia.json.util.ExpiringObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

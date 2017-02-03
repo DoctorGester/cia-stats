@@ -39,21 +39,6 @@ public class ViewApplication {
 
     private ObjectMapper mapper = ObjectMapperFactory.createObjectMapper();
     private OkHttpClient client = new OkHttpClient();
-    private GithubHelper helper = new GithubHelper();
-
-    public ViewApplication() {
-		/*threadPool(4);*/
-
-        /*
-		exception(Exception.class, (exception, request, response) -> {
-			exception.printStackTrace();
-		});
-
-		before("/admin/*", new RequiresAuthenticationFilter(setupAuth(), "DirectBasicAuthClient"));
-		mapGet("/admin/ranks/set/:id/:mode/:rank");
-		mapGet("/admin/elo/set/:id/:mode/:elo");
-        mapGet("/admin/stats/recalculate/:stat");*/
-    }
 
     @RequestMapping("/.well-known/acme-challenge/{path}")
     void wellKnown(@PathVariable("path") String path, HttpServletResponse response) {
@@ -76,10 +61,6 @@ public class ViewApplication {
     @RequestMapping("/heroes/**")
     String heroes(Model model) {
         model.addAttribute("stringUtils", StringUtils.class);
-        model.addAttribute("heroes", helper.getHeroesBase64());
-        model.addAttribute("abilities", helper.getAbilitiesBase64());
-        model.addAttribute("localization", helper.getLocalizationBase64());
-        model.addAttribute("localizationRU", helper.getLocalizationRussianBase64());
 
         return "heroes";
     }

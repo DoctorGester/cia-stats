@@ -7,7 +7,7 @@ import com.dglab.cia.json.Hero;
 import com.dglab.cia.json.HeroWinRateAndGames;
 import com.dglab.cia.json.PassQuest;
 import com.dglab.cia.json.QuestType;
-import com.dglab.cia.util.ExpiringObject;
+import com.dglab.cia.json.util.ExpiringObject;
 import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
