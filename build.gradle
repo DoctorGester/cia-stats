@@ -184,6 +184,7 @@ project(':cia-view') {
             exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
         }
         compile group: 'de.neuland-bfi', name: 'jade4j', version: '1.2.+'
+        compile group: 'org.springframework.boot', name: 'spring-boot-devtools'
         /*compile group: 'org.springframework.boot', name: 'spring-boot-starter-security'
         compile group: 'org.springframework.security', name: 'spring-security-openid'*/
 

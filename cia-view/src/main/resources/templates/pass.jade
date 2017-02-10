@@ -1,0 +1,5 @@
+extends base.jade
+
+block content
+    each entry in perLevel
+        div #{entry.hero} #{entry.taunt.sound} #{entry.emote} #{entry.item}

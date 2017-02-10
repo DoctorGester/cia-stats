@@ -33,6 +33,12 @@ public class DataFetcherService {
             this::parseHeroList
     );
 
+    private RemoteAsyncExpiringObject<KeyValueCosmetics> cosmetics = new RemoteAsyncExpiringObject<>(
+            helper,
+            "game/scripts/npc/cosmetics.txt",
+            (s) -> KvUtil.parseKV(s, KeyValueCosmetics.class, true)
+    );
+
     private Map<String, RemoteAsyncExpiringObject<KeyValueLocalization>> localization = new HashMap<>();
     private Map<String, RemoteAsyncExpiringObject<Hero>> heroMap = new HashMap<>();
     private Map<String, RemoteAsyncExpiringObject<KeyValueAbility>> abilityMap = new HashMap<>();
@@ -117,5 +123,9 @@ public class DataFetcherService {
                     (data) -> parseHero(hero, data)
             )
         ).get();
+    }
+
+    public KeyValueCosmetics getCosmetics() {
+        return cosmetics.get();
     }
 }

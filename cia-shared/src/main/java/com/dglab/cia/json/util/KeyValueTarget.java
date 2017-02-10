@@ -9,5 +9,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(KeyValueTargets.class)
 public @interface KeyValueTarget {
-    String value();
+    String value() default "";
 }

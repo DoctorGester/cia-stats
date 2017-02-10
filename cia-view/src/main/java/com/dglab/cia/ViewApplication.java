@@ -1,5 +1,7 @@
 package com.dglab.cia;
 
+import com.dglab.cia.data.KeyValueHeroCosmetics;
+import com.dglab.cia.data.KeyValueHeroCosmeticsEntry;
 import com.dglab.cia.json.AllStats;
 import com.dglab.cia.json.HeroStats;
 import com.dglab.cia.json.RankedPlayer;
@@ -12,6 +14,7 @@ import com.squareup.okhttp.Response;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Controller;
@@ -25,8 +28,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author doc
@@ -39,6 +44,9 @@ public class ViewApplication {
 
     private ObjectMapper mapper = ObjectMapperFactory.createObjectMapper();
     private OkHttpClient client = new OkHttpClient();
+
+    @Autowired
+    private DataFetcherService dataFetcher;
 
     @RequestMapping("/.well-known/acme-challenge/{path}")
     void wellKnown(@PathVariable("path") String path, HttpServletResponse response) {
@@ -68,6 +76,28 @@ public class ViewApplication {
     @RequestMapping("/reborn")
     String reborn(Model model) {
         return "reborn";
+    }
+
+    @RequestMapping("/pass")
+    String pass(Model model) {
+        Map<String, KeyValueHeroCosmetics> heroCosmetics = dataFetcher.getCosmetics().getHeroCosmetics();
+
+        // Preparing for flat-map
+        heroCosmetics
+                .entrySet().forEach(
+                        e -> e.getValue().getEntries().values().forEach(c -> c.setHero(e.getKey()))
+        );
+
+        List<KeyValueHeroCosmeticsEntry> cosmeticsPerLevel = heroCosmetics
+                .values()
+                .stream()
+                .flatMap(c -> c.getEntries().values().stream()).filter(c -> "pass".equals(c.getType()))
+                .sorted(Comparator.comparingInt(KeyValueHeroCosmeticsEntry::getLevel))
+                .collect(Collectors.toList());
+
+        model.addAttribute("perLevel", cosmeticsPerLevel);
+
+        return "pass";
     }
 
     @RequestMapping("/ranks/top/{mode}")

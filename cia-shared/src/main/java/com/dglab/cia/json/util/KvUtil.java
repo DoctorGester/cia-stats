@@ -80,9 +80,18 @@ public class KvUtil {
 
     private static void mapMapToObject(Map map, Object object)
             throws IllegalAccessException, NoSuchMethodException, InvocationTargetException, InstantiationException {
+        Map<String, Object> temporary = new LinkedHashMap();
+        temporary.putAll(map);
+
         for (Field field : object.getClass().getDeclaredFields()) {
             for (KeyValueTarget ann : field.getDeclaredAnnotationsByType(KeyValueTarget.class)) {
-                Object value = map.get(ann.value());
+                String targetName = ann.value();
+
+                if (targetName.isEmpty()) {
+                    targetName = field.getName();
+                }
+
+                Object value = temporary.remove(targetName);
 
                 if (value != null) {
                     Class<?> type = field.getType();
@@ -118,6 +127,42 @@ public class KvUtil {
                             mapMapToObject((Map) value, sub);
                         }
                     }
+                }
+            }
+        }
+
+        for (Field field : object.getClass().getDeclaredFields()) {
+            KeyValueConsumer consumer = field.getDeclaredAnnotation(KeyValueConsumer.class);
+
+            if (consumer != null) {
+                if (!Map.class.isAssignableFrom(field.getType())) {
+                    throw new IllegalArgumentException("Not a map");
+                }
+
+                field.setAccessible(true);
+
+                Map<String, Object> target = (Map<String, Object>) field.get(object);
+
+                for (Map.Entry<String, Object> mapEntry : temporary.entrySet()) {
+                    boolean isIgnored = false;
+
+                    for (String ignored : consumer.ignored()) {
+                        if (mapEntry.getKey().equals(ignored)) {
+                            isIgnored = true;
+                            break;
+                        }
+                    }
+
+                    if (isIgnored) {
+                        continue;
+                    }
+
+                    Constructor<?> constructor = consumer.value().getConstructor();
+                    Object sub = constructor.newInstance();
+
+                    mapMapToObject((Map) mapEntry.getValue(), sub);
+
+                    target.put(mapEntry.getKey(), sub);
                 }
             }
         }
