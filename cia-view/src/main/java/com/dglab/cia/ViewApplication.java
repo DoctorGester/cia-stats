@@ -4,6 +4,7 @@ import com.dglab.cia.data.KeyValueHeroCosmetics;
 import com.dglab.cia.data.KeyValueHeroCosmeticsEntry;
 import com.dglab.cia.json.AllStats;
 import com.dglab.cia.json.HeroStats;
+import com.dglab.cia.json.PassPlayer;
 import com.dglab.cia.json.RankedPlayer;
 import com.dglab.cia.json.util.ObjectMapperFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -80,6 +81,8 @@ public class ViewApplication {
 
     @RequestMapping("/pass")
     String pass(Model model) {
+        setupModelFromURL("/pass/top", model, new TypeReference<List<PassPlayer>>() {});
+
         Map<String, KeyValueHeroCosmetics> heroCosmetics = dataFetcher.getCosmetics().getHeroCosmetics();
 
         // Preparing for flat-map
@@ -95,7 +98,25 @@ public class ViewApplication {
                 .sorted(Comparator.comparingInt(KeyValueHeroCosmeticsEntry::getLevel))
                 .collect(Collectors.toList());
 
+        List<KeyValueHeroCosmeticsEntry> baseCosmetics = heroCosmetics
+                .values()
+                .stream()
+                .flatMap(c -> c.getEntries().values().stream()).filter(c -> "pass_base".equals(c.getType()))
+                .sorted(Comparator.comparingInt(c -> {
+                    if (c.getItem() != null) {
+                        return 0;
+                    }
+
+                    if (c.getTaunt() != null) {
+                        return 1;
+                    }
+
+                    return 2;
+                }))
+                .collect(Collectors.toList());
+
         model.addAttribute("perLevel", cosmeticsPerLevel);
+        model.addAttribute("base", baseCosmetics);
 
         return "pass";
     }
@@ -136,5 +157,6 @@ public class ViewApplication {
 
         model.addAttribute("model", result);
         model.addAttribute("stringUtils", StringUtils.class);
+        model.addAttribute("math", Math.class);
     }
 }

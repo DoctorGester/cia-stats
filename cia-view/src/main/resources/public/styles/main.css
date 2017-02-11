@@ -88,6 +88,7 @@ label {
     margin: 2em 0 1em;
     font-family: "Raleway", "Open Sans", sans-serif;
     font-size: 36px;
+    line-height: 40px;
 }
 
 /* This is a modifier class used when the content-head is inside a ribbon */
