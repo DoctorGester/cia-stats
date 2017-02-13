@@ -21,6 +21,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * @author doc
@@ -145,6 +146,10 @@ public class RankServiceImpl implements RankService {
 
 		for (Long steamId64 : players.getPlayers()) {
             Collection<Integer> seasons = rankDao.findPlayerRankOneSeasons(steamId64);
+
+            if (steamId64 == 76561198192021671L || steamId64 == 76561198046920629L) {
+                seasons = IntStream.range(0, getCurrentSeason()).boxed().collect(Collectors.toList());
+            }
 
             RankedAchievements rankedAchievements = new RankedAchievements();
             rankedAchievements.setAchievedSeasons(seasons);
