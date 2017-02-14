@@ -5,6 +5,7 @@ html
             link(rel="stylesheet", href="/styles/pure-min.css", type="text/css")
             link(rel="stylesheet", href="/styles/ez-plug-min.css", type="text/css")
             link(rel="stylesheet", href="/styles/main.css", type="text/css")
+            link(rel="stylesheet", href="/styles/menu.css", type="text/css")
             link(rel="icon", type="image/png", sizes="32x32", href="/images/favicon.png")
             link(href="https://fonts.googleapis.com/css?family=Raleway", rel="stylesheet")
             link(href="https://fonts.googleapis.com/css?family=Open+Sans&amp;subset=cyrillic", rel="stylesheet")
@@ -12,24 +13,37 @@ html
             block title
                 title Crumbling Island Arena Website
     body
-        div.header
-            div.home-menu.pure-menu.pure-menu-horizontal.pure-menu-fixed
-                a.pure-menu-heading(href="/") Crumbling Island Arena
-                ul.pure-menu-list
-                    li.pure-menu-item
-                        a.pure-menu-link(href="https://discord.me/cia") Join Discord
-                    li.pure-menu-item
-                        a.pure-menu-link(href="/") Home
-                    li.pure-menu-item
-                        a.pure-menu-link(href="/pass") Pass
-                    li.pure-menu-item
-                        a.pure-menu-link(href="/ranks/top/teams") Top 2v2/3v3
-                    li.pure-menu-item
-                        a.pure-menu-link(href="/ranks/top/duel") Top 1v1
-                    li.pure-menu-item
-                        a.pure-menu-link(href="/heroes") Heroes
-                    //
+        .header
+            .custom-menu-wrapper.pure-menu-fixed.pure-menu-horizontal
+                .pure-menu.custom-menu.custom-menu-top
+                    a.pure-menu-heading.custom-menu-brand(href='#') Crumbling Island Arena
+                    a#toggle.custom-menu-toggle(href='#')
+                        s.bar
+                        s.bar
+                #tuckedMenu.pure-menu.pure-menu-horizontal.pure-menu-scrollable.custom-menu.custom-menu-bottom.custom-menu-tucked
+                    .custom-menu-screen
+                    ul.pure-menu-list
                         li.pure-menu-item
-                            a.pure-menu-link(href="#") Matches
+                            a.pure-menu-link(href="https://discord.me/cia") Join Discord
+                        li.pure-menu-item
+                            a.pure-menu-link(href="/") Home
+                        li.pure-menu-item
+                            a.pure-menu-link(href="/pass") Pass
+                        li.pure-menu-item
+                            a.pure-menu-link(href="/ranks/top/teams") Top 2v2/3v3
+                        li.pure-menu-item
+                            a.pure-menu-link(href="/ranks/top/duel") Top 1v1
+                        li.pure-menu-item
+                            a.pure-menu-link(href="/heroes") Heroes
+                        //
+                            li.pure-menu-item
+                                a.pure-menu-link(href="#") Matches
         div.ez-wr.content-margin.page-content
             block content
+        script(type="text/javascript").
+            (function (window, document) {
+                document.getElementById('toggle').addEventListener('click', function (e) {
+                    document.getElementById('tuckedMenu').classList.toggle('custom-menu-tucked');
+                    document.getElementById('toggle').classList.toggle('x');
+                });
+            })(window, window.document);

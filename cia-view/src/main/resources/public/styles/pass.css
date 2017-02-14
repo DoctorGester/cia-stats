@@ -21,6 +21,7 @@
 
 #benefits span {
     align-self: center;
+    text-align: center;
     margin-top: 12px;
 }
 
@@ -116,8 +117,7 @@
     line-height: 26px;
     text-align: center;
     font-size: 34px;
-    margin: 6px;
-    margin-left: 50px;
+    margin: 6px 6px 6px 50px;
 }
 
 .item-block .hero {
@@ -134,4 +134,52 @@
     font-size: 30px;
     color: rgba(255, 255, 255, 0.9);
     line-height: 40px;
+}
+
+@media (max-width: 1024px) {
+    #benefits div {
+        padding-left: 14px;
+        font-size: 20px;
+    }
+
+    .top-player {
+        background-image: none;
+    }
+
+    .top-player .name {
+        font-size: 20px;
+    }
+
+    .top-player .avatar {
+        margin-left: 14px;
+        margin-right: 14px;
+    }
+
+    .item-block .level, .top-player .level {
+        margin-left: 14px;
+        font-size: 28px;
+    }
+
+    .item-block .type {
+        font-size: 28px;
+    }
+
+    .item-block .hero {
+        margin-left: 14px;
+        margin-right: 14px;
+    }
+}
+
+@media (max-width: 400px) {
+    #benefits div {
+        font-size: 14px;
+    }
+
+    .top-player .name {
+        font-size: 14px;
+    }
+
+    .item-block {
+        background-image: none;
+    }
 }
