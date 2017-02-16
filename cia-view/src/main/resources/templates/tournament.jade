@@ -1,0 +1,183 @@
+extends base.jade
+
+block append head
+    script(type="text/javascript", src="/scripts/jquery.js")
+    script(type="text/javascript", src="/scripts/countdown.min.js")
+
+    block title
+        title Arcana Tournament
+
+    style.
+        #arcanas {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        #arcanas img {
+            width: 225px;
+            height: 332px;
+            margin: 20px;
+            border-radius: 3px;
+        }
+
+        #timer {
+            font-size: 80px;
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 80px;
+            color: #2f6d96;
+        }
+
+        #login {
+            display: block;
+            margin: auto auto 80px;
+        }
+
+        #rules {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #rules span {
+            font-size: 22px;
+            line-height: 38px;
+        }
+
+        #register a {
+            display: block;
+            background: linear-gradient(to bottom, #6E9E30 0%, #5E8529 100%);
+            width: 250px;
+            height: 50px;
+            text-transform: uppercase;
+            border-radius: 2px;
+            font-size: 24px;
+            text-align: center;
+            color: white;
+            line-height: 48px;
+            user-select: none;
+            cursor: pointer;
+            font-family: "Raleway", "Open Sans", sans-serif;
+            margin: auto auto 80px;
+        }
+
+        #participants {
+            width: 75%;
+            margin: auto auto 80px;
+        }
+
+        #not-enough {
+            display: block;
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 80px;
+            color: #de0600;
+        }
+
+        .participant {
+            display: flex;
+            flex-direction: row;
+            height: 40px;
+            margin: 1px;
+        }
+
+        .participant.normal {
+            background: rgba(60, 100, 120, 0.78) url('/images/cosmetics/trophy.png') no-repeat center;
+            background-position-x: 100%;
+            background-size: 96px 96px;
+        }
+
+        .participant.replacement {
+            background-color: rgba(120, 34, 45, 0.78);
+        }
+
+        .participant .name {
+            letter-spacing: 2px;
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 35px;
+        }
+
+        .participant .avatar {
+            width: 40px;
+            height: 40px;
+            border: 0;
+            margin: 0 50px 0 50px;
+        }
+
+block content
+    h2.content-head.is-center Arcana Tournament
+
+    h2.is-center Compete with the best Crumbling Island Arena players in the first official tournament and earn a real Arcana!
+
+    #arcanas
+        img(src="/images/arcana/lina.png")
+        img(src="/images/arcana/cm.png")
+        img(src="/images/arcana/techies.png")
+        img(src="/images/arcana/zeus.png")
+
+    h2.content-head.is-center Rules
+
+    #rules
+        span #[strong When]: 18.02.2017
+        span #[strong Format]: 1v1, Single elimination
+        span #[strong Server location]: EU/RU
+        span #[strong Main prize]: Arcana item of choice (presented at the top)
+        span #[strong Participants]: 16 slots + 8 replacement slots (can replace players in the first round)
+        span #[strong Requirements]: Rank 1 in any season
+        span
+            a(href="http://steamcommunity.com/id/dart1122331337/") Main tournament administrator and sponsor
+
+    if !alreadyRegistered
+        h2.content-head.is-center Registration
+
+        if !open
+            h2.is-center Opens in
+            #timer
+        else
+            if !loggedIn
+                #login
+                    a(href="/login")
+                        img(src="/images/login-steam.png")
+            else
+                if rankIsEnough
+                    #register
+                        a(href="/tournament/register") Register
+                else
+                    span#not-enough Sorry, Rank 1 in any season is required!
+
+    if participants.size() > 0
+        h2.content-head.is-center Participants
+
+        #participants
+            for player in participants
+                - var cl = player.isReplacement() ? "replacement" : "normal";
+                a.participant(href="http://steamcommunity.com/profiles/#{player.steamId64}", class=cl)
+                    img.avatar(src=player.avatarUrl)
+                    .name #{player.name}
+
+    if !open
+        script(type="text/javascript").
+            function pad(num, size) {
+                var s = num + "";
+                while (s.length < size) s = "0" + s;
+                return s;
+            }
+
+            var targetDate = new Date(new Date().getTime() + #{timeRemaining});
+            var timerDiv = document.querySelector("#timer");
+            countdown(
+                function (ts) {
+                    if (ts.value <= 0) {
+                        location.reload();
+                    } else {
+                        timerDiv.innerHTML = pad(ts.hours, 2) + ":" + pad(ts.minutes, 2) + ":" + pad(ts.seconds, 2);
+                    }
+                },
+                targetDate,
+                countdown.HOURS | countdown.MINUTES | countdown.SECONDS,
+                3
+            );

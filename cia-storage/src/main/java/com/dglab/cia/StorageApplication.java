@@ -35,6 +35,7 @@ public class StorageApplication {
 
     private AnnotationConfigApplicationContext context;
     private CoordinatorService coordinatorService;
+    private TournamentService tournamentService;
     private StatsService statsService;
     private MatchService matchService;
     private QuestService questService;
@@ -56,6 +57,7 @@ public class StorageApplication {
 		context.refresh();
 
         coordinatorService = context.getBean(CoordinatorService.class);
+        tournamentService = context.getBean(TournamentService.class);
         statsService = context.getBean(StatsService.class);
 		matchService = context.getBean(MatchService.class);
         questService = context.getBean(QuestService.class);
@@ -204,6 +206,22 @@ public class StorageApplication {
         get("/pass/top", (request, response) -> {
             return passService.getTopPlayers();
         }, jsonUtil.json());
+
+        before("/auth/*", (request, response) -> {
+            if (!"127.0.0.1".equals(request.ip())) {
+                throw new IllegalAccessException();
+            }
+        });
+
+        get("/auth/tournament/register/:id", (request, response) -> {
+            long steamId64 = requestLong(request, "id");
+
+            return tournamentService.register(steamId64);
+        }, jsonUtil.json());
+
+        get("/tournament/time", (request, response) -> tournamentService.getTimeUntilRegistration(), jsonUtil.json());
+        get("/tournament/participants", (request, response) -> tournamentService.getParticipants(), jsonUtil.json());
+        get("/tournament/eligibility/:id", (request, response) -> tournamentService.canRegister(requestLong(request, "id")), jsonUtil.json());
 
 		before("/admin/*", (request, response) -> {
 			if (!"127.0.0.1".equals(request.ip())) {
