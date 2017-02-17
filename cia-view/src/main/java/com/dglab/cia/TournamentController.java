@@ -42,6 +42,7 @@ public class TournamentController {
         model.addAttribute("open", open);
         model.addAttribute("participants", participants);
         model.addAttribute("loggedIn", principal != null);
+        model.addAttribute("full", participants.size() >= 24);
 
         if (principal != null) {
             boolean registered = participants.stream().anyMatch(e -> e.getSteamId64() == extractSteamId64(principal));
