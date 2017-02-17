@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -36,6 +37,8 @@ public class TournamentController {
         List<TournamentParticipantData> participants
                 = HTTPHelper.urlToObject(playersUrl, new TypeReference<List<TournamentParticipantData>>() {});
         boolean open = remaining <= 0;
+
+        participants.sort(Comparator.comparing(TournamentParticipantData::isReplacement));
 
         model.addAttribute("principal", principal);
         model.addAttribute("timeRemaining", remaining);
