@@ -3,20 +3,16 @@ package com.dglab.cia.persistence;
 import com.dglab.cia.database.PassOwner;
 import com.dglab.cia.json.*;
 import com.dglab.cia.json.util.ExpiringObject;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.*;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -40,22 +36,6 @@ public class PassServiceImpl implements PassService {
             ChronoUnit.MINUTES,
             10
     );
-
-    private Map<Long, Offence> playerOffences = new ConcurrentHashMap<>();
-
-    private static final class Offence {
-        private LocalDateTime lastReportedDate;
-        private int repeats;
-
-        public Offence() {
-            lastReportedDate = LocalDateTime.now();
-        }
-
-        public void increment() {
-            lastReportedDate = LocalDateTime.now();
-            repeats++;
-        }
-    }
 
     @Override
     @Transactional(readOnly = true)
@@ -127,60 +107,31 @@ public class PassServiceImpl implements PassService {
             return null;
         }
 
-        DescriptiveStatistics statistics = new DescriptiveStatistics();
-
-        Map<Long, Short> damagePerPlayer = match.getRounds()
-                .stream()
-                .flatMap(r -> r.getPlayers().stream())
-                .collect(Collectors.toMap(
-                        PlayerRoundInfo::getSteamId64,
-                        PlayerRoundInfo::getDamageDealt,
-                        (a, b) -> (short) (a + b)
-                ));
-
-        damagePerPlayer.values().forEach(statistics::addValue);
+        Map<Long, Byte> playerTeams
+                = match.getPlayers().stream().collect(Collectors.toMap(PlayerInfo::getSteamId64, PlayerInfo::getTeam));
+        double multiplier = new HashSet<>(playerTeams.values()).size();
 
         Map<Long, PlayerQuestResult> result = new HashMap<>();
 
-        int award = (int) Math.ceil(Math.min(match.getGameLength() * EXPERIENCE_PER_SECOND, 100));
+        double baseAward = Math.min(match.getGameLength() * EXPERIENCE_PER_SECOND, 100);
         for (Long passPlayer : progress.getPassPlayers()) {
             PassOwner passOwner = getOrCreate(passPlayer);
-            short damage = damagePerPlayer.getOrDefault(passPlayer, (short) 0);
+            boolean won = playerTeams.get(passPlayer) == match.getWinnerTeam();
+            double award = baseAward * multiplier;
 
-            if (damage < statistics.getPercentile(20) && match.getPlayers().size() > 2) {
-                Offence offence = playerOffences.computeIfAbsent(passPlayer, (p) -> new Offence());
-
-                log.info(
-                        "Reporting player offence: player {}, damage {}, reported {} times",
-                        passPlayer,
-                        damage,
-                        offence.repeats
-                );
-
-                log.info("Damage per player: {}", damagePerPlayer);
-
-                if (Duration.between(LocalDateTime.now(), offence.lastReportedDate).abs().toHours() > 24) {
-                    log.info("Last offence more than 24 hours ago, resetting");
-                    playerOffences.remove(passPlayer);
-                } else {
-                    offence.increment();
-                }
-            }
-
-            Offence offence = playerOffences.get(passPlayer);
-
-            if (offence != null && offence.repeats >= 3) {
-                log.info("Skipping player awards for player {}", passPlayer);
-                continue;
+            if (!won) {
+                award = award * 0.1;
             }
 
             PlayerQuestResult questResult = new PlayerQuestResult();
             questResult.setExperience(passOwner.getExperience());
-            questResult.setEarnedExperience(award);
+            questResult.setEarnedExperience((int) Math.ceil(award));
 
             result.put(passOwner.getSteamId64(), questResult);
 
-            awardExperience(passPlayer, award);
+            awardExperience(passPlayer, (int) Math.ceil(award));
+
+            log.info("Awarded {} experience to player {} for match {}", award, passPlayer, match.getMatchId());
         }
 
         for (Map.Entry<Long, Integer> entry : progress.getQuestProgress().entrySet()) {
@@ -206,10 +157,6 @@ public class PassServiceImpl implements PassService {
             }
 
             completedQuests.add(quest);
-        }
-
-        if (progress.getPassPlayers().size() > 0) {
-            log.info("Awarded {} experience for match {}", award, match.getMatchId());
         }
 
         return result;
