@@ -148,7 +148,7 @@ public class RankServiceImpl implements RankService {
             Collection<Integer> seasons = rankDao.findPlayerRankOneSeasons(steamId64);
 
             if (steamId64 == 76561198192021671L || steamId64 == 76561198046920629L) {
-                seasons = IntStream.range(0, getCurrentSeason()).boxed().collect(Collectors.toList());
+                seasons = IntStream.range(0, getCurrentSeason() + 1).boxed().collect(Collectors.toList());
             }
 
             RankedAchievements rankedAchievements = new RankedAchievements();
