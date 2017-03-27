@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,7 +32,7 @@ public class TournamentService {
     private static final ZonedDateTime REGISTRATION_OPEN = ZonedDateTime.of(2017, 2, 17, 15, 0, 0, 0, ZoneOffset.UTC);
 
     public List<TournamentParticipantData> getParticipants() {
-        return repository.findAll().stream().map(p -> {
+        return repository.findAll().stream().sorted(Comparator.comparingInt(TournamentParticipant::getId)).map(p -> {
             TournamentParticipantData data = new TournamentParticipantData();
             data.setSteamId64(p.getSteamId64());
             data.setReplacement(p.isReplacementPlayer());

@@ -52,7 +52,7 @@ public class SteamAuthProvider implements AuthenticationProvider {
     @SuppressWarnings("unchecked")
     @GetMapping("/login")
     public String steamLogin(HttpServletRequest httpReq, HttpServletResponse httpResp) throws Exception {
-        String returnToUrl = "http://127.0.0.1/openid-verify";
+        String returnToUrl = "http://cia-is.moe/openid-verify";
         List<DiscoveryInformation> discoveries = manager.discover("http://steamcommunity.com/openid");
         DiscoveryInformation discovered = manager.associate(discoveries);
         httpReq.getSession().setAttribute("openid-disc", discovered);

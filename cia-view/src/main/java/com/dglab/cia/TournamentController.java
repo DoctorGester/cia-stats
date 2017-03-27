@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -37,11 +38,14 @@ public class TournamentController {
                 = HTTPHelper.urlToObject(playersUrl, new TypeReference<List<TournamentParticipantData>>() {});
         boolean open = remaining <= 0;
 
+        participants.sort(Comparator.comparing(TournamentParticipantData::isReplacement));
+
         model.addAttribute("principal", principal);
         model.addAttribute("timeRemaining", remaining);
         model.addAttribute("open", open);
         model.addAttribute("participants", participants);
         model.addAttribute("loggedIn", principal != null);
+        model.addAttribute("full", participants.size() >= 24);
 
         if (principal != null) {
             boolean registered = participants.stream().anyMatch(e -> e.getSteamId64() == extractSteamId64(principal));

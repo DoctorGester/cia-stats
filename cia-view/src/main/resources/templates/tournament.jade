@@ -33,6 +33,7 @@ block append head
         #login {
             display: block;
             margin: auto auto 80px;
+            text-align: center;
         }
 
         #rules {
@@ -131,7 +132,7 @@ block content
         span
             a(href="http://steamcommunity.com/id/dart1122331337/") Main tournament administrator and sponsor
 
-    if !alreadyRegistered
+    if !alreadyRegistered && !full
         h2.content-head.is-center Registration
 
         if !open
@@ -148,6 +149,9 @@ block content
                         a(href="/tournament/register") Register
                 else
                     span#not-enough Sorry, Rank 1 in any season is required!
+    else if !full
+        h2.content-head.is-center Registered!
+        h2.is-center Please join our discord through #[a(href='http://discord.me/cia') this link] and ping #[strong @MahouShoujo] for instructions
 
     if participants.size() > 0
         h2.content-head.is-center Participants
