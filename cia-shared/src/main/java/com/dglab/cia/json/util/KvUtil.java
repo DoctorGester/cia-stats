@@ -1,11 +1,12 @@
 package com.dglab.cia.json.util;
 
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -14,10 +15,10 @@ import java.util.function.Function;
  */
 @SuppressWarnings("unchecked")
 public class KvUtil {
-    public static Map<String, Object> parseKV(String content) {
+    public static Map<String, Object> parseKV(Reader reader) throws IOException {
         Map<String, Object> result = new LinkedHashMap<>();
 
-        parseKV(content, result);
+        parseKV(reader, result);
 
         return result;
     }
@@ -27,52 +28,62 @@ public class KvUtil {
     private static final int STATE_SKIP_TO_VALUE = 2;
     private static final int STATE_IN_VALUE = 3;
     private static final int STATE_COMMENT = 4;
+    private static final int BUFFER_SIZE = 1024 * 1024;
 
-    private static int parseKV(String content, Map<String, Object> target) {
+    private static int parseKV(Reader reader, Map<String, Object> target) throws IOException {
         int index = 0;
         int state = 0;
         int preCommentState = -1;
-        String buffer = "";
+        StringBuilder buffer = new StringBuilder();
         String lastKey = null;
         char prevToken = '\0';
 
-        while (index < content.length()) {
-            char token = content.charAt(index);
+        char buf[] = new char[BUFFER_SIZE];
+        int amount;
 
-            if (token == '}' && state != 1 && state != 3 && state != STATE_COMMENT) {
-                return index;
-            }
+        ArrayDeque<Map<String, Object>> targets = new ArrayDeque<>();
+        targets.offer(target);
 
-            if (token == '\"' && prevToken  != '\\' && state != STATE_COMMENT) {
-                if (state == STATE_INITIAL) {
-                    state = STATE_IN_KEY;
-                } else if (state == STATE_IN_KEY) {
-                    state = STATE_SKIP_TO_VALUE;
-                    lastKey = buffer;
-                    buffer = "";
-                } else if (state == STATE_SKIP_TO_VALUE) {
-                    state = STATE_IN_VALUE;
-                } else if (state == STATE_IN_VALUE) {
-                    target.put(lastKey, buffer);
-                    buffer = "";
-                    state = 0;
+        while ((amount = reader.read(buf)) != -1) {
+            for (int i = 0; i < amount; i++) {
+                char token = buf[i];
+
+                if (token == '}' && state != 1 && state != 3 && state != STATE_COMMENT) {
+                    targets.removeLast();
+                    state = STATE_INITIAL;
                 }
-            } else if (token == '{' && state == STATE_SKIP_TO_VALUE) {
-                Map<String, Object> internal = new LinkedHashMap<>();
-                index += parseKV(content.substring(index), internal);
-                target.put(lastKey, internal);
-                state = STATE_INITIAL;
-            } else if (token == '/' && prevToken == '/' && state != STATE_COMMENT) {
-                preCommentState = state;
-                state = STATE_COMMENT;
-            } else if (token == '\n' && state == STATE_COMMENT) {
-                state = preCommentState;
-            } else if ((state == STATE_IN_KEY || state == STATE_IN_VALUE) && token != '\r') {
-                buffer = buffer + token;
-            }
 
-            prevToken = token;
-            index++;
+                if (token == '\"' && prevToken != '\\' && state != STATE_COMMENT) {
+                    if (state == STATE_INITIAL) {
+                        state = STATE_IN_KEY;
+                    } else if (state == STATE_IN_KEY) {
+                        state = STATE_SKIP_TO_VALUE;
+                        lastKey = buffer.toString();
+                        buffer.setLength(0);
+                    } else if (state == STATE_SKIP_TO_VALUE) {
+                        state = STATE_IN_VALUE;
+                    } else if (state == STATE_IN_VALUE) {
+                        targets.peekLast().put(lastKey, buffer.toString());
+                        buffer.setLength(0);
+                        state = STATE_INITIAL;
+                    }
+                } else if (token == '{' && state == STATE_SKIP_TO_VALUE) {
+                    Map<String, Object> internal = new LinkedHashMap<>();
+                    targets.peekLast().put(lastKey, internal);
+                    targets.offer(internal);
+                    state = STATE_INITIAL;
+                } else if (token == '/' && prevToken == '/' && state != STATE_COMMENT) {
+                    preCommentState = state;
+                    state = STATE_COMMENT;
+                } else if (token == '\n' && state == STATE_COMMENT) {
+                    state = preCommentState;
+                } else if ((state == STATE_IN_KEY || state == STATE_IN_VALUE) && token != '\r') {
+                    buffer.append(token);
+                }
+
+                prevToken = token;
+                index++;
+            }
         }
 
         return index;
@@ -170,7 +181,7 @@ public class KvUtil {
 
     public static <T> T parseKV(String content, Class<T> type, boolean stripTopLevel) {
         try {
-            Map<String, Object> rawObject = parseKV(content);
+            Map<String, Object> rawObject = parseKV(new StringReader(content));
 
             if (stripTopLevel) {
                 while (rawObject.size() == 1) {
