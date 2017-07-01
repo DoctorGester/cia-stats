@@ -1,7 +1,8 @@
-package com.dglab.cia.persistence;
+package com.dglab.cia.services;
 
 import com.dglab.cia.database.*;
 import com.dglab.cia.json.*;
+import com.dglab.cia.persistence.MatchDao;
 import com.dglab.cia.util.MatchAlreadyExistsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +23,8 @@ import java.util.stream.Collectors;
  */
 
 @Service
-public class MatchServiceImpl implements MatchService {
-    private static final Logger log = LoggerFactory.getLogger(MatchServiceImpl.class);
+public class MatchService {
+    private static final Logger log = LoggerFactory.getLogger(MatchService.class);
 
 	@Autowired
 	private MatchDao matchDao;
@@ -40,7 +41,6 @@ public class MatchServiceImpl implements MatchService {
     @Autowired
     private PassService passService;
 
-	@Override
     @Transactional(readOnly = true)
 	public Map<Long, Long> getMatchesPlayed(PlayerList players) {
         return players.getPlayers()
@@ -51,7 +51,6 @@ public class MatchServiceImpl implements MatchService {
                 ));
     }
 
-    @Override
     @Transactional(readOnly = true)
     public Map<Long, Integer> getPassExperience(PlayerList players) {
         return players.getPlayers()
@@ -64,7 +63,6 @@ public class MatchServiceImpl implements MatchService {
                 ));
     }
 
-    @Override
     @Transactional(readOnly = true)
 	public MatchInfo getMatchDetails(long matchId) {
 		Match match = matchDao.getMatch(matchId);
@@ -128,7 +126,6 @@ public class MatchServiceImpl implements MatchService {
 		return info;
 	}
 
-    @Override
     public List<MatchHeader> getRecentPlayerMatches(long steamId64) {
         List<Match> recentMatches = matchDao.getRecentPlayerMatches(steamId64, 40);
 
@@ -137,7 +134,6 @@ public class MatchServiceImpl implements MatchService {
         ).collect(Collectors.toList());
     }
 
-    @Override
     @Transactional(propagation = Propagation.REQUIRED)
 	public void putMatch(MatchInfo matchInfo) throws MatchAlreadyExistsException {
 		Collection<PlayerMatchData> playerMatchData = new HashSet<>();

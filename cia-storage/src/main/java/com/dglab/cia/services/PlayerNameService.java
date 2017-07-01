@@ -1,6 +1,7 @@
-package com.dglab.cia.persistence;
+package com.dglab.cia.services;
 
 import com.dglab.cia.database.PlayerName;
+import com.dglab.cia.persistence.PlayerNameRepository;
 import com.lukaspradel.steamapi.core.exception.SteamApiException;
 import com.lukaspradel.steamapi.data.json.playersummaries.GetPlayerSummaries;
 import com.lukaspradel.steamapi.data.json.playersummaries.Player;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
  * @author doc
  */
 @Service
-public class PlayerNameServiceImpl implements PlayerNameService {
+public class PlayerNameService {
     private Logger log = LoggerFactory.getLogger(PlayerNameService.class);
 
 	@Autowired
@@ -34,7 +35,7 @@ public class PlayerNameServiceImpl implements PlayerNameService {
 	private ExecutorService executorService = Executors.newFixedThreadPool(16);
     private SteamWebApiClient api;
 
-    public PlayerNameServiceImpl() {
+    public PlayerNameService() {
         try {
             String key = FileUtils.readFileToString(new File("private.key"));
             api = new SteamWebApiClient.SteamWebApiClientBuilder(key).build();
@@ -43,7 +44,6 @@ public class PlayerNameServiceImpl implements PlayerNameService {
         }
     }
 
-    @Override
     public Future<?> updatePlayerNames(Collection<Long> steamIds64) {
         return executorService.submit(() -> {
             try {

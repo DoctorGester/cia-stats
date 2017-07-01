@@ -2,9 +2,9 @@ package com.dglab.cia.persistence;
 
 import com.dglab.cia.json.RankedMode;
 import com.dglab.cia.database.EliteElo;
-import com.dglab.cia.database.PlayerMatchData;
 import com.dglab.cia.database.PlayerRank;
 import com.dglab.cia.database.RankPrimaryKey;
+import com.dglab.cia.services.RankService;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;

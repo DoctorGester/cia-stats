@@ -1,4 +1,4 @@
-package com.dglab.cia.persistence;
+package com.dglab.cia.services;
 
 import com.dglab.cia.json.*;
 import com.dglab.cia.util.MatchAlreadyExistsException;
@@ -15,7 +15,7 @@ import java.util.Map;
  * @author doc
  */
 @Service
-public class CoordinatorServiceImpl implements CoordinatorService {
+public class CoordinatorService {
     private static Logger log = LoggerFactory.getLogger(CoordinatorService.class);
 
     @Autowired
@@ -27,7 +27,6 @@ public class CoordinatorServiceImpl implements CoordinatorService {
     @Autowired
     private PassService passService;
 
-    @Override
     @Transactional(readOnly = true)
     public Achievements getAchievements(PlayerList players) {
         Achievements achievements = new Achievements();
@@ -40,7 +39,6 @@ public class CoordinatorServiceImpl implements CoordinatorService {
         return achievements;
     }
 
-    @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public MatchResults processMatch(MatchInfo matchInfo) throws MatchAlreadyExistsException {
         MatchResults matchResults = new MatchResults();

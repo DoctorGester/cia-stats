@@ -1,4 +1,4 @@
-package com.dglab.cia.persistence;
+package com.dglab.cia.services;
 
 import com.dglab.cia.database.HeroWinRate;
 import com.dglab.cia.database.HeroWinRateKey;
@@ -8,6 +8,9 @@ import com.dglab.cia.json.HeroWinRateAndGames;
 import com.dglab.cia.json.MatchMap;
 import com.dglab.cia.json.PlayerHeroWinRateAndGames;
 import com.dglab.cia.json.RankRange;
+import com.dglab.cia.persistence.HeroWinRateRepository;
+import com.dglab.cia.persistence.PlayerHeroWinRateRepository;
+import com.dglab.cia.persistence.PlayerNameRepository;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -33,8 +36,8 @@ import static com.dglab.cia.database.QPlayerName.*;
  * @author doc
  */
 @Service
-public class StatsServiceImpl implements StatsService {
-    private static Logger log = LoggerFactory.getLogger(StatsServiceImpl.class);
+public class StatsService {
+    private static Logger log = LoggerFactory.getLogger(StatsService.class);
 
     @Autowired
     private EntityManager entityManager;
@@ -48,7 +51,6 @@ public class StatsServiceImpl implements StatsService {
     @Autowired
     private PlayerNameRepository playerNameRepository;
 
-    @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void incrementHeroStat(long steamId64, HeroWinRateKey key, boolean won) {
         PlayerHeroWinRateKey playerKey = new PlayerHeroWinRateKey();
@@ -124,7 +126,6 @@ public class StatsServiceImpl implements StatsService {
         }).collect(Collectors.toList());
     }
 
-    @Override
     public Map<LocalDate, HeroWinRateAndGames> getHeroWinRatePerDay(String hero) {
         if (hero == null) {
             return null;
@@ -149,7 +150,6 @@ public class StatsServiceImpl implements StatsService {
         }));
     }
 
-    @Override
     public List<PlayerHeroWinRateAndGames> getPlayerHeroWinRate(String hero) {
         if (hero == null) {
             return null;
@@ -203,17 +203,14 @@ public class StatsServiceImpl implements StatsService {
         }).collect(Collectors.toList());
     }
 
-    @Override
 	public List<HeroWinRateAndGames> getGeneralWinRates() {
 		return getHeroWinRates(RankRange.ALL, defaultMatchFilters(7));
 	}
 
-    @Override
     public List<HeroWinRateAndGames> getRankOneWinRates() {
         return getHeroWinRates(RankRange.RANK_ONE, defaultMatchFilters(7));
     }
 
-    @Override
     public List<HeroWinRateAndGames> getDuelWinRates() {
         return getHeroWinRates(RankRange.ALL, duelMatchFilters(7));
     }

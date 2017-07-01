@@ -1,7 +1,8 @@
-package com.dglab.cia.persistence;
+package com.dglab.cia.services;
 
 import com.dglab.cia.database.TournamentParticipant;
 import com.dglab.cia.json.TournamentParticipantData;
+import com.dglab.cia.persistence.TournamentParticipantsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

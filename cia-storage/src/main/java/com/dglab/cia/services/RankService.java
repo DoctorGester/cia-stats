@@ -1,10 +1,12 @@
-package com.dglab.cia.persistence;
+package com.dglab.cia.services;
 
 import com.dglab.cia.ConnectionState;
 import com.dglab.cia.json.RankedMode;
 import com.dglab.cia.database.*;
 import com.dglab.cia.json.*;
 import com.dglab.cia.json.util.ExpiringObject;
+import com.dglab.cia.persistence.MatchDao;
+import com.dglab.cia.persistence.RankDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +29,9 @@ import java.util.stream.IntStream;
  * @author doc
  */
 @Service
-public class RankServiceImpl implements RankService {
-    private static final Logger log = LoggerFactory.getLogger(RankServiceImpl.class);
+public class RankService {
+	public static final short STARTING_ELO = 1000;
+    private static final Logger log = LoggerFactory.getLogger(RankService.class);
 	private static final ZonedDateTime FIRST_SEASON = ZonedDateTime.of(2016, 7, 1, 0, 0, 0, 0, ZoneOffset.UTC);
 
 	@Autowired
@@ -89,7 +92,6 @@ public class RankServiceImpl implements RankService {
         return previousTopPlayers;
     }
 
-	@Override
 	public Map<RankedMode, RankAndStars> getPlayerRanks(long steamId64) {
 		Collection<PlayerRank> playerRanks = rankDao.findPlayerRanks(steamId64, getCurrentSeason());
 
@@ -103,7 +105,6 @@ public class RankServiceImpl implements RankService {
 				);
 	}
 
-	@Override
 	public Map<Byte, Map<RankedMode, RankAndStars>> getPlayerRankHistory(long steamId64) {
 		Map<Byte, Map<RankedMode, RankAndStars>> result = new HashMap<>();
 		Collection<PlayerRank> ranks = rankDao.findPlayerRanks(steamId64);
@@ -118,7 +119,6 @@ public class RankServiceImpl implements RankService {
 		return result;
 	}
 
-	@Override
 	public RankedMode getMatchRankedMode(String mode, int players, MatchMap map) {
 		if (map == MatchMap.UNRANKED) {
 			return null;
@@ -139,7 +139,6 @@ public class RankServiceImpl implements RankService {
 		return null;
 	}
 
-    @Override
 	@Transactional(readOnly = true)
     public Map<Long, RankedAchievements> getRankedAchievements(PlayerList players) {
         Map<Long, RankedAchievements> result = new HashMap<>();
@@ -166,7 +165,6 @@ public class RankServiceImpl implements RankService {
         return result;
     }
 
-    @Override
     @Transactional(propagation = Propagation.REQUIRED)
 	public Map<Long, RankAndStars> getMatchRanks(MatchInfo match) {
 		RankedMode matchRankedMode = getMatchRankedMode(match.getMode(), match.getPlayers().size(), match.getMap());
@@ -188,7 +186,6 @@ public class RankServiceImpl implements RankService {
 		return result;
 	}
 
-	@Override
 	public byte getCurrentSeason() {
 		long between = ChronoUnit.MONTHS.between(FIRST_SEASON, ZonedDateTime.now(ZoneOffset.UTC));
 		return (byte) between;
@@ -205,7 +202,6 @@ public class RankServiceImpl implements RankService {
         return (30 - playerRank.getRank()) * 30;
     }
 
-	@Override
     @Transactional(propagation = Propagation.REQUIRED)
 	public RankUpdateDetails processMatchResults(MatchInfo match) {
 		RankedMode matchRankedMode = getMatchRankedMode(match.getMode(), match.getPlayers().size(), match.getMap());
@@ -381,13 +377,11 @@ public class RankServiceImpl implements RankService {
         consumer.accept((short) Math.max(previousElo + eloDelta, 0));
 	}
 
-	@Override
 	public Map<RankedMode, List<RankedPlayer>> getTopPlayers() {
         Map<RankedMode, List<PlayerRank>> topPlayers = rankDao.findTopPlayers(getCurrentSeason(), 5);
         return convertPlayers(topPlayers);
 	}
 
-    @Override
     public RankedInfo getRankedInfo() {
         return cachedRankedInfo.get();
     }
@@ -410,7 +404,6 @@ public class RankServiceImpl implements RankService {
         return info;
     }
 
-    @Override
 	public List<RankedPlayer> getTopPlayers(RankedMode mode) {
 		return rankDao
 				.findTopPlayers(getCurrentSeason(), mode, 50)
@@ -419,14 +412,12 @@ public class RankServiceImpl implements RankService {
 				.collect(Collectors.toList());
 	}
 
-	@Override
 	public void setRank(long steamId64, RankedMode mode, byte rank) {
 		PlayerRank playerRank = rankDao.findPlayerRank(steamId64, getCurrentSeason(), mode);
 		playerRank.setRank(rank);
 		rankDao.save(playerRank);
 	}
 
-	@Override
 	public void setElo(long steamId64, RankedMode mode, short elo) {
 		PlayerRank playerRank = rankDao.findPlayerRank(steamId64, getCurrentSeason(), mode);
 		EliteElo playerElo = playerRank.getElo();

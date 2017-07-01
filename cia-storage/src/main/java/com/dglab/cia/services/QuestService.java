@@ -1,4 +1,4 @@
-package com.dglab.cia.persistence;
+package com.dglab.cia.services;
 
 import com.dglab.cia.database.PassOwner;
 import com.dglab.cia.database.Quest;
@@ -8,6 +8,8 @@ import com.dglab.cia.json.HeroWinRateAndGames;
 import com.dglab.cia.json.PassQuest;
 import com.dglab.cia.json.QuestType;
 import com.dglab.cia.json.util.ExpiringObject;
+import com.dglab.cia.persistence.QuestRerollsRepository;
+import com.dglab.cia.persistence.QuestsRepository;
 import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -39,10 +42,10 @@ import static com.dglab.cia.database.QQuest.quest;
  * @author doc
  */
 @Service
-public class QuestServiceImpl implements QuestService {
-    private static final Logger log = LoggerFactory.getLogger(QuestServiceImpl.class);
+public class QuestService {
+    private static final Logger log = LoggerFactory.getLogger(QuestService.class);
 
-    @Autowired
+    @PersistenceContext
     private EntityManager entityManager;
 
     @Autowired
@@ -68,7 +71,6 @@ public class QuestServiceImpl implements QuestService {
         );
     }
 
-    @Override
     @Transactional
     public List<PassQuest> updatePlayerQuests(long steamId64) {
         PassOwner player = passService.getOrCreate(steamId64);
@@ -108,7 +110,6 @@ public class QuestServiceImpl implements QuestService {
         return quests.stream().map(this::convertQuest).collect(Collectors.toList());
     }
 
-    @Override
     @Transactional
     public PassQuest updateQuestProgress(long questId, short progress) {
         Quest quest = questsRepository.findOne(questId);
@@ -133,7 +134,6 @@ public class QuestServiceImpl implements QuestService {
         return null;
     }
 
-    @Override
     @Transactional
     public PassQuest rerollQuest(long questId) {
         Quest quest = questsRepository.findOne(questId);
@@ -172,7 +172,6 @@ public class QuestServiceImpl implements QuestService {
         rerollsRepository.truncate();
     }
 
-    @Override
     @Transactional
     public void forceUpdateCompletedQuests() {
         for (QuestType questType : QuestType.values()) {
@@ -200,7 +199,6 @@ public class QuestServiceImpl implements QuestService {
         });
     }
 
-    @Override
     @Transactional
     public void forceCompleteImpossibleQuests() {
         List<Hero> heroes = new ArrayList<>(Arrays.asList(Hero.values()));

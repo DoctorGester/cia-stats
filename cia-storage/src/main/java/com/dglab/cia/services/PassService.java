@@ -1,8 +1,9 @@
-package com.dglab.cia.persistence;
+package com.dglab.cia.services;
 
 import com.dglab.cia.database.PassOwner;
 import com.dglab.cia.json.*;
 import com.dglab.cia.json.util.ExpiringObject;
+import com.dglab.cia.persistence.PassOwnersRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +20,9 @@ import java.util.stream.Collectors;
  * @author doc
  */
 @Service
-public class PassServiceImpl implements PassService {
-    private static final Logger log = LoggerFactory.getLogger(PassServiceImpl.class);
+public class PassService {
+    private static final double EXPERIENCE_PER_SECOND = 0.09;
+    private static final Logger log = LoggerFactory.getLogger(PassService.class);
 
     @Autowired
     private PassOwnersRepository repository;
@@ -28,22 +30,17 @@ public class PassServiceImpl implements PassService {
     @Autowired
     private QuestService questService;
 
-    @Autowired
-    private MatchDao matchDao;
-
     private ExpiringObject<List<PassPlayer>> cachedTop = new ExpiringObject<>(
             this::getTopPlayersInternal,
             ChronoUnit.MINUTES,
             10
     );
 
-    @Override
     @Transactional(readOnly = true)
     public PassOwner get(long steamId64) {
         return repository.findOne(steamId64);
     }
 
-    @Override
     @Transactional
     public PassOwner getOrCreate(long steamId64) {
         PassOwner owner = repository.findOne(steamId64);
@@ -63,7 +60,6 @@ public class PassServiceImpl implements PassService {
         return owner;
     }
 
-    @Override
     @Transactional
     public List<PassPlayer> getTopPlayers() {
         return cachedTop.get();
@@ -84,7 +80,6 @@ public class PassServiceImpl implements PassService {
         }).collect(Collectors.toList());
     }
 
-    @Override
     @Transactional
     public void awardExperience(long steamId64, int experience) {
         PassOwner owner = getOrCreate(steamId64);
@@ -92,7 +87,6 @@ public class PassServiceImpl implements PassService {
         owner.setExperience(owner.getExperience() + experience);
     }
 
-    @Override
     @Transactional
     public Map<Long, PlayerQuestResult> processMatchUpdate(MatchInfo match) {
         QuestProgressReport progress = match.getQuestProgress();

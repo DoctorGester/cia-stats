@@ -1,7 +1,7 @@
 package com.dglab.cia;
 
 import com.dglab.cia.json.*;
-import com.dglab.cia.persistence.*;
+import com.dglab.cia.services.*;
 import com.dglab.cia.util.JsonLogger;
 import com.dglab.cia.util.MatchAlreadyExistsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
