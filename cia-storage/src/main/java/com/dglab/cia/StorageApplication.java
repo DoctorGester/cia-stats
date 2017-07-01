@@ -82,21 +82,21 @@ public class StorageApplication {
             }
         });
 
-		get("/match/:id", (request, response) -> {
-			return matchService.getMatchDetails(requestLong(request, "id"));
-		}, jsonUtil.json());
+		get("/match/:id", (request, response) ->
+			matchService.getMatchDetails(requestLong(request, "id"))
+		, jsonUtil.json());
 
-        get("/matches/:id", (request, response) -> {
-            return matchService.getRecentPlayerMatches(requestLong(request, "id"));
-        }, jsonUtil.json());
+        get("/matches/:id", (request, response) ->
+            matchService.getRecentPlayerMatches(requestLong(request, "id"))
+        , jsonUtil.json());
 
-        get("/ranks/player/:id", (request, response) -> {
-			return rankService.getPlayerRanks(requestLong(request, "id"));
-		}, jsonUtil.json());
+        get("/ranks/player/:id", (request, response) ->
+			rankService.getPlayerRanks(requestLong(request, "id"))
+		, jsonUtil.json());
 
-		get("/ranks/history/:id", (request, response) -> {
-			return rankService.getPlayerRankHistory(requestLong(request, "id"));
-		}, jsonUtil.json());
+		get("/ranks/history/:id", (request, response) ->
+			rankService.getPlayerRankHistory(requestLong(request, "id"))
+		, jsonUtil.json());
 
 		get("/ranks/top/:mode", (request, response) -> {
 			RankedMode mode = paramToMode(request, "mode");
@@ -108,22 +108,22 @@ public class StorageApplication {
 			return "";
 		}, jsonUtil.json());
 
-		get("/ranks/top", (request, response) -> {
-			return rankService.getTopPlayers();
-		}, jsonUtil.json());
+		get("/ranks/top", (request, response) ->
+			rankService.getTopPlayers()
+		, jsonUtil.json());
 
-        get("/ranks/info", (request, response) -> {
-            return rankService.getRankedInfo();
-        }, jsonUtil.json());
+        get("/ranks/info", (request, response) ->
+            rankService.getRankedInfo()
+        , jsonUtil.json());
 
-        get("/requests", (request, response) -> {
-            return urlRequestTimes.entrySet().stream().collect(
-                    Collectors.toMap(
-                            Map.Entry::getKey,
-                            e -> Math.floor(e.getValue().stream().mapToLong(Long::longValue).average().orElse(-1))
-                    )
-            );
-        }, jsonUtil.json());
+        get("/requests", (request, response) ->
+            urlRequestTimes.entrySet().stream().collect(
+                Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> Math.floor(e.getValue().stream().mapToLong(Long::longValue).average().orElse(-1))
+                )
+            )
+        , jsonUtil.json());
 
         get("/", (request, response) -> {
             AllStats stats = new AllStats();
@@ -203,9 +203,9 @@ public class StorageApplication {
             return questService.rerollQuest(questId);
         });
 
-        get("/pass/top", (request, response) -> {
-            return passService.getTopPlayers();
-        }, jsonUtil.json());
+        get("/pass/top", (request, response) ->
+            passService.getTopPlayers()
+        , jsonUtil.json());
 
         before("/auth/*", (request, response) -> {
             if (!"127.0.0.1".equals(request.ip())) {
