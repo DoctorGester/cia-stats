@@ -48,7 +48,7 @@ public class PlayerNameService {
 
     public List<RankedPlayer> findPlayersByNameQuery(String query) {
         return playerNameRepository
-                .findTop20ByNameLike("%" + query + "%")
+                .findTop20ByNameLikeIgnoreCase("%" + query + "%")
                 .stream()
                 .map(name -> {
                     RankedPlayer player = new RankedPlayer();
