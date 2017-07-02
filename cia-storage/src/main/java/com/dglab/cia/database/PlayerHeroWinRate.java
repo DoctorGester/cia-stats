@@ -9,7 +9,9 @@ import javax.persistence.*;
  * @author doc
  */
 @Entity
-@Table(name = "player_hero_win_rates")
+@Table(name = "player_hero_win_rates", indexes = {
+        @Index(name = "player_hero_win_rates_index", columnList = "steamId64")
+})
 public class PlayerHeroWinRate {
     private PlayerHeroWinRateKey pk;
     private int wins;
