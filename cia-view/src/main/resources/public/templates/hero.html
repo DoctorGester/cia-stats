@@ -6,7 +6,7 @@
         <div ng-repeat="player in winratePerPlayer">
             <div class="player-column">
                 <img class="ranked-avatar" ng-src="{{player.avatarUrl}}"/>
-                <a class="ranked-name no-line-height" ng-href="/profile/{{player.steamId64}}">{{player.name}}</a>
+                <a class="ranked-name no-line-height" ng-href="/profile/{{player.steamId64}}" target="_self">{{player.name}}</a>
                 <div><b>{{player.winRateAndGames.games}}</b> rounds</div>
                 <div><b>{{player.winRate}}%</b> wins</div>
             </div>
