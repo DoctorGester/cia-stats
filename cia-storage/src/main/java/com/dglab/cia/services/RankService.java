@@ -113,7 +113,7 @@ public class RankService {
 			byte season = rank.getPk().getSeason();
 			Map<RankedMode, RankAndStars> seasonRanks = result.computeIfAbsent(season, k -> new HashMap<>());
 
-			seasonRanks.put(rank.getPk().getMode(), new RankAndStars(rank.getRank(), rank.getStars()));
+			seasonRanks.put(rank.getPk().getMode(), convertRank(rank));
 		}
 
 		return result;
