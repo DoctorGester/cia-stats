@@ -1,4 +1,4 @@
-package com.dglab.cia;
+package com.dglab.cia.util;
 
 import com.dglab.cia.json.util.ExpiringObject;
 

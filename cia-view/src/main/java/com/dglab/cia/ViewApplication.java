@@ -6,6 +6,7 @@ import com.dglab.cia.json.AllStats;
 import com.dglab.cia.json.HeroStats;
 import com.dglab.cia.json.PassPlayer;
 import com.dglab.cia.json.RankedPlayer;
+import com.dglab.cia.util.HTTPHelper;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;

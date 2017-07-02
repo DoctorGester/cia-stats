@@ -7,6 +7,7 @@ import java.util.Collection;
  */
 public class RankedAchievements {
     private Collection<Integer> achievedSeasons;
+    private Collection<String> achievedMasteryHeroes;
     private boolean wasTopPlayer;
 
     public Collection<Integer> getAchievedSeasons() {
@@ -23,5 +24,13 @@ public class RankedAchievements {
 
     public void setWasTopPlayer(boolean wasTopPlayer) {
         this.wasTopPlayer = wasTopPlayer;
+    }
+
+    public Collection<String> getAchievedMasteryHeroes() {
+        return achievedMasteryHeroes;
+    }
+
+    public void setAchievedMasteryHeroes(Collection<String> achievedMasteryHeroes) {
+        this.achievedMasteryHeroes = achievedMasteryHeroes;
     }
 }

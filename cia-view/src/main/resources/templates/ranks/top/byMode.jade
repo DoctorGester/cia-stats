@@ -10,7 +10,7 @@ block content
                     if player.avatarUrl
                         img.ranked-avatar(src="#{player.avatarUrl}")
                         
-                    a.ranked-name.pure-u(href="http://steamcommunity.com/profiles/#{player.steamId64}")
+                    a.ranked-name.pure-u(href="/profile/#{player.steamId64}")
                         if player.name
                             | #{player.name}
                         else

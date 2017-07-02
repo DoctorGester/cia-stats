@@ -1,4 +1,4 @@
-package com.dglab.cia;
+package com.dglab.cia.util;
 
 /**
  * Created by shoujo on 2/2/2017.

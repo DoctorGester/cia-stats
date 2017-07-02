@@ -1,14 +1,12 @@
-package com.dglab.cia;
+package com.dglab.cia.controllers;
 
+import com.dglab.cia.DataFetcherService;
 import com.dglab.cia.data.Hero;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Created by shoujo on 2/2/2017.
- */
 @RestController
 @RequestMapping("/api/heroes")
 public class HeroDataController {

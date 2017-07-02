@@ -1,4 +1,4 @@
-package com.dglab.cia;
+package com.dglab.cia.util;
 
 import com.squareup.okhttp.Cache;
 import com.squareup.okhttp.OkHttpClient;

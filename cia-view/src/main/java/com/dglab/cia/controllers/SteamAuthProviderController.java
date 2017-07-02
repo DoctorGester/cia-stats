@@ -1,4 +1,4 @@
-package com.dglab.cia;
+package com.dglab.cia.controllers;
 
 import org.apache.commons.lang3.StringUtils;
 import org.openid4java.association.AssociationSessionType;
@@ -28,7 +28,7 @@ import java.util.List;
  * @author doc
  */
 @Controller
-public class SteamAuthProvider implements AuthenticationProvider {
+public class SteamAuthProviderController implements AuthenticationProvider {
     private static final String OPENID_IDENTIFIER = "openid_identifier";
     private static ConsumerManager manager = null;
 

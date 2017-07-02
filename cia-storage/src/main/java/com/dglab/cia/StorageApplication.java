@@ -148,6 +148,10 @@ public class StorageApplication {
             return heroStats;
         }, jsonUtil.json());
 
+        get("/players/:id", (request, response) ->
+            statsService.getPlayerProfileInfo(requestLong(request, "id"))
+        , jsonUtil.json());
+
         post("/match/achievements", (request, response) -> {
             PlayerList players = requestObject(request, PlayerList.class);
 

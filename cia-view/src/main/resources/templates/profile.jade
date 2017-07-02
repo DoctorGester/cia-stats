@@ -1,0 +1,140 @@
+extends base.jade
+
+block title
+    title #{profile.name} / Player Profile
+
+block content
+    style.
+        #profileHead {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #profileAvatar > img {
+            border-radius: 50%;
+        }
+
+        #winratesHeader
+        {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+        }
+
+        .winrateEntry {
+            display: flex;
+            flex-direction: row;
+            flex: 1 0 200px;
+        }
+
+        .heroImage {
+            margin-right: 10px;
+        }
+
+        .gamesContainer, .winrateContainer {
+            display: flex;
+            flex-direction: column;
+            width: 120px;
+            margin-left: 10px;
+        }
+
+        .gamesBar, .winrateBar {
+            height: 8px;
+        }
+
+        .winrateBar {
+            background-color: red;
+        }
+
+        .gamesBar {
+            background-color: deepskyblue;
+        }
+
+        .winrateEntry > .heroImage > img {
+            border-radius: 3px;
+            height: 40px;
+        }
+
+        #data {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+        }
+
+        #history {
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+        }
+
+        #history .rank-image-container {
+            margin: 0;
+            align-self: center;
+        }
+
+        .seasonTitle {
+            margin-right: 30px;
+            align-self: center;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-size: 22px;
+        }
+
+        .seasonEntry {
+            display: flex;
+            flex-direction: row;
+            margin: 3px;
+            background-color: rgba(0, 148, 255, 0.15);
+            padding: 10px 40px;
+        }
+
+        .seasonEntry:nth-child(even) {
+            background-color: rgba(0, 127, 127, 0.15);
+        }
+
+        .modeEntry {
+            display: flex;
+            flex-direction: column;
+            margin-left: 20px;
+        }
+
+        .modeTitle {
+            align-self: center;
+            text-transform: uppercase;
+        }
+    h2#profileHead.content-head.is-center
+        a#profileAvatar(href="http://steamcommunity.com/profiles/#{profile.steamId64}")
+            img(src="#{profile.avatarUrl}")
+        span #{profile.name}
+
+    #data
+        #history
+            for season in profile.rankHistory.keySet()
+                .seasonEntry
+                    span.seasonTitle Season #{season + 1}
+                    for mode in profile.rankHistory[season].keySet()
+                        .modeEntry
+                            span.modeTitle #{mode.getUrl()}
+                            - var player = profile.rankHistory[season][mode]
+                            - var rankImage = 101 - player.rank
+                            div.rank-image-container(class=player.elo ? "elite-rank-container" : "")
+                                img.rank-image(src="/images/ranks/#{rankImage}.png")
+                                if player.elo
+                                    span.rank-number.elite-number #{player.elo}
+                                else
+                                    span.rank-number.normal-number #{player.rank}
+        #winrates
+            #winratesHeader
+                span Hero
+                span Games
+                span Wins
+            for winrate in profile.winrates
+                .winrateEntry
+                    a.heroImage(href='/heroes/#{winrate.hero}')
+                        img(src='http://cdn.dota2.com/apps/dota2/images/heroes/#{winrate.hero}_hphover.png')
+                    .gamesContainer
+                        span #{winrate.games}
+                        .gamesBar(style='width:#{math.round(winrate.games * 1.0 / maxGames * 100)}%')
+                    .winrateContainer
+                        span #{math.round(winrate.winRate * 100)}%
+                        .winrateBar(style='width:#{math.round(winrate.winRate / maxWinrate * 100)}%')
