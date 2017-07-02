@@ -9,5 +9,5 @@ import java.util.List;
  * @author doc
  */
 public interface PlayerNameRepository extends JpaRepository<PlayerName, Long> {
-    List<PlayerName> findTop20ByNameLikeIgnoreCase(String name);
+    List<PlayerName> findTop20ByNameLikeIgnoreCaseOrderByName(String name);
 }

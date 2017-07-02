@@ -11,12 +11,14 @@ import com.lukaspradel.steamapi.webapi.client.SteamWebApiClient;
 import com.lukaspradel.steamapi.webapi.request.GetPlayerSummariesRequest;
 import com.lukaspradel.steamapi.webapi.request.builders.SteamWebApiRequestFactory;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -47,8 +49,12 @@ public class PlayerNameService {
     }
 
     public List<RankedPlayer> findPlayersByNameQuery(String query) {
+        if (StringUtils.isBlank(query) || query.length() < 3) {
+            return new ArrayList<>();
+        }
+
         return playerNameRepository
-                .findTop20ByNameLikeIgnoreCase("%" + query + "%")
+                .findTop20ByNameLikeIgnoreCaseOrderByName("%" + query + "%")
                 .stream()
                 .map(name -> {
                     RankedPlayer player = new RankedPlayer();
