@@ -15,9 +15,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -127,6 +125,20 @@ public class ViewApplication {
         });
 
         return model.asMap().get("model");
+    }
+
+    @GetMapping("/players")
+    String playerSearch(Model model, @RequestParam(required = false) String query) {
+        query = StringUtils.substring(query,0, 64);
+
+        if (StringUtils.isNotBlank(query)) {
+            String url = String.format("/players/search/%s", query);
+            setupModelFromURL(url, model, new TypeReference<List<RankedPlayer>>() {});
+        }
+
+        model.addAttribute("query", StringUtils.defaultString(query, ""));
+
+        return "players";
     }
 
     private void setupModelFromURL(String query, Model model, TypeReference<?> type) {

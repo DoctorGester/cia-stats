@@ -1,17 +1,13 @@
 package com.dglab.cia.persistence;
 
-import com.dglab.cia.database.*;
-import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.dglab.cia.database.PlayerName;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import java.util.List;
 
 /**
  * @author doc
  */
 public interface PlayerNameRepository extends JpaRepository<PlayerName, Long> {
+    List<PlayerName> findTop20ByNameLike(String name);
 }

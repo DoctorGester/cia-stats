@@ -35,6 +35,7 @@ public class StorageApplication {
 
     private AnnotationConfigApplicationContext context;
     private CoordinatorService coordinatorService;
+    private PlayerNameService playerNameService;
     private TournamentService tournamentService;
     private StatsService statsService;
     private MatchService matchService;
@@ -57,6 +58,7 @@ public class StorageApplication {
 		context.refresh();
 
         coordinatorService = context.getBean(CoordinatorService.class);
+        playerNameService = context.getBean(PlayerNameService.class);
         tournamentService = context.getBean(TournamentService.class);
         statsService = context.getBean(StatsService.class);
 		matchService = context.getBean(MatchService.class);
@@ -147,6 +149,10 @@ public class StorageApplication {
 
             return heroStats;
         }, jsonUtil.json());
+
+        get("/players/search/:query", (request, response) ->
+            playerNameService.findPlayersByNameQuery(request.params("query"))
+        , jsonUtil.json());
 
         get("/players/:id", (request, response) ->
             statsService.getPlayerProfileInfo(requestLong(request, "id"))

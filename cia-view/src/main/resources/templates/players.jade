@@ -1,0 +1,34 @@
+extends base.jade
+
+block title
+    title Search for players
+
+block content
+    h2.content-head.is-center Search for players
+
+    form.pure-form.is-center
+        fieldset
+            input.pure-input-2-3(type="text", placeholder="Player name", name="query", autocomplete="off", value="#{query}")
+            | &nbsp;
+            button.pure-button.pure-button-primary(type="submit") Search
+
+    style.
+        .foundPlayer {
+            padding: 5px;
+        }
+
+        .foundPlayer:hover {
+            background-color: #f3f3f3;
+        }
+    if model != null
+        #searchResults.pure-u-2-3(style="display: flex; flex-direction: column; margin: auto")
+            for player in model
+                a.foundPlayer(href="/profile/#{player.steamId64}")
+                    if player.avatarUrl
+                        img.ranked-avatar(src="#{player.avatarUrl}")
+
+                    .ranked-name.pure-u
+                        if player.name
+                            | #{player.name}
+                        else
+                            | #{player.steamId64}

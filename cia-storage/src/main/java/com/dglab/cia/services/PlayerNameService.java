@@ -1,6 +1,7 @@
 package com.dglab.cia.services;
 
 import com.dglab.cia.database.PlayerName;
+import com.dglab.cia.json.RankedPlayer;
 import com.dglab.cia.persistence.PlayerNameRepository;
 import com.lukaspradel.steamapi.core.exception.SteamApiException;
 import com.lukaspradel.steamapi.data.json.playersummaries.GetPlayerSummaries;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -42,6 +44,21 @@ public class PlayerNameService {
         } catch (Exception e) {
             log.warn("Error initializing Steam API file: {}", e.toString());
         }
+    }
+
+    public List<RankedPlayer> findPlayersByNameQuery(String query) {
+        return playerNameRepository
+                .findTop20ByNameLike("%" + query + "%")
+                .stream()
+                .map(name -> {
+                    RankedPlayer player = new RankedPlayer();
+                    player.setAvatarUrl(name.getAvatarUrl());
+                    player.setName(name.getName());
+                    player.setSteamId64(name.getSteamId64());
+
+                    return player;
+                })
+                .collect(Collectors.toList());
     }
 
     public Future<?> updatePlayerNames(Collection<Long> steamIds64) {
