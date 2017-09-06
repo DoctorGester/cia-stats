@@ -1,7 +1,5 @@
 package com.dglab.cia;
 
-import java.net.UnknownHostException;
-
 /**
  * @author doc
  */
@@ -9,7 +7,7 @@ public class IpRange {
 	private final long network;
 	private final long netmask;
 
-	public IpRange(String networkPart, String cidrPart) throws UnknownHostException {
+	public IpRange(String networkPart, String cidrPart) {
 		long netmask = 0;
 		int cidr = cidrPart == null ? 32 : Integer.parseInt(cidrPart);
 		for (int pos = 0; pos < 32; ++pos) {
