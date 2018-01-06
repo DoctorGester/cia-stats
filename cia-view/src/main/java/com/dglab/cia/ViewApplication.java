@@ -75,10 +75,7 @@ public class ViewApplication {
         Map<String, KeyValueHeroCosmetics> heroCosmetics = dataFetcher.getCosmetics().getHeroCosmetics();
 
         // Preparing for flat-map
-        heroCosmetics
-                .entrySet().forEach(
-                        e -> e.getValue().getEntries().values().forEach(c -> c.setHero(e.getKey()))
-        );
+        heroCosmetics.forEach((key, value) -> value.getEntries().values().forEach(c -> c.setHero(key)));
 
         List<KeyValueHeroCosmeticsEntry> cosmeticsPerLevel = heroCosmetics
                 .values()

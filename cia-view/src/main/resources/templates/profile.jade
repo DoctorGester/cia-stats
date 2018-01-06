@@ -114,13 +114,13 @@ block content
 
     #data
         #history
-            for season in profile.rankHistory.keySet()
+            for entry in rankHistory
                 .seasonEntry
-                    span.seasonTitle Season #{season + 1}
-                    for mode in profile.rankHistory[season].keySet()
+                    span.seasonTitle Season #{entry.season + 1}
+                    for mode in entry.getRankByMode().keySet()
                         .modeEntry
                             span.modeTitle #{mode.getUrl()}
-                            - var player = profile.rankHistory[season][mode]
+                            - var player = entry.rankByMode[mode]
                             - var rankImage = 101 - player.rank
                             div.rank-image-container(class=player.elo ? "elite-rank-container" : "")
                                 img.rank-image(src="/images/ranks/#{rankImage}.png")
