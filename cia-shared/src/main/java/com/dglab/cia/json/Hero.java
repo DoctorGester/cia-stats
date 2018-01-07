@@ -40,5 +40,6 @@ public enum Hero {
     ANTIMAGE,
     PHANTOM_LANCER,
     GYROCOPTER,
-    WINDRUNNER
+    WINDRUNNER,
+    NEVERMORE
 }

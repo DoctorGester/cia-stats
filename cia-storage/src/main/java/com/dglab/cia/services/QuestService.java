@@ -208,13 +208,25 @@ public class QuestService {
         findQuestsAndComplete(QuestType.PLAY_ROUNDS_AS_OR, quest.hero.in(heroes).or(quest.secondaryHero.in(heroes)));
     }
 
+    private Hero heroNameToHeroOrNull(String rawHeroName) {
+        String fixedName = rawHeroName.substring("npc_dota_hero_".length()).toUpperCase();
+
+        try {
+            return Hero.valueOf(fixedName);
+        } catch (IllegalArgumentException ex) {
+            return null;
+        }
+    }
+
     private synchronized Map<Hero, Double> getHeroWeights() {
         List<HeroWinRateAndGames> heroWinRates = cachedWinRates.get();
 
-        Map<Hero, Long> heroGames = heroWinRates.stream().collect(Collectors.toMap(
-                h -> Hero.valueOf(h.getHero().substring("npc_dota_hero_".length()).toUpperCase()),
-                HeroWinRateAndGames::getGames
-        ));
+        Map<Hero, Long> heroGames = heroWinRates.stream()
+                .filter(h -> heroNameToHeroOrNull(h.getHero()) != null)
+                .collect(Collectors.toMap(
+                    h -> heroNameToHeroOrNull(h.getHero()),
+                    HeroWinRateAndGames::getGames
+                ));
 
         if (heroGames.size() < 2) {
             double avg = heroGames.values().stream().mapToLong(l -> l).average().orElse(1);
