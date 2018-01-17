@@ -146,8 +146,14 @@ public class RankService {
 		for (Long steamId64 : players.getPlayers()) {
             Collection<Integer> seasons = rankDao.findPlayerRankOneSeasons(steamId64);
 
+            // Game owner accounts have sets for all seasons
             if (steamId64 == 76561198192021671L || steamId64 == 76561198046920629L) {
                 seasons = IntStream.range(0, getCurrentSeason() + 1).boxed().collect(Collectors.toList());
+            }
+			
+            // Sozdatel' top 2017 player reward: ember spirit set
+            if (steamId64 == 76561198267389327L) {
+                 seasons.add(5);
             }
 
             RankedAchievements rankedAchievements = new RankedAchievements();
