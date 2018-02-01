@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory;
 import spark.Request;
 import spark.utils.IOUtils;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
+import java.nio.file.*;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -33,7 +33,9 @@ public class ReverseProxy {
 
 	private ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
 	private Collection<IpRange> whiteList = new HashSet<>();
-	private Lock lock = new ReentrantLock();
+	private Lock whiteListLock = new ReentrantLock();
+	private Lock propertiesLock = new ReentrantLock();
+	private final Properties applicationProperties = new Properties();
 
 	private String getRequestURL(Request request){
 		String queryString = (request.queryString() != null ? "?" + request.queryString() : "");
@@ -44,18 +46,39 @@ public class ReverseProxy {
 	private void downloadAndParseWhiteList() {
 		Optional<Collection<IpRange>> parsedIpRanges = new WhitelistHandler().downloadAndParse(WHITE_LIST_URL);
 
-		lock.lock();
+		whiteListLock.lock();
 
 		try {
 			whiteList.clear();
 			parsedIpRanges.ifPresent(whiteList::addAll);
 			whiteList.add(new IpRange("127.0.0.1", null));
 		} finally {
-			lock.unlock();
+			whiteListLock.unlock();
 		}
 
 		log.info("IP white-list updated successfully, size: {}", whiteList.size());
 	}
+
+	private void reloadProperties(final Path file) {
+	    if (!Files.exists(file)) {
+	        log.warn("No properties file found at {}", file);
+	        return;
+        }
+
+		try {
+		    propertiesLock.lock();
+
+            try (final BufferedReader reader = Files.newBufferedReader(file)) {
+                applicationProperties.load(reader);
+            }
+
+            log.info("Reloaded properties file from {}, {}", file, applicationProperties);
+		} catch (IOException e) {
+			log.error("Error while reading properties", e);
+		} finally {
+            propertiesLock.unlock();
+        }
+    }
 
 	public ReverseProxy() {
 		port(3637);
@@ -63,6 +86,11 @@ public class ReverseProxy {
 
 		Unirest.setTimeouts(3000, 6000);
 		Unirest.clearDefaultHeaders();
+
+        final Path propertiesFile = Paths.get("application.properties");
+        reloadProperties(propertiesFile);
+
+        new PropertiesWatchDog(propertiesFile, this::reloadProperties).start();
 
 		service.scheduleAtFixedRate(this::downloadAndParseWhiteList, 0, 1, TimeUnit.DAYS);
 
@@ -88,18 +116,17 @@ public class ReverseProxy {
 		}));
 
 		post("/*", (request, response) -> {
-            lock.lock();
+		    final String requestKey = request.headers("Dedicated-Server-Key");
+		    final String propertiesKey = applicationProperties.getProperty("dedicated.key");
 
-			try {
-				String ip = request.ip();
-				
-				if (whiteList.stream().noneMatch(range -> range.isInRange(ip))) {
-					log.info("Access rejected to " + ip);
-					// halt(403);
-				}
-			} finally {
-				lock.unlock();
-			}
+		    if (StringUtils.isNotBlank(propertiesKey)) {
+                if (!Objects.equals(requestKey, propertiesKey)) {
+                    log.info("Access rejected to {}", request.ip());
+                    halt(403);
+                }
+            } else {
+		        log.warn("No dedicated server key set, received a key: {}", requestKey);
+            }
 
             String url = getRequestURL(request);
 			Map<String, String> headers = request.headers().stream().collect(Collectors.toMap(h -> h, request::headers));
