@@ -121,7 +121,7 @@ public class ReverseProxy {
 
 		    if (StringUtils.isNotBlank(propertiesKey)) {
                 if (!Objects.equals(requestKey, propertiesKey)) {
-                    log.info("Access rejected to {}", request.ip());
+                    log.info("Access rejected to {}, key given: {}", request.ip(), requestKey);
                     halt(403);
                 }
             } else {
