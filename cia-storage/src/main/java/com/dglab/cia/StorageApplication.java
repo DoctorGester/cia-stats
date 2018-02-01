@@ -69,6 +69,8 @@ public class StorageApplication {
 		jsonUtil = context.getBean(JsonUtil.class);
         jsonLogger = context.getBean(JsonLogger.class);
 
+        final String localhost = "127.0.0.1";
+
         before((request, response) -> requestTimeMap.put(request.raw(), System.currentTimeMillis()));
 
         after((request, response) -> {
@@ -218,7 +220,7 @@ public class StorageApplication {
         , jsonUtil.json());
 
         before("/auth/*", (request, response) -> {
-            if (!"127.0.0.1".equals(request.ip())) {
+            if (!localhost.equals(request.ip())) {
                 throw new IllegalAccessException();
             }
         });
@@ -233,8 +235,14 @@ public class StorageApplication {
         get("/tournament/participants", (request, response) -> tournamentService.getParticipants(), jsonUtil.json());
         get("/tournament/eligibility/:id", (request, response) -> tournamentService.canRegister(requestLong(request, "id")), jsonUtil.json());
 
+        before("/*", (request, response) -> {
+            if (!localhost.equals(request.ip()) && "POST".equals(request.requestMethod())) {
+                throw new IllegalAccessException();
+            }
+        });
+
 		before("/admin/*", (request, response) -> {
-			if (!"127.0.0.1".equals(request.ip())) {
+			if (!localhost.equals(request.ip())) {
 				throw new IllegalAccessException();
 			}
 		});
@@ -262,6 +270,11 @@ public class StorageApplication {
 
 			return "";
 		});
+
+        exception(IllegalAccessException.class, (exception, request, response) -> {
+            log.info("Illegal access from {} at {}", request.ip(), exception.getStackTrace()[0]);
+            response.status(403);
+        });
 
 		exception(Exception.class, (exception, request, response) -> {
 			log.error("Error processing request: {} at {}", exception, exception.getStackTrace()[0]);
